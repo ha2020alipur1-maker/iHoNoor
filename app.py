@@ -36,6 +36,7 @@ st.set_page_config(
 # 2. دریافت قیمت لحظه‌ای (بدون کش)
 # ==========================================
 def get_real_prices():
+    """دریافت قیمت لحظه‌ای با غیرفعال‌سازی کامل کش"""
     prices = {
         'dollar': 195000,
         'gold': 0,
@@ -72,6 +73,8 @@ def get_real_prices():
     prices['inflation'] = 30 + (prices['dollar'] - 195000) / 5000
     return prices
 
+# ===== کش رو پاک کن و قیمت جدید بگیر =====
+st.cache_data.clear()
 prices = get_real_prices()
 
 # ==========================================
@@ -870,7 +873,7 @@ with st.sidebar:
     st.markdown("""
     <div style="background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,0.05);border-radius:50px 15px 50px 15px;padding:18px;text-align:center;margin-bottom:18px;">
         <h1 style="font-size:2rem;margin:0;background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">iHo<span style="background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Noor</span></h1>
-        <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">✨ v9.0</p>
+        <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">✨ v9.1</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -927,7 +930,7 @@ st.markdown(f"""
         <span class="dollar-badge">🏅 طلا: {prices['gold']:,}</span>
         <span class="dollar-badge">🛢️ نفت: {prices['oil']} $</span>
         <span class="source-badge">📡 {prices['source']}</span>
-        <span class="source-badge">✨ v9.0</span>
+        <span class="source-badge">✨ v9.1</span>
         <span class="source-badge">⏱️ {prices['date']}</span>
     </div>
 </div>
@@ -1328,6 +1331,6 @@ with tab11:
 # ==========================================
 st.markdown(f"""
 <div class="footer">
-    ✨ iHoNoor v9.0 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
+    ✨ iHoNoor v9.1 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
 </div>
 """, unsafe_allow_html=True)
