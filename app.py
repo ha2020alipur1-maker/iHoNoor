@@ -35,9 +35,8 @@ st.set_page_config(
 # ==========================================
 # 2. دریافت قیمت‌های واقعی از API
 # ==========================================
-@st.cache_data(ttl=300)  # هر ۵ دقیقه آپدیت میشه
+@st.cache_data(ttl=300)
 def get_real_prices():
-    """دریافت قیمت‌های واقعی از API"""
     prices = {
         'dollar': 195000,
         'gold': 0,
@@ -48,7 +47,6 @@ def get_real_prices():
         'source': 'آفلاین'
     }
     
-    # ۱. دریافت قیمت دلار
     try:
         url1 = "https://api.exchangerate-api.com/v4/latest/USD"
         response = requests.get(url1, timeout=5)
@@ -61,7 +59,6 @@ def get_real_prices():
     except:
         pass
     
-    # ۲. دریافت قیمت طلا
     try:
         url2 = "https://api.gold-api.com/price/XAU"
         response = requests.get(url2, timeout=5)
@@ -71,27 +68,18 @@ def get_real_prices():
             if gold_usd > 0:
                 prices['gold'] = int(gold_usd * prices['dollar'] / 31.1)
     except:
-        # تخمین طلا از روی دلار
         prices['gold'] = int(prices['dollar'] * 180)
     
-    # ۳. قیمت نفت (از API)
     try:
-        url3 = "https://api.exchangerate-api.com/v4/latest/USD"
-        response = requests.get(url3, timeout=5)
-        if response.status_code == 200:
-            # تخمین قیمت نفت بر اساس دلار
-            prices['oil'] = int(75 + (prices['dollar'] - 195000) / 2000)
+        prices['oil'] = int(75 + (prices['dollar'] - 195000) / 2000)
     except:
         prices['oil'] = 85
     
-    # ۴. قیمت فولاد
     try:
-        # تخمین قیمت فولاد بر اساس دلار
         prices['steel'] = int(1100 + (prices['dollar'] - 195000) / 100)
     except:
         prices['steel'] = 1200
     
-    # ۵. نرخ تورم
     try:
         prices['inflation'] = 30 + (prices['dollar'] - 195000) / 5000
     except:
@@ -99,7 +87,6 @@ def get_real_prices():
     
     return prices
 
-# دریافت قیمت‌ها
 prices = get_real_prices()
 
 # ==========================================
@@ -157,70 +144,91 @@ LANG = {
 }
 
 # ==========================================
-# 5. استایل حرفه‌ای
+# 5. طراحی پیشرفته روانشناسی با بیضی و انیمیشن
 # ==========================================
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    
-    * {
-        font-family: 'Inter', 'Vazirmatn', sans-serif;
+    /* ===== فونت و پایه ===== */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    * { 
+        font-family: 'Inter', 'Vazirmatn', sans-serif; 
         direction: rtl;
         box-sizing: border-box;
     }
-    
     .stApp {
-        background: #F9FAFB;
+        background: radial-gradient(ellipse at 20% 50%, #0A1A2F, #0D2137);
+        transition: background 0.8s ease;
     }
-    
+
+    /* ===== هدر با هاله نورانی ===== */
     .main-header {
-        background: linear-gradient(105deg, #0A2540 0%, #1A3A5C 100%);
+        background: linear-gradient(135deg, rgba(10, 26, 47, 0.85), rgba(20, 50, 80, 0.7));
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 215, 0, 0.15);
         padding: 28px 35px;
-        border-radius: 24px;
-        color: white;
-        text-align: center;
-        margin-bottom: 28px;
-        box-shadow: 0 15px 40px -10px rgba(10, 37, 64, 0.25);
-        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 40px 40px 40px 12px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 80px rgba(255, 215, 0, 0.03);
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+        animation: headerGlow 4s infinite alternate;
+    }
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at 30% 50%, rgba(255, 215, 0, 0.03), transparent 60%);
+        animation: rotateGlow 20s linear infinite;
+        pointer-events: none;
+    }
+    @keyframes rotateGlow {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    @keyframes headerGlow {
+        0% { box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 60px rgba(255, 215, 0, 0.02); }
+        100% { box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 100px rgba(255, 215, 0, 0.06); }
     }
     .main-header h1 {
-        font-size: 2.6rem;
-        font-weight: 800;
-        letter-spacing: -0.5px;
+        font-size: 2.8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-size: 200% 200%;
+        animation: goldShine 4s ease-in-out infinite alternate;
+        text-shadow: 0 0 60px rgba(255, 215, 0, 0.1);
         margin: 0;
     }
-    .main-header h1 .highlight {
-        color: #F5A623;
-        text-shadow: 0 0 30px rgba(245, 166, 35, 0.2);
+    @keyframes goldShine {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 100% 50%; }
     }
     .main-header p {
-        font-size: 1rem;
+        color: rgba(255,255,255,0.7);
         font-weight: 300;
-        opacity: 0.8;
-        margin-top: 6px;
-        letter-spacing: 0.3px;
-    }
-    .main-header .badge-version {
-        background: rgba(255,255,255,0.08);
-        backdrop-filter: blur(4px);
-        padding: 4px 16px;
-        border-radius: 40px;
-        font-size: 0.7rem;
-        display: inline-block;
-        margin-top: 8px;
-        border: 1px solid rgba(255,255,255,0.1);
+        letter-spacing: 0.5px;
+        margin-top: 5px;
     }
     .main-header .dollar-badge {
-        background: rgba(245, 166, 35, 0.15);
-        backdrop-filter: blur(4px);
-        padding: 4px 16px;
+        background: rgba(255, 215, 0, 0.1);
+        backdrop-filter: blur(8px);
+        padding: 6px 18px;
         border-radius: 40px;
-        font-size: 0.75rem;
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        color: #FFD700;
+        font-size: 0.8rem;
         display: inline-block;
-        margin-top: 8px;
-        margin-right: 8px;
-        border: 1px solid rgba(245, 166, 35, 0.2);
-        color: #F5A623;
+        margin: 6px 4px;
+        animation: pulseBadge 3s infinite ease-in-out;
+    }
+    @keyframes pulseBadge {
+        0%, 100% { opacity: 0.8; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.03); }
     }
     .main-header .source-badge {
         background: rgba(255,255,255,0.05);
@@ -235,102 +243,191 @@ st.markdown("""
         color: #94A9C2;
     }
 
-    .card {
-        background: rgba(255, 255, 255, 0.75);
+    /* ===== تب‌های بیضی‌شکل با انیمیشن ===== */
+    .stTabs [data-baseweb="tab-list"] {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        background: transparent;
+        padding: 0;
+        border: none;
+        justify-content: center;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background: rgba(255, 255, 255, 0.04);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        padding: 22px 26px;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.6);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-        margin-bottom: 18px;
-        transition: all 0.25s ease;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 60px 20px 60px 20px;
+        padding: 12px 28px !important;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.6);
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+        min-width: 100px;
+        text-align: center;
+    }
+    .stTabs [data-baseweb="tab"]::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 60px 20px 60px 20px;
+        padding: 1px;
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), transparent, rgba(255, 215, 0, 0.05));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        transform: translateY(-4px) scale(1.02);
+        background: rgba(255, 215, 0, 0.08);
+        border-color: rgba(255, 215, 0, 0.2);
+        color: white;
+        box-shadow: 0 12px 40px rgba(255, 215, 0, 0.05);
+    }
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.08)) !important;
+        border-color: rgba(255, 215, 0, 0.3) !important;
+        color: #FFD700 !important;
+        box-shadow: 0 8px 30px rgba(255, 215, 0, 0.08), inset 0 1px 0 rgba(255, 215, 0, 0.1) !important;
+        transform: translateY(-2px) scale(1.02);
+    }
+    .stTabs [aria-selected="true"]::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 20%;
+        width: 60%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #FFD700, transparent);
+        border-radius: 10px;
+        animation: tabLine 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes tabLine {
+        0% { width: 30%; left: 35%; opacity: 0.5; }
+        100% { width: 70%; left: 15%; opacity: 1; }
+    }
+
+    /* ===== کارت‌های با افکت شیشه‌ای ===== */
+    .card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 24px 24px 24px 12px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    .card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 24px 24px 24px 12px;
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.02), transparent 50%);
+        pointer-events: none;
     }
     .card:hover {
-        box-shadow: 0 12px 40px rgba(10, 37, 64, 0.08);
-        transform: translateY(-2px);
+        transform: translateY(-6px);
+        box-shadow: 0 16px 60px rgba(0,0,0,0.3);
+        border-color: rgba(255, 215, 0, 0.1);
     }
     .card-title {
-        font-size: 1rem;
+        color: rgba(255,255,255,0.9);
         font-weight: 700;
-        color: #0A2540;
-        margin-bottom: 12px;
+        font-size: 1.1rem;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        margin-bottom: 12px;
     }
     .card-title .icon {
-        font-size: 1.3rem;
+        font-size: 1.5rem;
+        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.05));
     }
 
-    .stButton > button {
-        border-radius: 14px !important;
-        font-weight: 600 !important;
-        padding: 12px 32px !important;
-        border: none !important;
-        transition: all 0.2s ease !important;
-        background: #0A2540 !important;
-        color: white !important;
-        box-shadow: 0 6px 18px rgba(10, 37, 64, 0.12);
-    }
-    .stButton > button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 10px 28px rgba(10, 37, 64, 0.25);
-        background: #143D5E !important;
-    }
-
+    /* ===== جعبه نتیجه با انیمیشن ===== */
     .result-box {
-        background: linear-gradient(135deg, #EBF4FF, #D6E8FF);
-        padding: 28px 30px;
-        border-radius: 24px;
-        border: 1px solid rgba(10, 37, 64, 0.06);
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 165, 0, 0.02));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 215, 0, 0.08);
+        border-radius: 30px 30px 30px 12px;
+        padding: 32px 36px;
         text-align: center;
         margin-top: 16px;
-        box-shadow: inset 0 1px 4px rgba(255,255,255,0.8);
+        box-shadow: 0 8px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255, 215, 0, 0.03);
+        animation: resultFadeIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes resultFadeIn {
+        0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
     }
     .result-number {
-        font-size: 3rem;
-        font-weight: 800;
-        color: #0A2540;
-        letter-spacing: -1px;
+        font-size: 3.6rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: numberPulse 3s infinite ease-in-out;
+    }
+    @keyframes numberPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
     }
     .result-label {
+        color: rgba(255,255,255,0.6);
         font-size: 0.95rem;
-        font-weight: 400;
-        color: #3D5A78;
         margin-top: 4px;
     }
     .result-emoji {
-        font-size: 2.8rem;
+        font-size: 3.2rem;
+        display: block;
         margin-bottom: 6px;
+        animation: emojiFloat 3s infinite ease-in-out;
+    }
+    @keyframes emojiFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
     }
 
+    /* ===== جعبه مشاور ===== */
     .advisor-box {
-        background: linear-gradient(105deg, #0A2540, #1A3A5C);
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.04), rgba(10, 26, 47, 0.6));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 215, 0, 0.06);
+        border-radius: 20px 20px 20px 8px;
         padding: 22px 28px;
-        border-radius: 20px;
-        color: white;
+        color: rgba(255,255,255,0.9);
         margin-top: 20px;
-        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: 0 4px 30px rgba(0,0,0,0.1);
     }
     .advisor-box strong {
-        color: #F5A623;
-        font-weight: 700;
+        color: #FFD700;
     }
 
+    /* ===== جعبه تحلیل آینده ===== */
     .future-box {
-        background: linear-gradient(135deg, #1A3A5C, #0A2540);
-        padding: 22px 28px;
-        border-radius: 20px;
-        color: white;
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.04), rgba(10, 26, 47, 0.6));
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 215, 0, 0.06);
+        border-radius: 24px 24px 24px 12px;
+        padding: 24px 28px;
+        color: rgba(255,255,255,0.9);
         margin-top: 20px;
-        border: 1px solid rgba(245, 166, 35, 0.2);
-        box-shadow: 0 0 30px rgba(245, 166, 35, 0.05);
+        box-shadow: 0 8px 40px rgba(0,0,0,0.2);
     }
     .future-box .title {
         font-size: 1.2rem;
         font-weight: 700;
-        color: #F5A623;
+        color: #FFD700;
         margin-bottom: 10px;
     }
     .future-box .status-badge {
@@ -345,60 +442,96 @@ st.markdown("""
     .future-box .status-badge.warning { background: #F5A623; color: #0A2540; }
     .future-box .status-badge.stable { background: #38A169; color: white; }
 
+    /* ===== دکمه‌ها با انیمیشن ===== */
+    .stButton > button {
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 165, 0, 0.05)) !important;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 215, 0, 0.15) !important;
+        border-radius: 60px 20px 60px 20px !important;
+        padding: 14px 36px !important;
+        font-weight: 600 !important;
+        color: #FFD700 !important;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+        position: relative;
+        overflow: hidden;
+    }
+    .stButton > button::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 60px 20px 60px 20px;
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), transparent);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+    .stButton > button:hover {
+        transform: translateY(-4px) scale(1.02) !important;
+        border-color: rgba(255, 215, 0, 0.3) !important;
+        box-shadow: 0 12px 40px rgba(255, 215, 0, 0.08) !important;
+        color: #FFD700 !important;
+    }
+    .stButton > button:hover::before {
+        opacity: 1;
+    }
+    .stButton > button:active {
+        transform: scale(0.96) !important;
+    }
+
+    /* ===== مراحل با اعداد دایره‌ای ===== */
     .steps {
         display: flex;
-        gap: 12px;
-        margin-bottom: 24px;
+        gap: 16px;
+        margin-bottom: 28px;
         flex-wrap: wrap;
+        justify-content: center;
     }
     .step-item {
-        flex: 1;
-        min-width: 130px;
-        background: white;
-        padding: 12px 16px;
-        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        border-radius: 60px 20px 60px 20px;
+        padding: 14px 22px;
         text-align: center;
-        border: 1px solid #E2E8F0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        min-width: 130px;
+        flex: 1;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .step-item:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255, 215, 0, 0.1);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
     }
     .step-item .num {
-        background: #0A2540;
-        color: white;
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
-        font-size: 0.8rem;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.05));
+        border: 1px solid rgba(255, 215, 0, 0.1);
+        color: #FFD700;
+        font-weight: 800;
+        font-size: 0.9rem;
         margin-bottom: 4px;
+        animation: stepPulse 3s infinite ease-in-out;
     }
-    .step-item .text { font-weight: 600; color: #0A2540; font-size: 0.85rem; }
-    .step-item .desc { font-size: 0.65rem; color: #6B85A0; }
-
-    .footer {
-        text-align: center;
-        color: #94A9C2;
-        font-size: 0.75rem;
-        margin-top: 50px;
-        padding-top: 18px;
-        border-top: 1px solid #E2E8F0;
+    @keyframes stepPulse {
+        0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0); }
+        50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.03); }
     }
-
-    .badge {
-        display: inline-block;
-        padding: 4px 14px;
-        border-radius: 40px;
+    .step-item .text {
+        color: rgba(255,255,255,0.8);
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    .step-item .desc {
+        color: rgba(255,255,255,0.3);
         font-size: 0.7rem;
-        font-weight: 700;
-        margin: 3px;
     }
-    .badge-gold { background: #F5A623; color: #0A2540; }
-    .badge-silver { background: #C0C8D4; color: #0A2540; }
-    .badge-bronze { background: #CD7F32; color: white; }
-    .badge-blue { background: #0A2540; color: white; }
 
+    /* ===== چت ===== */
     .chat-message {
         padding: 12px 18px;
         border-radius: 14px;
@@ -406,31 +539,60 @@ st.markdown("""
         max-width: 80%;
     }
     .chat-user {
-        background: #0A2540;
+        background: rgba(255, 215, 0, 0.08);
+        border: 1px solid rgba(255, 215, 0, 0.05);
         color: white;
         margin-right: auto;
     }
     .chat-bot {
-        background: #E8F0F8;
-        color: #0A2540;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.03);
+        color: rgba(255,255,255,0.8);
         margin-left: auto;
     }
 
+    /* ===== فوتر ===== */
+    .footer {
+        text-align: center;
+        color: rgba(255,255,255,0.15);
+        font-size: 0.7rem;
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.02);
+    }
+
+    /* ===== اسکرول ===== */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.02);
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: rgba(255, 215, 0, 0.2);
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 215, 0, 0.3);
+    }
+
+    /* ===== راهنما ===== */
     .guide-step {
-        background: white;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        border-radius: 60px 20px 60px 20px;
         padding: 20px 24px;
-        border-radius: 16px;
         margin-bottom: 16px;
-        border-right: 5px solid #0A2540;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        transition: all 0.2s ease;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .guide-step:hover {
-        box-shadow: 0 4px 16px rgba(10, 37, 64, 0.08);
         transform: translateX(-4px);
+        border-color: rgba(255, 215, 0, 0.05);
     }
     .guide-step h3 {
-        color: #0A2540;
+        color: rgba(255,255,255,0.9);
         margin: 0;
         font-size: 1.1rem;
         display: flex;
@@ -438,40 +600,101 @@ st.markdown("""
         gap: 10px;
     }
     .guide-step p {
-        color: #3D5A78;
+        color: rgba(255,255,255,0.6);
         margin-top: 8px;
         margin-bottom: 0;
     }
     .guide-step .tip {
-        background: #F0F7FF;
+        background: rgba(255, 215, 0, 0.03);
         padding: 10px 16px;
         border-radius: 10px;
         margin-top: 8px;
         font-size: 0.9rem;
+        color: rgba(255,255,255,0.6);
+        border-right: 3px solid rgba(255, 215, 0, 0.1);
     }
     .guide-step .warning {
-        background: #FFF5F5;
+        background: rgba(229, 62, 62, 0.03);
         padding: 10px 16px;
         border-radius: 10px;
         margin-top: 8px;
         font-size: 0.9rem;
-        border-right: 3px solid #E53E3E;
+        color: rgba(255,255,255,0.6);
+        border-right: 3px solid rgba(229, 62, 62, 0.1);
     }
     .guide-step .success {
-        background: #F0FFF4;
+        background: rgba(56, 161, 105, 0.03);
         padding: 10px 16px;
         border-radius: 10px;
         margin-top: 8px;
         font-size: 0.9rem;
-        border-right: 3px solid #38A169;
+        color: rgba(255,255,255,0.6);
+        border-right: 3px solid rgba(56, 161, 105, 0.1);
     }
 
+    /* ===== بروشور ===== */
+    .brochure {
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        border-radius: 24px 24px 24px 12px;
+        padding: 30px 35px;
+        margin-bottom: 20px;
+    }
+    .brochure h2 {
+        color: #FFD700;
+        font-weight: 800;
+        font-size: 1.6rem;
+        border-bottom: 1px solid rgba(255, 215, 0, 0.05);
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+    }
+    .brochure h3 {
+        color: rgba(255,255,255,0.9);
+        font-weight: 700;
+        margin-top: 22px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .brochure ul, .brochure ol {
+        padding-right: 25px;
+        line-height: 1.9;
+        color: rgba(255,255,255,0.6);
+    }
+    .brochure li {
+        margin-bottom: 4px;
+    }
+    .brochure table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        font-size: 0.9rem;
+    }
+    .brochure th {
+        background: rgba(255, 215, 0, 0.05);
+        color: rgba(255,255,255,0.8);
+        padding: 10px 14px;
+        text-align: right;
+    }
+    .brochure td {
+        padding: 10px 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.02);
+        color: rgba(255,255,255,0.5);
+    }
+
+    /* ===== پاسخگویی ===== */
     @media (max-width: 768px) {
-        .main-header h1 { font-size: 1.8rem; }
+        .main-header h1 { font-size: 2rem; }
+        .stTabs [data-baseweb="tab"] { padding: 10px 18px !important; font-size: 0.8rem; min-width: 70px; }
         .steps { flex-direction: column; }
         .step-item { min-width: 100%; }
-        .result-number { font-size: 2.2rem; }
-        .guide-step { padding: 16px; }
+        .result-number { font-size: 2.6rem; }
+        .card { padding: 18px 20px; }
+        .brochure { padding: 20px; }
+        .brochure table { font-size: 0.75rem; }
+        .brochure th, .brochure td { padding: 6px 8px; }
         .chat-message { max-width: 95%; }
     }
 </style>
@@ -861,23 +1084,24 @@ if "chat_history" not in st.session_state: st.session_state.chat_history = []
 
 with st.sidebar:
     st.markdown("""
-    <div style="background:#0A2540;color:white;padding:18px;border-radius:18px;text-align:center;margin-bottom:18px;">
-        <h1 style="font-size:2rem;margin:0;"><span style="color:#F5A623;">iHo</span>Noor</h1>
-        <p style="font-size:0.75rem;opacity:0.7;margin:0;">✨ v6.1</p>
+    <div style="background:rgba(255,255,255,0.02);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,0.05);border-radius:60px 20px 60px 20px;padding:18px;text-align:center;margin-bottom:18px;">
+        <h1 style="font-size:2rem;margin:0;background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">iHo<span style="background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Noor</span></h1>
+        <p style="color:rgba(255,255,255,0.3);font-size:0.75rem;margin:0;">✨ v7.0</p>
     </div>
     """, unsafe_allow_html=True)
     
     صنف = st.selectbox("🏷️ " + t['step1'], industries)
     
     st.markdown("---")
-    st.markdown("### 📊 وضعیت اقتصادی لحظه‌ای")
-    st.metric("💰 دلار", f"{prices['dollar']:,} تومان", delta=f"{((prices['dollar']-195000)/195000*100):.1f}%")
-    st.metric("🏅 طلا", f"{prices['gold']:,} تومان")
-    st.metric("🛢️ نفت", f"{prices['oil']} دلار")
-    st.metric("🔩 فولاد", f"{prices['steel']} دلار")
-    st.caption(f"📡 {prices['source']} | {prices['date']}")
+    st.markdown("""
+    <div style="background:rgba(255,215,0,0.02);border:1px solid rgba(255,215,0,0.03);border-radius:20px 20px 20px 8px;padding:14px 16px;margin-bottom:12px;">
+        <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;margin:0;">📊 وضعیت اقتصادی</p>
+        <p style="color:#FFD700;font-size:0.9rem;margin:4px 0 0 0;">💰 دلار: {prices['dollar']:,}</p>
+        <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;margin:2px 0 0 0;">🏅 طلا: {prices['gold']:,}</p>
+        <p style="color:rgba(255,255,255,0.3);font-size:0.6rem;margin:4px 0 0 0;">📡 {prices['source']} | {prices['date']}</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    st.markdown("---")
     فایل = st.file_uploader("📁 " + t['step2'], type=["csv", "xlsx", "xls"])
     
     حالت_ساده = st.checkbox("📱 حالت ساده (تبلت)", value=False)
@@ -885,10 +1109,18 @@ with st.sidebar:
         st.markdown("<style>.stButton>button{padding:16px 32px!important;font-size:1.1rem!important;}</style>", unsafe_allow_html=True)
     
     st.markdown("---")
-    st.markdown(f"### 🎖️ امتیاز شما")
-    c1, c2 = st.columns(2)
-    c1.metric("⭐", st.session_state.score)
-    c2.metric("🔥", f"{st.session_state.streak} روز")
+    st.markdown("""
+    <div style="display:flex;gap:12px;justify-content:center;">
+        <div style="text-align:center;">
+            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;margin:0;">⭐ امتیاز</p>
+            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;margin:0;">{}</p>
+        </div>
+        <div style="text-align:center;">
+            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;margin:0;">🔥 روز</p>
+            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;margin:0;">{}</p>
+        </div>
+    </div>
+    """.format(st.session_state.score, st.session_state.streak), unsafe_allow_html=True)
 
 # ==========================================
 # 15. بارگذاری دیتا
@@ -913,19 +1145,19 @@ st.markdown(f"""
     <h1><span class="highlight">iHo</span>Noor</h1>
     <p>{t['app_name']} | {t['subtitle']}</p>
     <div>
-        <span class="badge-version">✨ نسخه ۶.۱ | پیش‌بینی هوشمند</span>
         <span class="dollar-badge">💰 دلار: {prices['dollar']:,} تومان</span>
         <span class="dollar-badge">🏅 طلا: {prices['gold']:,}</span>
         <span class="source-badge">📡 {prices['source']}</span>
+        <span class="source-badge">✨ v7.0</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown(f"""
 <div class="steps">
-    <div class="step-item"><div class="num">۱</div><div class="text">{t['step1']}</div><div class="desc">از منوی کناری</div></div>
-    <div class="step-item"><div class="num">۲</div><div class="text">{t['step2']}</div><div class="desc">Excel یا CSV</div></div>
-    <div class="step-item"><div class="num">۳</div><div class="text">{t['step3']}</div><div class="desc">دریافت نتیجه</div></div>
+    <div class="step-item"><span class="num">۱</span><div class="text">{t['step1']}</div><div class="desc">از منوی کناری</div></div>
+    <div class="step-item"><span class="num">۲</span><div class="text">{t['step2']}</div><div class="desc">Excel یا CSV</div></div>
+    <div class="step-item"><span class="num">۳</span><div class="text">{t['step3']}</div><div class="desc">دریافت نتیجه</div></div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1020,7 +1252,7 @@ with tab1:
                     
                     st.markdown(f"""
                     <div class="result-box">
-                        <div class="result-emoji">{emoji}</div>
+                        <span class="result-emoji">{emoji}</span>
                         <div class="result-label">{msg}</div>
                         <div class="result-number">{pred:,.0f}</div>
                         <div class="result-label">{unit}</div>
@@ -1132,8 +1364,8 @@ with tab2:
                 {''.join([f'<li>{action}</li>' for action in analysis['actions']])}
             </ul>
         </div>
-        <div style="margin-top:10px;background:rgba(245,166,35,0.1);padding:12px;border-radius:10px;border-right:3px solid #F5A623;">
-            <strong>{analysis['opportunity']}</strong>
+        <div style="margin-top:10px;background:rgba(255,215,0,0.05);padding:12px;border-radius:10px;border-right:3px solid #FFD700;">
+            <strong style="color:#FFD700;">{analysis['opportunity']}</strong>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1164,67 +1396,55 @@ with tab2:
         """)
 
 # ==========================================
-# تب 3: راهنمای کامل (کاربرپسند)
+# تب 3: راهنمای کامل
 # ==========================================
 with tab3:
     st.markdown("""
-    <div class="card" style="background: linear-gradient(135deg, #EBF4FF, #D6E8FF); border: none;">
+    <div class="card" style="background:linear-gradient(135deg,rgba(255,215,0,0.02),rgba(255,165,0,0.01));border:1px solid rgba(255,215,0,0.03);">
         <div class="card-title" style="font-size:1.4rem;">
             <span class="icon">📖</span> راهنمای کامل iHoNoor
         </div>
-        <p style="font-size:1.1rem; color:#0A2540;">
-            با <strong>۴ گام ساده</strong> از iHoNoor استفاده کنید و فروش خود را پیش‌بینی کنید.
+        <p style="color:rgba(255,255,255,0.6);">
+            با <strong style="color:#FFD700;">۴ گام ساده</strong> از iHoNoor استفاده کنید و فروش خود را پیش‌بینی کنید.
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    # ===== گام ۱ =====
     st.markdown("""
     <div class="guide-step">
         <h3>📌 گام ۱: صنف خود را انتخاب کنید</h3>
         <p>از منوی سمت راست، صنف خود را انتخاب کنید. iHoNoor برای هر صنف، تحلیل مخصوص خود را دارد.</p>
-        <div class="tip">
-            💡 <strong>مثال:</strong> اگر فروشگاه مواد غذایی دارید، "خواربارفروشی" را انتخاب کنید.
-        </div>
+        <div class="tip">💡 <strong>مثال:</strong> اگر فروشگاه مواد غذایی دارید، "خواربارفروشی" را انتخاب کنید.</div>
     </div>
     """, unsafe_allow_html=True)
     
-    # ===== گام ۲ =====
     st.markdown("""
     <div class="guide-step">
         <h3>📌 گام ۲: فایل خود را آپلود کنید</h3>
         <p>فایل Excel یا CSV خود را در بخش آپلود بارگذاری کنید.</p>
-        <div class="warning">
-            ⚠️ <strong>نکته مهم:</strong> فایل شما باید حداقل شامل دو ستون باشد:
+        <div class="warning">⚠️ <strong>نکته مهم:</strong> فایل شما باید حداقل شامل دو ستون باشد:
             <ul style="margin:4px 0;padding-right:20px;">
                 <li><strong>📅 تاریخ:</strong> روزهای مختلف (مثلاً ۱۴۰۳/۰۱/۰۱)</li>
                 <li><strong>💰 فروش:</strong> مقدار فروش در آن روز (عددی)</li>
             </ul>
         </div>
-        <div class="tip">
-            💡 <strong>تعداد رکوردهای توصیه شده:</strong> حداقل ۵۰ روز برای پیش‌بینی قابل اعتماد.
-        </div>
+        <div class="tip">💡 <strong>تعداد رکوردهای توصیه شده:</strong> حداقل ۵۰ روز برای پیش‌بینی قابل اعتماد.</div>
     </div>
     """, unsafe_allow_html=True)
     
-    # ===== گام ۳ =====
     st.markdown("""
     <div class="guide-step">
         <h3>📌 گام ۳: ستون هدف را انتخاب کنید</h3>
         <p>ستونی که میخواهید پیش‌بینی کنید را انتخاب کنید.</p>
-        <div class="success">
-            ✅ <strong>پیشنهاد iHoNoor:</strong> اگر مطمئن نیستید، گزینه <strong>"💡 پیشنهاد iHoNoor"</strong> را انتخاب کنید تا بهترین ستون به شما پیشنهاد شود.
-        </div>
+        <div class="success">✅ <strong>پیشنهاد iHoNoor:</strong> اگر مطمئن نیستید، گزینه <strong>"💡 پیشنهاد iHoNoor"</strong> را انتخاب کنید.</div>
     </div>
     """, unsafe_allow_html=True)
     
-    # ===== گام ۴ =====
     st.markdown("""
     <div class="guide-step">
         <h3>📌 گام ۴: پیش‌بینی را دریافت کنید</h3>
         <p>روی دکمه <strong>"🚀 پیش‌بینی کن"</strong> کلیک کنید و نتیجه را مشاهده کنید.</p>
-        <div class="tip">
-            📊 <strong>خروجی‌ها:</strong>
+        <div class="tip">📊 <strong>خروجی‌ها:</strong>
             <ul style="margin:4px 0;padding-right:20px;">
                 <li><strong>عدد پیش‌بینی:</strong> مقدار مورد انتظار برای فردا</li>
                 <li><strong>دقت مدل:</strong> نشان میدهد چقدر میتوانید به نتیجه اعتماد کنید</li>
@@ -1234,27 +1454,25 @@ with tab3:
     </div>
     """, unsafe_allow_html=True)
     
-    # ===== نکات کلیدی =====
     st.markdown("""
-    <div style="background:linear-gradient(105deg, #0A2540, #1A3A5C);padding:22px 28px;border-radius:20px;color:white;margin-top:16px;">
-        <h3 style="color:#F5A623;margin:0;">💡 نکات کلیدی برای بهترین نتیجه</h3>
-        <ul style="margin-top:10px;line-height:2;">
-            <li>📊 <strong>حداقل ۵۰ روز داده</strong> داشته باشید</li>
-            <li>📅 داده‌های خود را <strong>هر هفته آپدیت</strong> کنید</li>
-            <li>🎯 ستون هدف حتماً <strong>عددی</strong> باشد</li>
-            <li>🔄 هر بار که داده جدید دارید، پیش‌بینی را <strong>تکرار</strong> کنید</li>
+    <div style="background:linear-gradient(135deg,rgba(255,215,0,0.02),rgba(255,165,0,0.01));border:1px solid rgba(255,215,0,0.03);border-radius:60px 20px 60px 20px;padding:22px 28px;margin-top:16px;">
+        <h3 style="color:#FFD700;margin:0;">💡 نکات کلیدی برای بهترین نتیجه</h3>
+        <ul style="margin-top:10px;line-height:2;color:rgba(255,255,255,0.6);">
+            <li>📊 <strong style="color:rgba(255,255,255,0.8);">حداقل ۵۰ روز داده</strong> داشته باشید</li>
+            <li>📅 داده‌های خود را <strong style="color:rgba(255,255,255,0.8);">هر هفته آپدیت</strong> کنید</li>
+            <li>🎯 ستون هدف حتماً <strong style="color:rgba(255,255,255,0.8);">عددی</strong> باشد</li>
+            <li>🔄 هر بار که داده جدید دارید، پیش‌بینی را <strong style="color:rgba(255,255,255,0.8);">تکرار</strong> کنید</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
     
-    # ===== پشتیبانی =====
     st.markdown("""
-    <div style="background:#FFF8E1;padding:16px 22px;border-radius:16px;border-right:4px solid #F5A623;margin-top:16px;">
-        <strong>📞 نیاز به کمک دارید؟</strong>
-        <p style="margin:4px 0;">با ما در ارتباط باشید:</p>
-        <ul style="margin:4px 0;padding-right:20px;">
-            <li>📧 <strong>ایمیل:</strong> ha2021alipur@gmail.com</li>
-            <li>📱 <strong>واتساپ/تلگرام:</strong> 09019470509</li>
+    <div style="background:rgba(255,215,0,0.02);border:1px solid rgba(255,215,0,0.03);border-radius:20px 20px 20px 8px;padding:16px 22px;margin-top:16px;">
+        <strong style="color:#FFD700;">📞 نیاز به کمک دارید؟</strong>
+        <p style="color:rgba(255,255,255,0.4);margin:4px 0;">با ما در ارتباط باشید:</p>
+        <ul style="margin:4px 0;padding-right:20px;color:rgba(255,255,255,0.4);">
+            <li>📧 <strong style="color:rgba(255,255,255,0.6);">ha2021alipur@gmail.com</strong></li>
+            <li>📱 <strong style="color:rgba(255,255,255,0.6);">09019470509</strong></li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
@@ -1297,7 +1515,8 @@ with tab5:
     if not st.session_state.admin_logged_in:
         st.markdown("""
         <div style="text-align:center;padding:40px 0;">
-            <h2 style="color:#0A2540;">🔐 ورود به پنل مدیریت</h2>
+            <h2 style="color:#FFD700;">🔐 ورود به پنل مدیریت</h2>
+            <p style="color:rgba(255,255,255,0.3);">لطفاً اطلاعات خود را وارد کنید</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -1325,8 +1544,8 @@ with tab6:
     st.markdown("""
     <div class="card">
         <div class="card-title"><span class="icon">📱</span> نصب روی گوشی</div>
-        <p>در کروم: ⋮ → Add to Home screen</p>
-        <p>در سافاری: اشتراک‌گذاری → Add to Home Screen</p>
+        <p style="color:rgba(255,255,255,0.6);">در کروم: ⋮ → Add to Home screen</p>
+        <p style="color:rgba(255,255,255,0.6);">در سافاری: اشتراک‌گذاری → Add to Home Screen</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1368,6 +1587,6 @@ with tab11:
 # ==========================================
 st.markdown(f"""
 <div class="footer">
-    ✨ iHoNoor v6.1 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
+    ✨ iHoNoor v7.0 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
 </div>
 """, unsafe_allow_html=True)
