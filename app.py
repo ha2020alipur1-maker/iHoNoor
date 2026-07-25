@@ -35,7 +35,7 @@ st.set_page_config(
 # ==========================================
 # 2. دریافت قیمت لحظه‌ای (هر ۱ دقیقه)
 # ==========================================
-@st.cache_data(ttl=60)
+@st.cache_resource(ttl=60)
 def get_real_prices():
     prices = {
         'dollar': 195000,
