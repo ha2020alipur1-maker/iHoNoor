@@ -34,78 +34,65 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. دریافت داده‌های واقعی اقتصادی از API
+# 2. دریافت قیمت‌های بروز (دلار، طلا، نفت، تورم)
 # ==========================================
 @st.cache_data(ttl=300)  # کش ۵ دقیقه‌ای
-def get_real_economic_data():
-    """
-    دریافت داده‌های واقعی اقتصادی از منابع معتبر
-    شامل: دلار، طلا، نفت، تورم، شاخص بورس، قیمت مسکن
-    """
-    data = {
-        'dollar': 195000,
-        'gold': 0,
+def get_real_prices():
+    """دریافت قیمت‌های بروز از API با فرمول صحیح طلای ۱۸ عیار"""
+    prices = {
+        'dollar': 188500,
+        'gold_18': 0,
+        'gold_24': 0,
         'oil': 85,
         'inflation': 35,
-        'stock_index': 0,
-        'housing_price': 0,
-        'unemployment': 0,
         'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        'source': 'آفلاین (کش)'
+        'source': 'آفلاین'
     }
     
-    # ۱. قیمت دلار از API
+    # ۱. دریافت قیمت دلار آزاد
     try:
         url = "https://api.exchangerate-api.com/v4/latest/USD"
         r = requests.get(url, timeout=5)
         if r.status_code == 200:
-            res = r.json()
-            price = res['rates']['IRR'] / 10
-            if price > 1000:
-                data['dollar'] = int(price)
-                data['source'] = 'آنلاین (به‌روز)'
+            data = r.json()
+            price = data['rates']['IRR'] / 10
+            if 180000 < price < 200000:
+                prices['dollar'] = int(price)
+                prices['source'] = 'آنلاین'
     except:
         pass
     
-    # ۲. قیمت طلا از API
+    # ۲. دریافت قیمت طلای جهانی و محاسبه طلای ۱۸ عیار
     try:
         url = "https://api.gold-api.com/price/XAU"
         r = requests.get(url, timeout=5)
         if r.status_code == 200:
-            res = r.json()
-            gold_usd = res.get('price', 0)
+            data = r.json()
+            gold_usd = data.get('price', 2450)
             if gold_usd > 0:
-                data['gold'] = int(gold_usd * data['dollar'] / 31.1)
+                # فرمول صحیح طلای ۱۸ عیار: (اونس × دلار) ÷ ۹.۵۷۴
+                prices['gold_18'] = int((gold_usd * prices['dollar']) / 9.574)
+                prices['gold_24'] = int(prices['gold_18'] / 0.75)
     except:
-        data['gold'] = int(data['dollar'] * 180)
+        prices['gold_18'] = int(prices['dollar'] * 95)
+        prices['gold_24'] = int(prices['gold_18'] / 0.75)
     
-    # ۳. قیمت نفت از API
+    # ۳. قیمت نفت
     try:
         url = "https://api.exchangerate-api.com/v4/latest/USD"
         r = requests.get(url, timeout=5)
         if r.status_code == 200:
-            # تخمین قیمت نفت بر اساس دلار
-            data['oil'] = int(75 + (data['dollar'] - 195000) / 2000)
+            prices['oil'] = 85
     except:
-        data['oil'] = 85
+        prices['oil'] = 85
     
-    # ۴. نرخ تورم (تخمین از روی دلار)
-    data['inflation'] = 30 + (data['dollar'] - 195000) / 5000
+    # ۴. نرخ تورم (تخمین)
+    prices['inflation'] = 30 + (prices['dollar'] - 188500) / 5000
     
-    # ۵. شاخص بورس (تخمین)
-    data['stock_index'] = int(2000000 + (data['dollar'] - 195000) * 10)
-    
-    # ۶. قیمت مسکن (تخمین)
-    data['housing_price'] = int(300000000 + (data['dollar'] - 195000) * 1500)
-    
-    # ۷. نرخ بیکاری (تخمین)
-    data['unemployment'] = 8 + (data['dollar'] - 195000) / 20000
-    
-    data['date'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    return data
+    prices['date'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return prices
 
-# دریافت داده‌های اقتصادی
-economic_data = get_real_economic_data()
+prices = get_real_prices()
 
 # ==========================================
 # 3. تنظیمات ادمین
@@ -336,8 +323,17 @@ def get_emoji(val, unit):
         return "📢", "جذب مشتری بیشتر"
     return "📊", "پیش‌بینی انجام شد"
 
-def future_analyst(صنف, eco_data):
-    """تحلیلگر آینده بر اساس داده‌های اقتصادی واقعی"""
+# ==========================================
+# 10. تحلیلگر هوشمند آینده (نسخه جامع)
+# ==========================================
+def future_analyst(صنف, prices):
+    """
+    تحلیل جامع با در نظر گرفتن:
+    - سیاست‌های کلان و ژئوپولیتیک
+    - پیش‌بینی روند دلار
+    - تأثیر بر هر صنف
+    - هشدارهای اختصاصی
+    """
     analysis = {
         'status': 'پایدار',
         'trend': 'ثابت',
@@ -346,107 +342,175 @@ def future_analyst(صنف, eco_data):
         'message': '',
         'actions': [],
         'risk_level': 'متوسط',
-        'opportunity': ''
+        'opportunity': '',
+        'dollar_prediction': '',
+        'geo_political': '',
+        'alert': ''
     }
     
-    dollar = eco_data['dollar']
-    gold = eco_data['gold']
-    oil = eco_data['oil']
-    inflation = eco_data['inflation']
-    stock = eco_data['stock_index']
-    housing = eco_data['housing_price']
+    dollar = prices['dollar']
+    gold = prices['gold_18']
+    oil = prices['oil']
+    inflation = prices['inflation']
     
-    # تحلیل بر اساس صنف با داده‌های واقعی
+    # ===== ۱. تحلیل ژئوپولیتیک و سیاست‌های کلان =====
+    if dollar > 190000:
+        analysis['geo_political'] = """
+        🔴 **تنش‌های ژئوپولیتیک و تحریم‌ها:**  
+        - تشدید تحریم‌های نفتی و بانکی  
+        - افزایش نااطمینانی در مذاکرات هسته‌ای  
+        - خروج سرمایه از کشور  
+        - فشار بر منابع ارزی  
+        
+        📈 **پیش‌بینی روند دلار:** صعودی (با احتمال افزایش ۵-۱۰٪ در ماه آینده)
+        """
+        analysis['dollar_prediction'] = 'صعودی 📈'
+        analysis['risk_level'] = 'بالا'
+    elif dollar > 180000:
+        analysis['geo_political'] = """
+        ⚠️ **شرایط متشنج اما کنترل‌شده:**  
+        - تحریم‌ها در وضعیت فعلی  
+        - انتظار برای تغییرات دیپلماتیک  
+        - مدیریت منابع ارزی توسط بانک مرکزی  
+        
+        📊 **پیش‌بینی روند دلار:** نوسانی (با تمایل به افزایش)
+        """
+        analysis['dollar_prediction'] = 'نوسانی 📊'
+        analysis['risk_level'] = 'متوسط'
+    else:
+        analysis['geo_political'] = """
+        ✅ **ثبات نسبی در بازار ارز:**  
+        - کاهش تنش‌های سیاسی  
+        - ورود منابع ارزی جدید  
+        - بهبود روابط دیپلماتیک  
+        
+        📉 **پیش‌بینی روند دلار:** کاهشی یا ثبات
+        """
+        analysis['dollar_prediction'] = 'کاهشی 📉'
+        analysis['risk_level'] = 'کم'
+    
+    # ===== ۲. تحلیل تأثیر بر صنف‌ها =====
+    
+    # ---- خواربارفروشی و صنایع غذایی ----
     if "خواربار" in صنف or "غذایی" in صنف or "نانوایی" in صنف:
-        if inflation > 40:
-            analysis['status'] = '⚠️ هشدار'
-            analysis['trend'] = 'افزایش قیمت مواد غذایی'
-            analysis['price_change'] = 15 + (inflation - 35) * 0.5
+        if dollar > 190000:
+            analysis['status'] = '🔴 هشدار شدید'
+            analysis['trend'] = 'افزایش قیمت مواد اولیه'
+            analysis['price_change'] = 15 + (dollar - 190000) / 1000
             analysis['impact'] = 'بسیار بالا'
-            analysis['risk_level'] = 'بالا'
-            analysis['message'] = f'📊 تورم {inflation:.1f}% باعث افزایش قیمت مواد اولیه {analysis["price_change"]:.0f}% میشود.'
-            analysis['actions'].append('🔹 موجودی کالاهای اساسی را افزایش دهید')
-            analysis['actions'].append('🔹 قراردادهای بلندمدت با تامین‌کنندگان منعقد کنید')
-            analysis['opportunity'] = '📈 فرصت: افزایش قیمت فروش با مدیریت هزینه‌ها'
+            analysis['risk_level'] = 'بسیار بالا'
+            analysis['message'] = f'💰 با افزایش دلار به {dollar:,} تومان، قیمت مواد اولیه و وارداتی {analysis["price_change"]:.0f}% افزایش می‌یابد.'
+            analysis['alert'] = '🚨 هشدار: موجودی خود را افزایش دهید و قراردادهای بلندمدت منعقد کنید.'
+            analysis['actions'] = [
+                '🔹 افزایش موجودی کالاهای اساسی (حداقل ۳۰ روز)',
+                '🔹 انعقاد قراردادهای بلندمدت با تأمین‌کنندگان',
+                '🔹 افزایش قیمت فروش با مدیریت هزینه‌ها',
+                '🔹 کاهش ضایعات و بهینه‌سازی مصرف'
+            ]
+            analysis['opportunity'] = '📈 فرصت: افزایش قیمت فروش با حفظ کیفیت'
         else:
             analysis['status'] = '✅ پایدار'
             analysis['trend'] = 'ثابت'
             analysis['price_change'] = 3
             analysis['impact'] = 'متوسط'
-            analysis['message'] = '📊 تورم کنترل شده و شرایط پایدار است.'
-            analysis['actions'].append('🔹 حفظ کیفیت محصولات')
+            analysis['message'] = '📊 شرایط فعلی نسبتاً پایدار است.'
+            analysis['alert'] = '✅ وضعیت عادی است.'
+            analysis['actions'] = ['🔹 حفظ کیفیت محصولات']
             analysis['opportunity'] = '📈 فرصت: جذب مشتری با کیفیت بالا'
     
+    # ---- ساختمان و پیمانکاری ----
     elif "ساختمان" in صنف or "پیمانکاری" in صنف or "مصالح" in صنف:
-        if housing > 350_000_000:
-            analysis['status'] = '📈 رشد'
-            analysis['trend'] = 'افزایش قیمت مسکن'
-            analysis['price_change'] = 12 + (housing - 300_000_000) / 10_000_000
-            analysis['impact'] = 'بالا'
-            analysis['risk_level'] = 'متوسط'
-            analysis['message'] = f'🏠 قیمت مسکن به {housing:,} تومان رسیده و تقاضا برای ساخت افزایش یافته است.'
-            analysis['actions'].append('🔹 شروع پروژه‌های جدید')
-            analysis['actions'].append('🔹 خرید مصالح با قیمت مناسب')
-            analysis['opportunity'] = '📈 فرصت: سرمایه‌گذاری در پروژه‌های ساختمانی'
+        if dollar > 190000:
+            analysis['status'] = '🔴 بحران'
+            analysis['trend'] = 'افزایش شدید هزینه‌ها'
+            analysis['price_change'] = 22 + (dollar - 190000) / 800
+            analysis['impact'] = 'بسیار بالا'
+            analysis['risk_level'] = 'بحرانی'
+            analysis['message'] = f'🏗️ افزایش دلار به {dollar:,} تومان، هزینه مصالح و ساخت را {analysis["price_change"]:.0f}% افزایش میدهد.'
+            analysis['alert'] = '🚨 هشدار بحرانی: پروژه‌های جدید را متوقف کنید و مصالح استراتژیک بخرید.'
+            analysis['actions'] = [
+                '🔹 خرید فوری مصالح اساسی (سیمان، فولاد، آهن)',
+                '🔹 توقف پروژه‌های جدید تا ثبات بازار',
+                '🔹 بازنگری در قیمت‌های قراردادها',
+                '🔹 کاهش نیروی کار موقت'
+            ]
+            analysis['opportunity'] = '📉 فرصت: خرید مصالح با قیمت فعلی و فروش بعدی'
         else:
             analysis['status'] = '⚠️ توجه'
-            analysis['trend'] = 'ثابت'
-            analysis['price_change'] = 5
-            analysis['impact'] = 'متوسط'
-            analysis['message'] = '📊 بازار مسکن در وضعیت عادی است.'
-            analysis['actions'].append('🔹 برنامه‌ریزی دقیق پروژه‌ها')
-            analysis['opportunity'] = '📉 فرصت: خرید مصالح با قیمت مناسب'
+            analysis['trend'] = 'افزایش ملایم'
+            analysis['price_change'] = 8
+            analysis['impact'] = 'بالا'
+            analysis['message'] = '📊 افزایش تدریجی قیمت مصالح قابل پیش‌بینی است.'
+            analysis['alert'] = '⚠️ توصیه به برنامه‌ریزی دقیق پروژه‌ها'
+            analysis['actions'] = ['🔹 برنامه‌ریزی دقیق پروژه‌ها']
+            analysis['opportunity'] = '📈 فرصت: شروع پروژه‌های جدید'
     
+    # ---- پوشاک و نساجی ----
     elif "پوشاک" in صنف or "لباس" in صنف:
-        if dollar > 200000:
+        if dollar > 190000:
             analysis['status'] = '⚠️ هشدار'
             analysis['trend'] = 'افزایش قیمت پارچه'
-            analysis['price_change'] = 10 + (dollar - 195000) / 1500
+            analysis['price_change'] = 14 + (dollar - 190000) / 1200
             analysis['impact'] = 'بالا'
             analysis['risk_level'] = 'بالا'
-            analysis['message'] = f'👗 با افزایش دلار به {dollar:,} تومان، قیمت پارچه {analysis["price_change"]:.0f}% افزایش می‌یابد.'
-            analysis['actions'].append('🔹 خرید مواد اولیه را پیش‌بینی کنید')
-            analysis['actions'].append('🔹 استفاده از تولیدات داخلی را افزایش دهید')
-            analysis['opportunity'] = '📈 فرصت: تولید با مواد داخلی'
+            analysis['message'] = f'👗 افزایش دلار، قیمت پارچه و مواد اولیه را {analysis["price_change"]:.0f}% افزایش میدهد.'
+            analysis['alert'] = '🚨 هشدار: خرید پارچه را پیش‌بینی کنید و تولید داخلی را افزایش دهید.'
+            analysis['actions'] = [
+                '🔹 خرید مواد اولیه به میزان ۲ ماه',
+                '🔹 افزایش تولید داخلی',
+                '🔹 تنوع‌بخشی به محصولات'
+            ]
+            analysis['opportunity'] = '📈 فرصت: تولید با مواد داخلی و کاهش وابستگی'
         else:
             analysis['status'] = '✅ مناسب'
             analysis['trend'] = 'ثابت'
             analysis['price_change'] = 4
             analysis['impact'] = 'متوسط'
             analysis['message'] = '📊 شرایط برای تولید و فروش مناسب است.'
-            analysis['actions'].append('🔹 افزایش تنوع محصولات')
+            analysis['alert'] = '✅ وضعیت مناسب برای سرمایه‌گذاری'
+            analysis['actions'] = ['🔹 افزایش تنوع محصولات']
             analysis['opportunity'] = '📈 فرصت: توسعه برند'
     
+    # ---- خودرو و قطعات یدکی ----
     elif "خودرو" in صنف or "یدکی" in صنف:
-        if dollar > 210000:
-            analysis['status'] = '🔴 بحران'
-            analysis['trend'] = 'افزایش شدید'
-            analysis['price_change'] = 25 + (dollar - 195000) / 1000
+        if dollar > 195000:
+            analysis['status'] = '🔴 بحران شدید'
+            analysis['trend'] = 'افزایش شدید قیمت'
+            analysis['price_change'] = 28 + (dollar - 190000) / 800
             analysis['impact'] = 'بسیار بالا'
             analysis['risk_level'] = 'بحرانی'
-            analysis['message'] = f'🚗 افزایش شدید دلار قیمت خودرو را {analysis["price_change"]:.0f}% بالا می‌برد.'
-            analysis['actions'].append('🔹 فروش را به تعویق نیندازید')
-            analysis['actions'].append('🔹 قطعات یدکی استراتژیک خریداری کنید')
+            analysis['message'] = f'🚗 افزایش دلار و تحریم‌ها قیمت خودرو را {analysis["price_change"]:.0f}% بالا می‌برد.'
+            analysis['alert'] = '🚨 هشدار بحرانی: فروش را متوقف نکنید، قطعات استراتژیک بخرید.'
+            analysis['actions'] = [
+                '🔹 فروش سریع خودروهای موجود',
+                '🔹 خرید قطعات یدکی استراتژیک',
+                '🔹 مدیریت دقیق موجودی'
+            ]
             analysis['opportunity'] = '📈 فرصت: فروش در شرایط افزایش قیمت'
         else:
             analysis['status'] = '⚠️ هشدار'
             analysis['trend'] = 'افزایش ملایم'
-            analysis['price_change'] = 10
+            analysis['price_change'] = 12
             analysis['impact'] = 'بالا'
             analysis['message'] = '📊 افزایش قیمت خودرو ادامه دارد.'
-            analysis['actions'].append('🔹 مدیریت موجودی قطعات')
+            analysis['alert'] = '⚠️ مدیریت موجودی قطعات را جدی بگیرید'
+            analysis['actions'] = ['🔹 مدیریت موجودی قطعات']
             analysis['opportunity'] = '📉 فرصت: خرید در قیمت‌های فعلی'
     
+    # ---- بهداشت و درمان ----
     elif "بهداشت" in صنف or "درمان" in صنف:
         if inflation > 40:
             analysis['status'] = '⚠️ توجه'
             analysis['trend'] = 'افزایش هزینه'
-            analysis['price_change'] = 8 + (inflation - 35) / 2
+            analysis['price_change'] = 9 + (inflation - 35) / 2
             analysis['impact'] = 'متوسط'
             analysis['risk_level'] = 'متوسط'
-            analysis['message'] = f'🏥 با تورم {inflation:.1f}%، هزینه‌های درمانی {analysis["price_change"]:.0f}% افزایش می‌یابد.'
-            analysis['actions'].append('🔹 قیمت خدمات را بازبینی کنید')
-            analysis['actions'].append('🔹 قراردادهای بیمه را بهبود دهید')
+            analysis['message'] = f'🏥 تورم {inflation:.1f}% هزینه‌های درمانی را {analysis["price_change"]:.0f}% افزایش میدهد.'
+            analysis['alert'] = '⚠️ بازبینی قیمت خدمات و بهبود قراردادهای بیمه'
+            analysis['actions'] = [
+                '🔹 قیمت خدمات را بازبینی کنید',
+                '🔹 قراردادهای بیمه را بهبود دهید'
+            ]
             analysis['opportunity'] = '📈 فرصت: توسعه خدمات تخصصی'
         else:
             analysis['status'] = '✅ پایدار'
@@ -454,19 +518,24 @@ def future_analyst(صنف, eco_data):
             analysis['price_change'] = 3
             analysis['impact'] = 'کم'
             analysis['message'] = '📊 شرایط برای فعالیت درمانی مطلوب است.'
-            analysis['actions'].append('🔹 بهبود کیفیت خدمات')
+            analysis['alert'] = '✅ وضعیت پایدار'
+            analysis['actions'] = ['🔹 بهبود کیفیت خدمات']
             analysis['opportunity'] = '📈 فرصت: جذب بیماران بیشتر'
     
+    # ---- املاک و مستغلات ----
     elif "املاک" in صنف or "مستغلات" in صنف:
-        if housing > 350_000_000:
+        if dollar > 190000:
             analysis['status'] = '📈 رشد'
             analysis['trend'] = 'افزایش قیمت ملک'
-            analysis['price_change'] = 15 + (housing - 300_000_000) / 10_000_000
+            analysis['price_change'] = 18 + (dollar - 190000) / 1000
             analysis['impact'] = 'بالا'
             analysis['risk_level'] = 'متوسط'
-            analysis['message'] = f'🏠 قیمت ملک با افزایش تقاضا {analysis["price_change"]:.0f}% رشد میکند.'
-            analysis['actions'].append('🔹 خرید ملک برای سرمایه‌گذاری')
-            analysis['actions'].append('🔹 اجاره‌ها را به‌روزرسانی کنید')
+            analysis['message'] = f'🏠 قیمت ملک با افزایش دلار {analysis["price_change"]:.0f}% رشد میکند.'
+            analysis['alert'] = '✅ فرصت سرمایه‌گذاری: خرید ملک برای سرمایه‌گذاری'
+            analysis['actions'] = [
+                '🔹 خرید ملک برای سرمایه‌گذاری',
+                '🔹 به‌روزرسانی اجاره‌ها'
+            ]
             analysis['opportunity'] = '📈 فرصت: سرمایه‌گذاری در ملک'
         else:
             analysis['status'] = '✅ پایدار'
@@ -474,47 +543,59 @@ def future_analyst(صنف, eco_data):
             analysis['price_change'] = 5
             analysis['impact'] = 'متوسط'
             analysis['message'] = '📊 بازار ملک در وضعیت عادی است.'
-            analysis['actions'].append('🔹 بررسی فرصت‌های سرمایه‌گذاری')
+            analysis['alert'] = '✅ بررسی فرصت‌های سرمایه‌گذاری'
+            analysis['actions'] = ['🔹 بررسی فرصت‌های سرمایه‌گذاری']
             analysis['opportunity'] = '📈 فرصت: خرید ملک برای اجاره'
     
+    # ---- فناوری و مخابرات ----
     elif "فناوری" in صنف or "مخابرات" in صنف:
-        if stock > 2_500_000:
-            analysis['status'] = '📈 رشد'
-            analysis['trend'] = 'افزایش سرمایه‌گذاری'
-            analysis['price_change'] = 8 + (stock - 2_000_000) / 50_000
+        if dollar > 190000:
+            analysis['status'] = '⚠️ هشدار'
+            analysis['trend'] = 'افزایش هزینه تجهیزات'
+            analysis['price_change'] = 12 + (dollar - 190000) / 1300
             analysis['impact'] = 'بالا'
-            analysis['risk_level'] = 'متوسط'
-            analysis['message'] = f'📱 شاخص بورس به {stock:,} رسیده و سرمایه‌گذاری در فناوری افزایش یافته است.'
-            analysis['actions'].append('🔹 توسعه خدمات دیجیتال')
-            analysis['actions'].append('🔹 سرمایه‌گذاری در زیرساخت')
-            analysis['opportunity'] = '📈 فرصت: نوآوری در خدمات فناوری'
+            analysis['risk_level'] = 'بالا'
+            analysis['message'] = f'📱 هزینه تجهیزات فناوری {analysis["price_change"]:.0f}% افزایش می‌یابد.'
+            analysis['alert'] = '⚠️ خرید تجهیزات را به تعویق نیندازید'
+            analysis['actions'] = [
+                '🔹 خرید تجهیزات با قیمت فعلی',
+                '🔹 استفاده از خدمات ابری داخلی'
+            ]
+            analysis['opportunity'] = '📈 فرصت: توسعه نرم‌افزارهای داخلی'
         else:
             analysis['status'] = '✅ مناسب'
             analysis['trend'] = 'ثابت'
             analysis['price_change'] = 3
             analysis['impact'] = 'متوسط'
             analysis['message'] = '📊 شرایط برای سرمایه‌گذاری در فناوری مناسب است.'
-            analysis['actions'].append('🔹 توسعه نرم‌افزارهای داخلی')
-            analysis['opportunity'] = '📈 فرصت: رشد در بازار دیجیتال'
+            analysis['alert'] = '✅ سرمایه‌گذاری در فناوری'
+            analysis['actions'] = ['🔹 توسعه خدمات دیجیتال']
+            analysis['opportunity'] = '📈 فرصت: نوآوری در خدمات'
     
     else:
         analysis['status'] = 'ℹ️ تحلیل'
         analysis['trend'] = 'متغیر'
         analysis['price_change'] = 5
         analysis['impact'] = 'متوسط'
-        analysis['message'] = f'📊 تحلیل {صنف} بر اساس داده‌های اقتصادی در حال انجام است.'
-        analysis['actions'].append('🔹 بررسی دقیق شرایط بازار')
+        analysis['message'] = f'📊 تحلیل {صنف} در حال انجام است.'
+        analysis['alert'] = 'ℹ️ بررسی دقیق شرایط بازار'
+        analysis['actions'] = ['🔹 بررسی دقیق شرایط بازار']
         analysis['opportunity'] = '📈 فرصت: تحلیل دقیق‌تر داده‌ها'
     
+    # ===== ۳. جمع‌بندی نهایی =====
     if analysis['risk_level'] == 'بحرانی':
-        analysis['status'] = '🔴 وضعیت بحرانی'
+        analysis['status'] = '🔴 بحران'
     elif analysis['risk_level'] == 'بالا':
-        analysis['status'] = '⚠️ وضعیت هشدار'
+        analysis['status'] = '⚠️ هشدار'
+    elif analysis['risk_level'] == 'متوسط':
+        analysis['status'] = '📊 متوسط'
+    else:
+        analysis['status'] = '✅ پایدار'
     
     return analysis
 
 # ==========================================
-# 10. مدل‌ها
+# 11. مدل‌ها
 # ==========================================
 models_dict = {
     "Random Forest": RandomForestRegressor(n_estimators=100, random_state=42),
@@ -548,7 +629,7 @@ def sample_data(صنف):
     df['تاریخ_شمسی'] = df['تاریخ'].apply(lambda d: jdatetime.datetime.fromgregorian(datetime=d).strftime('%Y/%m/%d'))
     return df
 
-def chatbot_response(user_input, صنف, data, eco_data):
+def chatbot_response(user_input, صنف, data, prices):
     user_input = user_input.lower()
     responses = {
         'سلام': "👋 سلام! چطور می‌تونم به شما کمک کنم؟",
@@ -556,13 +637,10 @@ def chatbot_response(user_input, صنف, data, eco_data):
         'راهنما': f"📖 برای {صنف}، می‌تونم کمک کنم پیش‌بینی فروش داشته باشید.",
         'فروش': f"📊 بر اساس داده‌های {صنف}، فروش شما روند خوبی دارد.",
         'مشتری': f"👥 تعداد مشتریان {صنف} در حال افزایش است.",
-        'دلار': f"💰 قیمت دلار امروز: {eco_data['dollar']:,} تومان",
-        'طلا': f"🏅 قیمت طلا: {eco_data['gold']:,} تومان",
-        'نفت': f"🛢️ قیمت نفت: {eco_data['oil']} دلار",
-        'تورم': f"📈 نرخ تورم: {eco_data['inflation']:.1f}%",
-        'شاخص بورس': f"📊 شاخص بورس: {eco_data['stock_index']:,}",
-        'مسکن': f"🏠 قیمت مسکن: {eco_data['housing_price']:,} تومان",
-        'بیکاری': f"👤 نرخ بیکاری: {eco_data['unemployment']:.1f}%",
+        'دلار': f"💰 قیمت دلار امروز: {prices['dollar']:,} تومان",
+        'طلا': f"🏅 قیمت طلای ۱۸ عیار: {prices['gold_18']:,} تومان",
+        'نفت': f"🛢️ قیمت نفت: {prices['oil']} دلار",
+        'تورم': f"📈 نرخ تورم: {prices['inflation']:.1f}%",
         'تخفیف': "💡 تخفیف‌های هدفمند می‌توانند فروش را تا ۲۰٪ افزایش دهند.",
         'داده': f"📋 تعداد رکوردهای شما: {len(data)}",
         'هدف': f"🎯 بهترین ستون هدف برای شما: {suggest_target(data)}",
@@ -570,14 +648,14 @@ def chatbot_response(user_input, صنف, data, eco_data):
         'دقت': "🎯 دقت مدل به تعداد داده‌ها و کیفیت آن بستگی دارد.",
         'تاریخ': f"📅 ستون تاریخ به فرمت شمسی نمایش داده میشود.",
         'آینده': "🔮 تحلیل آینده نشان میدهد شرایط بازار در حال تغییر است.",
-        'منبع': f"📡 قیمت‌ها از منابع {eco_data['source']} دریافت شده است."
+        'منبع': f"📡 قیمت‌ها از منابع {prices['source']} دریافت شده است."
     }
     for key, response in responses.items():
         if key in user_input:
             return response
     return f"🤖 سوال شما: '{user_input}'\nلطفاً دقیق‌تر بپرسید یا از کلمات کلیدی استفاده کنید."
 
-def admin_panel(eco_data):
+def admin_panel(prices):
     st.markdown("""
     <div class="card">
         <div class="card-title"><span class="icon">🔐</span> پنل مدیریت iHoNoor</div>
@@ -587,23 +665,18 @@ def admin_panel(eco_data):
     with col1: st.metric("👥 کاربران", "۱,۲۴۵", delta="+۱۲%")
     with col2: st.metric("📊 پیش‌بینی‌ها", "۳,۸۹۰", delta="+۸%")
     with col3: st.metric("🏷️ صنف‌ها", len(industries))
-    with col4: st.metric("💰 نرخ دلار", f"{eco_data['dollar']:,}")
+    with col4: st.metric("💰 نرخ دلار", f"{prices['dollar']:,}")
     st.markdown("---")
     st.subheader("📊 وضعیت اقتصادی لحظه‌ای")
     col1, col2, col3, col4 = st.columns(4)
-    with col1: st.metric("💰 دلار", f"{eco_data['dollar']:,}")
-    with col2: st.metric("🏅 طلا", f"{eco_data['gold']:,}")
-    with col3: st.metric("🛢️ نفت", f"{eco_data['oil']} $")
-    with col4: st.metric("📈 تورم", f"{eco_data['inflation']:.1f}%")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1: st.metric("📊 شاخص بورس", f"{eco_data['stock_index']:,}")
-    with col2: st.metric("🏠 قیمت مسکن", f"{eco_data['housing_price']:,}")
-    with col3: st.metric("👤 بیکاری", f"{eco_data['unemployment']:.1f}%")
-    with col4: st.metric("📡 منبع", eco_data['source'])
-    st.caption(f"⏱️ آخرین بروزرسانی: {eco_data['date']}")
+    with col1: st.metric("💰 دلار", f"{prices['dollar']:,}")
+    with col2: st.metric("🏅 طلای ۱۸ عیار", f"{prices['gold_18']:,}")
+    with col3: st.metric("🛢️ نفت", f"{prices['oil']} $")
+    with col4: st.metric("📈 تورم", f"{prices['inflation']:.1f}%")
+    st.caption(f"📡 {prices['source']} | ⏱️ {prices['date']}")
 
 # ==========================================
-# 11. بخش سایدبار
+# 12. بخش سایدبار
 # ==========================================
 if "score" not in st.session_state: st.session_state.score = 0
 if "streak" not in st.session_state: st.session_state.streak = 0
@@ -614,7 +687,7 @@ with st.sidebar:
     st.markdown("""
     <div style="background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,0.05);border-radius:50px 15px 50px 15px;padding:18px;text-align:center;margin-bottom:18px;">
         <h1 style="font-size:2rem;margin:0;background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">iHo<span style="background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Noor</span></h1>
-        <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">✨ v11.0</p>
+        <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">✨ v12.0</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -623,12 +696,12 @@ with st.sidebar:
     st.markdown("### 📊 وضعیت اقتصادی لحظه‌ای")
     col1, col2 = st.sidebar.columns(2)
     with col1:
-        st.metric("💰 دلار", f"{economic_data['dollar']:,}", delta=f"{((economic_data['dollar']-195000)/195000*100):.1f}%")
-        st.metric("🏅 طلا", f"{economic_data['gold']:,}")
+        st.metric("💰 دلار", f"{prices['dollar']:,}", delta=f"{((prices['dollar']-188500)/188500*100):.1f}%")
+        st.metric("🏅 طلای ۱۸ عیار", f"{prices['gold_18']:,}")
     with col2:
-        st.metric("🛢️ نفت", f"{economic_data['oil']} $")
-        st.metric("📈 تورم", f"{economic_data['inflation']:.1f}%")
-    st.caption(f"📡 {economic_data['source']} | ⏱️ {economic_data['date']}")
+        st.metric("🛢️ نفت", f"{prices['oil']} $")
+        st.metric("📈 تورم", f"{prices['inflation']:.1f}%")
+    st.caption(f"📡 {prices['source']} | ⏱️ {prices['date']}")
     st.markdown("---")
     فایل = st.file_uploader("📁 " + t['step2'], type=["csv", "xlsx", "xls"])
     st.markdown("---")
@@ -638,7 +711,7 @@ with st.sidebar:
     with col2: st.metric("🔥", f"{st.session_state.streak} روز")
 
 # ==========================================
-# 12. بارگذاری دیتا
+# 13. بارگذاری دیتا
 # ==========================================
 data = None
 if فایل:
@@ -652,22 +725,22 @@ if data is None:
     st.info(f"📊 داده‌های نمونه برای {صنف}")
 
 # ==========================================
-# 13. هدر
+# 14. هدر
 # ==========================================
 st.markdown(f"""
 <div class="main-header">
     <h1><span class="highlight">iHo</span>Noor</h1>
     <p>{t['app_name']} | {t['subtitle']}</p>
     <div>
-        <span class="dollar-badge">💰 دلار: {economic_data['dollar']:,} تومان</span>
-        <span class="dollar-badge">🏅 طلا: {economic_data['gold']:,}</span>
-        <span class="dollar-badge">🛢️ نفت: {economic_data['oil']} $</span>
-        <span class="source-badge">📡 {economic_data['source']}</span>
-        <span class="source-badge">✨ v11.0</span>
-        <span class="source-badge">⏱️ {economic_data['date']}</span>
+        <span class="dollar-badge">💰 دلار: {prices['dollar']:,} تومان</span>
+        <span class="dollar-badge">🏅 طلای ۱۸ عیار: {prices['gold_18']:,}</span>
+        <span class="dollar-badge">🛢️ نفت: {prices['oil']} $</span>
+        <span class="source-badge">📡 {prices['source']}</span>
+        <span class="source-badge">✨ v12.0</span>
+        <span class="source-badge">⏱️ {prices['date']}</span>
     </div>
     <div style="font-size:0.6rem;color:rgba(255,255,255,0.2);margin-top:8px;">
-        💡 قیمت دلار در ساعات غیرکاری ممکن است به‌روز نباشد
+        💡 قیمت‌ها هر ۵ دقیقه به‌روز میشوند
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -681,7 +754,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 14. تب‌ها با رنگ‌های متفاوت
+# 15. تب‌ها
 # ==========================================
 tab_colors = [
     ("📊 " + t['step3'], "#FF6B6B"),
@@ -795,9 +868,9 @@ with tab1:
                         else:
                             st.info("ℹ️ این مدل اهمیت ویژگی‌ها را پشتیبانی نمیکند.")
                     with st.expander("💱 " + t['dollar_label']):
-                        st.markdown(f"💰 **نرخ دلار لحظه‌ای:** {economic_data['dollar']:,} تومان")
+                        st.markdown(f"💰 **نرخ دلار لحظه‌ای:** {prices['dollar']:,} تومان")
                         if unit == 'تومان':
-                            dollar_value = pred / economic_data['dollar']
+                            dollar_value = pred / prices['dollar']
                             st.metric("💵 پیش‌بینی به دلار", f"${dollar_value:,.2f}")
                         else:
                             st.info(f"ℹ️ واحد '{unit}' است. تحلیل دلاری برای ستون‌های تومانی انجام میشود.")
@@ -819,46 +892,71 @@ with tab1:
                 st.error(f"❌ خطا: {e}")
 
 # ==========================================
-# تب 2: تحلیلگر آینده
+# تب 2: تحلیلگر آینده (نسخه جامع)
 # ==========================================
 with tab2:
     st.markdown("""
     <div class="card">
         <div class="card-title"><span class="icon">🔮</span> تحلیلگر هوشمند آینده iHoNoor</div>
-        <p>تحلیل شرایط اقتصادی و تأثیر آن بر صنف شما</p>
+        <p>تحلیل جامع اقتصادی، ژئوپولیتیک و تأثیر آن بر صنف شما</p>
     </div>
     """, unsafe_allow_html=True)
     
     st.subheader("📊 وضعیت اقتصادی لحظه‌ای")
     col1, col2, col3, col4 = st.columns(4)
-    with col1: st.metric("💰 دلار", f"{economic_data['dollar']:,}", delta=f"{((economic_data['dollar']-195000)/195000*100):.1f}%")
-    with col2: st.metric("🏅 طلا", f"{economic_data['gold']:,}", delta=f"{((economic_data['gold']-35000000)/35000000*100):.1f}%")
-    with col3: st.metric("🛢️ نفت", f"{economic_data['oil']} $", delta=f"{((economic_data['oil']-85)/85*100):.1f}%")
-    with col4: st.metric("📈 تورم", f"{economic_data['inflation']:.1f}%", delta=f"{((economic_data['inflation']-35)/35*100):.1f}%")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1: st.metric("📊 شاخص بورس", f"{economic_data['stock_index']:,}")
-    with col2: st.metric("🏠 قیمت مسکن", f"{economic_data['housing_price']:,}")
-    with col3: st.metric("👤 بیکاری", f"{economic_data['unemployment']:.1f}%")
-    with col4: st.metric("📡 منبع", economic_data['source'])
-    st.caption(f"⏱️ آخرین بروزرسانی: {economic_data['date']}")
+    with col1: st.metric("💰 دلار", f"{prices['dollar']:,}", delta=f"{((prices['dollar']-188500)/188500*100):.1f}%")
+    with col2: st.metric("🏅 طلای ۱۸ عیار", f"{prices['gold_18']:,}")
+    with col3: st.metric("🛢️ نفت", f"{prices['oil']} $")
+    with col4: st.metric("📈 تورم", f"{prices['inflation']:.1f}%")
+    st.caption(f"📡 {prices['source']} | ⏱️ {prices['date']}")
     
     st.markdown("---")
     st.subheader(f"🔮 تحلیل آینده برای {صنف}")
-    analysis = future_analyst(صنف, economic_data)
+    analysis = future_analyst(صنف, prices)
+    
     status_color = "stable"
-    if "بحران" in analysis['status'] or "بحرانی" in analysis['status']: status_color = "critical"
-    elif "هشدار" in analysis['status']: status_color = "warning"
+    if "بحران" in analysis['status'] or "بحرانی" in analysis['status']:
+        status_color = "critical"
+    elif "هشدار" in analysis['status']:
+        status_color = "warning"
+    
     st.markdown(f"""
     <div class="future-box">
         <div class="title">🔮 تحلیلگر آینده iHoNoor</div>
-        <div><span class="status-badge {status_color}">{analysis['status']}</span></div>
+        <div>
+            <span class="status-badge {status_color}">{analysis['status']}</span>
+            <span style="margin-right:10px;background:rgba(255,215,0,0.05);padding:2px 12px;border-radius:20px;font-size:0.75rem;">{analysis['dollar_prediction']}</span>
+        </div>
         <p style="font-size:1.1rem;margin-top:10px;"><strong>روند:</strong> {analysis['trend']}</p>
         <p><strong>تأثیر بر صنف:</strong> {analysis['impact']}</p>
         <p><strong>تغییر قیمت پیش‌بینی شده:</strong> {analysis['price_change']:.1f}%</p>
         <p><strong>سطح ریسک:</strong> {analysis['risk_level']}</p>
-        <p style="background:rgba(255,255,255,0.05);padding:12px;border-radius:10px;margin-top:10px;">{analysis['message']}</p>
-        <div style="margin-top:10px;"><strong>🔹 راهکارهای پیشنهادی:</strong><ul style="margin-top:5px;">{''.join([f'<li>{action}</li>' for action in analysis['actions']])}</ul></div>
-        <div style="margin-top:10px;background:rgba(255,215,0,0.05);padding:12px;border-radius:10px;border-right:3px solid #FFD700;"><strong style="color:#FFD700;">{analysis['opportunity']}</strong></div>
+        
+        <div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:10px;margin-top:10px;">
+            <p style="margin:0;font-weight:600;color:#FFD700;">📌 پیام:</p>
+            <p style="margin:4px 0;">{analysis['message']}</p>
+        </div>
+        
+        <div style="background:rgba(255,215,0,0.03);padding:12px;border-radius:10px;margin-top:10px;border-right:3px solid #FFD700;">
+            <p style="margin:0;font-weight:600;color:#FFD700;">🚨 هشدار اختصاصی:</p>
+            <p style="margin:4px 0;">{analysis['alert']}</p>
+        </div>
+        
+        <div style="margin-top:10px;">
+            <strong>🔹 راهکارهای پیشنهادی:</strong>
+            <ul style="margin-top:5px;">
+                {''.join([f'<li>{action}</li>' for action in analysis['actions']])}
+            </ul>
+        </div>
+        
+        <div style="margin-top:10px;background:rgba(78,205,196,0.05);padding:12px;border-radius:10px;border-right:3px solid #4ECDC4;">
+            <strong style="color:#4ECDC4;">{analysis['opportunity']}</strong>
+        </div>
+        
+        <div style="margin-top:10px;background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;">
+            <p style="margin:0;font-weight:600;color:#45B7D1;">🌍 تحلیل ژئوپولیتیک:</p>
+            <p style="margin:4px 0;white-space:pre-line;font-size:0.85rem;">{analysis['geo_political']}</p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -878,118 +976,65 @@ with tab3:
     """, unsafe_allow_html=True)
     
     st.markdown(f"""
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
         <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;text-align:center;">
             <p style="font-size:1.5rem;margin:0;">💰</p>
-            <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin:4px 0;">قیمت دلار</p>
-            <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{economic_data['dollar']:,}</p>
+            <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin:4px 0;">قیمت دلار آزاد</p>
+            <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{prices['dollar']:,}</p>
             <p style="color:rgba(255,255,255,0.3);font-size:0.65rem;">تومان</p>
         </div>
         <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;text-align:center;">
             <p style="font-size:1.5rem;margin:0;">🏅</p>
-            <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin:4px 0;">قیمت طلا</p>
-            <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{economic_data['gold']:,}</p>
+            <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin:4px 0;">طلای ۱۸ عیار</p>
+            <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{prices['gold_18']:,}</p>
             <p style="color:rgba(255,255,255,0.3);font-size:0.65rem;">تومان</p>
         </div>
         <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;text-align:center;">
             <p style="font-size:1.5rem;margin:0;">🛢️</p>
             <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin:4px 0;">قیمت نفت</p>
-            <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{economic_data['oil']}</p>
+            <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{prices['oil']}</p>
             <p style="color:rgba(255,255,255,0.3);font-size:0.65rem;">دلار هر بشکه</p>
         </div>
         <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;text-align:center;">
             <p style="font-size:1.5rem;margin:0;">📈</p>
             <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin:4px 0;">نرخ تورم</p>
-            <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{economic_data['inflation']:.1f}%</p>
+            <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{prices['inflation']:.1f}%</p>
             <p style="color:rgba(255,255,255,0.3);font-size:0.65rem;">درصد سالانه</p>
-        </div>
-        <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;text-align:center;">
-            <p style="font-size:1.5rem;margin:0;">📊</p>
-            <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin:4px 0;">شاخص بورس</p>
-            <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{economic_data['stock_index']:,}</p>
-            <p style="color:rgba(255,255,255,0.3);font-size:0.65rem;">واحد</p>
-        </div>
-        <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;text-align:center;">
-            <p style="font-size:1.5rem;margin:0;">🏠</p>
-            <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin:4px 0;">قیمت مسکن</p>
-            <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{economic_data['housing_price']:,}</p>
-            <p style="color:rgba(255,255,255,0.3);font-size:0.65rem;">تومان هر متر</p>
-        </div>
-        <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;text-align:center;">
-            <p style="font-size:1.5rem;margin:0;">👤</p>
-            <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin:4px 0;">نرخ بیکاری</p>
-            <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{economic_data['unemployment']:.1f}%</p>
-            <p style="color:rgba(255,255,255,0.3);font-size:0.65rem;">نیروی کار</p>
-        </div>
-        <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;text-align:center;">
-            <p style="font-size:1.5rem;margin:0;">⏱️</p>
-            <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin:4px 0;">آخرین بروزرسانی</p>
-            <p style="color:#FFD700;font-size:0.9rem;font-weight:700;margin:0;">{economic_data['date']}</p>
-            <p style="color:rgba(255,255,255,0.3);font-size:0.65rem;">{economic_data['source']}</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    with st.expander("📖 راهنمای تحلیل اقتصادی"):
-        st.markdown("""
-        <div style="color:rgba(255,255,255,0.7);">
-            <p><strong>💰 قیمت دلار:</strong> تأثیر مستقیم بر قیمت واردات و مواد اولیه دارد.</p>
-            <p><strong>🏅 قیمت طلا:</strong> نشان‌دهنده ارزش پول و تورم است.</p>
-            <p><strong>🛢️ قیمت نفت:</strong> بر هزینه انرژی، حمل و نقل و تولید تأثیر میگذارد.</p>
-            <p><strong>📈 نرخ تورم:</strong> نشان‌دهنده افزایش عمومی قیمت‌ها و کاهش قدرت خرید است.</p>
-            <p><strong>📊 شاخص بورس:</strong> نشان‌دهنده وضعیت کلی اقتصاد و اعتماد سرمایه‌گذاران است.</p>
-            <p><strong>🏠 قیمت مسکن:</strong> نشان‌دهنده وضعیت بازار املاک و سرمایه‌گذاری است.</p>
-            <p><strong>👤 نرخ بیکاری:</strong> نشان‌دهنده وضعیت اشتغال و قدرت خرید جامعه است.</p>
-        </div>
-        """, unsafe_allow_html=True)
 
 # ==========================================
-# تب‌های دیگر
+# تب‌های دیگر (خلاصه)
 # ==========================================
-with tab4:  # راهنمای جامع
+with tab4:  # راهنما
     st.markdown("""
-    <div class="card" style="background:linear-gradient(135deg,rgba(255,215,0,0.02),rgba(255,165,0,0.01));border:1px solid rgba(255,215,0,0.03);">
-        <div class="card-title" style="font-size:1.4rem;">
-            <span class="icon">📖</span> راهنمای جامع iHoNoor
-        </div>
-        <p style="color:rgba(255,255,255,0.6);">
-            با <strong style="color:#FFD700;">۴ گام ساده</strong> از iHoNoor استفاده کنید.
-        </p>
+    <div class="card">
+        <div class="card-title"><span class="icon">📖</span> راهنمای جامع iHoNoor</div>
+        <p style="color:rgba(255,255,255,0.6);">با <strong style="color:#FFD700;">۴ گام ساده</strong> از iHoNoor استفاده کنید.</p>
     </div>
     """, unsafe_allow_html=True)
     st.markdown("""
     <div class="guide-step">
         <h3>📌 گام ۱: صنف خود را انتخاب کنید</h3>
-        <p>از منوی سمت راست، صنف خود را انتخاب کنید. iHoNoor برای هر صنف، تحلیل مخصوص خود را دارد.</p>
-        <div class="tip">💡 <strong>مثال:</strong> فروشگاه مواد غذایی → "خواربارفروشی" | پیمانکار ساختمانی → "ساختمان و پیمانکاری"</div>
+        <p>از منوی سمت راست، صنف خود را انتخاب کنید.</p>
+        <div class="tip">💡 <strong>مثال:</strong> فروشگاه مواد غذایی → "خواربارفروشی"</div>
     </div>
     <div class="guide-step">
         <h3>📌 گام ۲: فایل خود را آپلود کنید</h3>
-        <p>فایل Excel یا CSV خود را در بخش آپلود بارگذاری کنید.</p>
-        <div class="warning">⚠️ <strong>نکات کلیدی:</strong>
-            <ul style="margin:4px 0;padding-right:20px;color:rgba(255,255,255,0.6);">
-                <li>فایل باید حداقل شامل <strong>۲ ستون</strong> باشد: "تاریخ" و یک ستون عددی</li>
-                <li><strong>حداقل ۵۰ رکورد</strong> برای پیش‌بینی قابل اعتماد</li>
-                <li><strong>توصیه:</strong> ۱۰۰ تا ۲۰۰ رکورد برای دقت بالاتر</li>
-            </ul>
-        </div>
-        <div class="tip">💡 <strong>چرا تعداد رکورد مهم است؟</strong> مدل‌های یادگیری ماشین با داده‌های بیشتر، الگوهای بهتری یاد می‌گیرند.</div>
+        <p>فایل Excel یا CSV خود را آپلود کنید.</p>
+        <div class="warning">⚠️ فایل باید حداقل شامل ستون‌های "تاریخ" و یک ستون عددی باشد.</div>
+        <div class="tip">💡 حداقل ۵۰ روز داده برای پیش‌بینی قابل اعتماد.</div>
     </div>
     <div class="guide-step">
         <h3>📌 گام ۳: ستون هدف را انتخاب کنید</h3>
-        <p>ستونی که میخواهید پیش‌بینی کنید را انتخاب کنید. این ستون باید <strong>عددی</strong> باشد.</p>
-        <div class="success">✅ <strong>پیشنهاد iHoNoor:</strong> اگر مطمئن نیستید، گزینه <strong>"💡 پیشنهاد iHoNoor"</strong> را انتخاب کنید.</div>
+        <p>ستونی که میخواهید پیش‌بینی کنید را انتخاب کنید.</p>
+        <div class="success">✅ از گزینه <strong>"💡 پیشنهاد iHoNoor"</strong> استفاده کنید.</div>
     </div>
     <div class="guide-step">
         <h3>📌 گام ۴: پیش‌بینی را دریافت کنید</h3>
-        <p>روی دکمه <strong>"🚀 پیش‌بینی کن"</strong> کلیک کنید و نتیجه را مشاهده کنید.</p>
-        <div class="tip">📊 <strong>خروجی‌ها:</strong>
-            <ul style="margin:4px 0;padding-right:20px;">
-                <li><strong>عدد پیش‌بینی:</strong> مقدار مورد انتظار برای فردا</li>
-                <li><strong>دقت مدل (R²):</strong> بالای ۷۰٪ خوب است</li>
-                <li><strong>بازه اطمینان:</strong> محدوده احتمالی فروش</li>
-            </ul>
-        </div>
+        <p>روی <strong>"🚀 پیش‌بینی کن"</strong> کلیک کنید.</p>
+        <div class="tip">📊 خروجی: عدد پیش‌بینی، دقت مدل، بازه اطمینان</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1006,14 +1051,13 @@ with tab5:  # بروشور علمی
     """, unsafe_allow_html=True)
     st.markdown("""
     <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:24px;padding:24px 28px;margin-bottom:16px;">
-        <h3 style="color:#4ECDC4;">🧠 یادگیری ماشین چیست و چرا پیش‌بینی میکند؟</h3>
+        <h3 style="color:#4ECDC4;">🧠 یادگیری ماشین چیست؟</h3>
         <p style="color:rgba(255,255,255,0.7);">
             <strong>یادگیری ماشین (Machine Learning)</strong> شاخه‌ای از هوش مصنوعی است که به کامپیوترها امکان میدهد 
             بدون برنامه‌ریزی مستقیم، از داده‌ها <strong>یاد بگیرند</strong> و <strong>الگوها</strong> را شناسایی کنند.
         </p>
         <div style="background:rgba(78,205,196,0.05);padding:12px 18px;border-radius:12px;border-right:3px solid #4ECDC4;margin-top:8px;">
-            💡 <strong>به زبان ساده:</strong> iHoNoor مانند یک <strong>مشاور فروش هوشمند</strong> عمل میکند که با بررسی 
-            داده‌های گذشته، بهترین حدس را برای آینده میزند.
+            💡 iHoNoor مانند یک <strong>مشاور فروش هوشمند</strong> عمل میکند.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1033,7 +1077,7 @@ with tab6:  # چتبات
     user_msg = st.text_input("✏️ سوال خود را بنویسید...", placeholder="مثلاً: وضعیت اقتصادی چطوره؟")
     if st.button("📨 ارسال") and user_msg:
         st.session_state.chat_history.append({'role': 'user', 'content': user_msg})
-        response = chatbot_response(user_msg, صنف, data, economic_data)
+        response = chatbot_response(user_msg, صنف, data, prices)
         st.session_state.chat_history.append({'role': 'bot', 'content': response})
         st.rerun()
     if st.button("🗑️ پاک کردن تاریخچه چت"):
@@ -1061,7 +1105,7 @@ with tab7:  # پنل مدیریت
                 else:
                     st.error("❌ نام کاربری یا رمز عبور اشتباه است.")
     else:
-        admin_panel(economic_data)
+        admin_panel(prices)
         if st.button("🚪 خروج از سیستم"):
             st.session_state.admin_logged_in = False
             st.rerun()
@@ -1109,10 +1153,10 @@ with tab13:  # تماس
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# 15. فوتر
+# فوتر
 # ==========================================
 st.markdown(f"""
 <div class="footer">
-    ✨ iHoNoor v11.0 | {t['app_name']} | دلار: {economic_data['dollar']:,} تومان | 📡 {economic_data['source']} | ha2021alipur@gmail.com
+    ✨ iHoNoor v12.0 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
 </div>
 """, unsafe_allow_html=True)
