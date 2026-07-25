@@ -144,11 +144,10 @@ LANG = {
 }
 
 # ==========================================
-# 5. طراحی پیشرفته با پشتیبانی از دارک/روشن
+# 5. طراحی پیشرفته
 # ==========================================
 st.markdown("""
 <style>
-    /* ===== فونت و پایه ===== */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
     * { 
         font-family: 'Inter', 'Vazirmatn', sans-serif; 
@@ -156,191 +155,17 @@ st.markdown("""
         box-sizing: border-box;
     }
     
-    /* ===== تم پیش‌فرض (دارک) ===== */
     .stApp {
         background: radial-gradient(ellipse at 20% 50%, #0A1A2F, #0D2137);
         transition: background 0.8s ease;
         color: #FFFFFF;
     }
     
-    /* ===== تم روشن (Light Mode) ===== */
     .stApp.light-mode {
         background: radial-gradient(ellipse at 20% 50%, #F0F4F8, #E2E8F0);
         color: #0A2540;
     }
-    .stApp.light-mode .main-header {
-        background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(240,244,248,0.7));
-        border: 1px solid rgba(10, 37, 64, 0.05);
-    }
-    .stApp.light-mode .main-header h1 {
-        background: linear-gradient(135deg, #0A2540, #1A3A5C);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .stApp.light-mode .main-header p {
-        color: #3D5A78;
-    }
-    .stApp.light-mode .main-header .dollar-badge {
-        background: rgba(10, 37, 64, 0.05);
-        border: 1px solid rgba(10, 37, 64, 0.08);
-        color: #0A2540;
-    }
-    .stApp.light-mode .main-header .source-badge {
-        color: #6B85A0;
-    }
-    .stApp.light-mode .card {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(10, 37, 64, 0.04);
-        color: #0A2540;
-    }
-    .stApp.light-mode .card-title {
-        color: #0A2540;
-    }
-    .stApp.light-mode .card:hover {
-        border-color: rgba(10, 37, 64, 0.08);
-        box-shadow: 0 16px 60px rgba(0,0,0,0.04);
-    }
-    .stApp.light-mode .stTabs [data-baseweb="tab"] {
-        background: rgba(255, 255, 255, 0.5);
-        border: 1px solid rgba(10, 37, 64, 0.04);
-        color: #3D5A78;
-    }
-    .stApp.light-mode .stTabs [data-baseweb="tab"]:hover {
-        background: rgba(10, 37, 64, 0.04);
-        color: #0A2540;
-    }
-    .stApp.light-mode .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, rgba(10, 37, 64, 0.06), rgba(10, 37, 64, 0.02)) !important;
-        border-color: rgba(10, 37, 64, 0.1) !important;
-        color: #0A2540 !important;
-    }
-    .stApp.light-mode .stTabs [aria-selected="true"]::after {
-        background: linear-gradient(90deg, transparent, #0A2540, transparent);
-    }
-    .stApp.light-mode .result-box {
-        background: linear-gradient(135deg, rgba(10, 37, 64, 0.04), rgba(10, 37, 64, 0.02));
-        border: 1px solid rgba(10, 37, 64, 0.04);
-    }
-    .stApp.light-mode .result-number {
-        background: linear-gradient(135deg, #0A2540, #1A3A5C);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .stApp.light-mode .result-label {
-        color: #3D5A78;
-    }
-    .stApp.light-mode .advisor-box {
-        background: linear-gradient(135deg, rgba(10, 37, 64, 0.04), rgba(255,255,255,0.6));
-        border: 1px solid rgba(10, 37, 64, 0.04);
-        color: #0A2540;
-    }
-    .stApp.light-mode .advisor-box strong {
-        color: #0A2540;
-    }
-    .stApp.light-mode .future-box {
-        background: linear-gradient(135deg, rgba(10, 37, 64, 0.04), rgba(255,255,255,0.6));
-        border: 1px solid rgba(10, 37, 64, 0.04);
-        color: #0A2540;
-    }
-    .stApp.light-mode .future-box .title {
-        color: #0A2540;
-    }
-    .stApp.light-mode .step-item {
-        background: rgba(255, 255, 255, 0.5);
-        border: 1px solid rgba(10, 37, 64, 0.04);
-    }
-    .stApp.light-mode .step-item .text {
-        color: #0A2540;
-    }
-    .stApp.light-mode .step-item .desc {
-        color: #6B85A0;
-    }
-    .stApp.light-mode .step-item .num {
-        background: linear-gradient(135deg, rgba(10, 37, 64, 0.08), rgba(10, 37, 64, 0.02));
-        border: 1px solid rgba(10, 37, 64, 0.06);
-        color: #0A2540;
-    }
-    .stApp.light-mode .stButton > button {
-        background: linear-gradient(135deg, rgba(10, 37, 64, 0.06), rgba(10, 37, 64, 0.02)) !important;
-        border: 1px solid rgba(10, 37, 64, 0.08) !important;
-        color: #0A2540 !important;
-    }
-    .stApp.light-mode .stButton > button:hover {
-        border-color: rgba(10, 37, 64, 0.2) !important;
-        box-shadow: 0 12px 40px rgba(0,0,0,0.04) !important;
-    }
-    .stApp.light-mode .chat-user {
-        background: rgba(10, 37, 64, 0.04);
-        border: 1px solid rgba(10, 37, 64, 0.04);
-        color: #0A2540;
-    }
-    .stApp.light-mode .chat-bot {
-        background: rgba(255, 255, 255, 0.6);
-        border: 1px solid rgba(10, 37, 64, 0.04);
-        color: #0A2540;
-    }
-    .stApp.light-mode .guide-step {
-        background: rgba(255, 255, 255, 0.5);
-        border: 1px solid rgba(10, 37, 64, 0.04);
-    }
-    .stApp.light-mode .guide-step h3 {
-        color: #0A2540;
-    }
-    .stApp.light-mode .guide-step p {
-        color: #3D5A78;
-    }
-    .stApp.light-mode .guide-step .tip {
-        background: rgba(10, 37, 64, 0.02);
-        border-right: 3px solid rgba(10, 37, 64, 0.08);
-        color: #3D5A78;
-    }
-    .stApp.light-mode .guide-step .warning {
-        background: rgba(229, 62, 62, 0.02);
-        border-right: 3px solid rgba(229, 62, 62, 0.08);
-        color: #3D5A78;
-    }
-    .stApp.light-mode .guide-step .success {
-        background: rgba(56, 161, 105, 0.02);
-        border-right: 3px solid rgba(56, 161, 105, 0.08);
-        color: #3D5A78;
-    }
-    .stApp.light-mode .footer {
-        color: #94A9C2;
-        border-top: 1px solid rgba(10, 37, 64, 0.04);
-    }
-    .stApp.light-mode .brochure {
-        background: rgba(255, 255, 255, 0.5);
-        border: 1px solid rgba(10, 37, 64, 0.04);
-    }
-    .stApp.light-mode .brochure h2 {
-        color: #0A2540;
-        border-bottom: 1px solid rgba(10, 37, 64, 0.04);
-    }
-    .stApp.light-mode .brochure h3 {
-        color: #0A2540;
-    }
-    .stApp.light-mode .brochure ul, .stApp.light-mode .brochure ol {
-        color: #3D5A78;
-    }
-    .stApp.light-mode .brochure th {
-        background: rgba(10, 37, 64, 0.02);
-        color: #0A2540;
-    }
-    .stApp.light-mode .brochure td {
-        color: #3D5A78;
-        border-bottom: 1px solid rgba(10, 37, 64, 0.02);
-    }
-    .stApp.light-mode .future-box .status-badge.critical { background: #E53E3E; color: white; }
-    .stApp.light-mode .future-box .status-badge.warning { background: #F5A623; color: #0A2540; }
-    .stApp.light-mode .future-box .status-badge.stable { background: #38A169; color: white; }
-    .stApp.light-mode .stDataFrame { color: #0A2540; }
-    .stApp.light-mode .stDataFrame thead th { color: #0A2540; background: rgba(10, 37, 64, 0.02); }
-    .stApp.light-mode .stDataFrame tbody td { color: #3D5A78; }
-    .stApp.light-mode .stAlert { color: #0A2540; }
-    .stApp.light-mode .stMarkdown { color: #0A2540; }
-
-    /* ===== هدر اصلی (دارک) ===== */
+    
     .main-header {
         background: linear-gradient(135deg, rgba(10, 26, 47, 0.85), rgba(20, 50, 80, 0.7));
         backdrop-filter: blur(20px);
@@ -381,7 +206,6 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
         background-size: 200% 200%;
         animation: goldShine 4s ease-in-out infinite alternate;
-        text-shadow: 0 0 60px rgba(255, 215, 0, 0.1);
         margin: 0;
     }
     @keyframes goldShine {
@@ -423,49 +247,6 @@ st.markdown("""
         color: #94A9C2;
     }
 
-    /* ===== کارت‌ها ===== */
-    .card {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 24px 24px 24px 12px;
-        padding: 24px 28px;
-        margin-bottom: 20px;
-        box-shadow: 0 8px 40px rgba(0,0,0,0.2);
-        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        position: relative;
-        overflow: hidden;
-        color: rgba(255,255,255,0.9);
-    }
-    .card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 24px 24px 24px 12px;
-        background: linear-gradient(135deg, rgba(255, 215, 0, 0.02), transparent 50%);
-        pointer-events: none;
-    }
-    .card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 16px 60px rgba(0,0,0,0.3);
-        border-color: rgba(255, 215, 0, 0.1);
-    }
-    .card-title {
-        color: rgba(255,255,255,0.9);
-        font-weight: 700;
-        font-size: 1.1rem;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
-    }
-    .card-title .icon {
-        font-size: 1.5rem;
-        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.05));
-    }
-
-    /* ===== تب‌های بیضی‌شکل ===== */
     .stTabs [data-baseweb="tab-list"] {
         display: flex;
         flex-wrap: wrap;
@@ -478,7 +259,6 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         background: rgba(255, 255, 255, 0.04);
         backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 60px 20px 60px 20px;
         padding: 12px 28px !important;
@@ -487,8 +267,6 @@ st.markdown("""
         color: rgba(255,255,255,0.6);
         transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        position: relative;
-        overflow: hidden;
         min-width: 100px;
         text-align: center;
     }
@@ -503,7 +281,7 @@ st.markdown("""
         background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.08)) !important;
         border-color: rgba(255, 215, 0, 0.3) !important;
         color: #FFD700 !important;
-        box-shadow: 0 8px 30px rgba(255, 215, 0, 0.08), inset 0 1px 0 rgba(255, 215, 0, 0.1) !important;
+        box-shadow: 0 8px 30px rgba(255, 215, 0, 0.08) !important;
         transform: translateY(-2px) scale(1.02);
     }
     .stTabs [aria-selected="true"]::after {
@@ -522,7 +300,35 @@ st.markdown("""
         100% { width: 70%; left: 15%; opacity: 1; }
     }
 
-    /* ===== جعبه نتیجه ===== */
+    .card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 24px 24px 24px 12px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        color: rgba(255,255,255,0.9);
+    }
+    .card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 60px rgba(0,0,0,0.3);
+        border-color: rgba(255, 215, 0, 0.1);
+    }
+    .card-title {
+        color: rgba(255,255,255,0.9);
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    .card-title .icon {
+        font-size: 1.5rem;
+    }
+
     .result-box {
         background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 165, 0, 0.02));
         backdrop-filter: blur(12px);
@@ -531,7 +337,7 @@ st.markdown("""
         padding: 32px 36px;
         text-align: center;
         margin-top: 16px;
-        box-shadow: 0 8px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255, 215, 0, 0.03);
+        box-shadow: 0 8px 40px rgba(0,0,0,0.2);
         animation: resultFadeIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes resultFadeIn {
@@ -566,7 +372,6 @@ st.markdown("""
         50% { transform: translateY(-8px); }
     }
 
-    /* ===== جعبه مشاور ===== */
     .advisor-box {
         background: linear-gradient(135deg, rgba(255, 215, 0, 0.04), rgba(10, 26, 47, 0.6));
         backdrop-filter: blur(12px);
@@ -581,7 +386,6 @@ st.markdown("""
         color: #FFD700;
     }
 
-    /* ===== جعبه تحلیل آینده ===== */
     .future-box {
         background: linear-gradient(135deg, rgba(255, 215, 0, 0.04), rgba(10, 26, 47, 0.6));
         backdrop-filter: blur(16px);
@@ -610,7 +414,6 @@ st.markdown("""
     .future-box .status-badge.warning { background: #F5A623; color: #0A2540; }
     .future-box .status-badge.stable { background: #38A169; color: white; }
 
-    /* ===== دکمه‌ها ===== */
     .stButton > button {
         background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 165, 0, 0.05)) !important;
         backdrop-filter: blur(8px);
@@ -621,20 +424,16 @@ st.markdown("""
         color: #FFD700 !important;
         transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
         box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
-        position: relative;
-        overflow: hidden;
     }
     .stButton > button:hover {
         transform: translateY(-4px) scale(1.02) !important;
         border-color: rgba(255, 215, 0, 0.3) !important;
         box-shadow: 0 12px 40px rgba(255, 215, 0, 0.08) !important;
-        color: #FFD700 !important;
     }
     .stButton > button:active {
         transform: scale(0.96) !important;
     }
 
-    /* ===== مراحل ===== */
     .steps {
         display: flex;
         gap: 16px;
@@ -687,27 +486,6 @@ st.markdown("""
         font-size: 0.7rem;
     }
 
-    /* ===== چت ===== */
-    .chat-message {
-        padding: 12px 18px;
-        border-radius: 14px;
-        margin-bottom: 8px;
-        max-width: 80%;
-    }
-    .chat-user {
-        background: rgba(255, 215, 0, 0.08);
-        border: 1px solid rgba(255, 215, 0, 0.05);
-        color: white;
-        margin-right: auto;
-    }
-    .chat-bot {
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.03);
-        color: rgba(255,255,255,0.8);
-        margin-left: auto;
-    }
-
-    /* ===== راهنما ===== */
     .guide-step {
         background: rgba(255, 255, 255, 0.02);
         backdrop-filter: blur(8px);
@@ -762,60 +540,25 @@ st.markdown("""
         border-right: 3px solid rgba(56, 161, 105, 0.1);
     }
 
-    /* ===== بروشور ===== */
-    .brochure {
-        background: rgba(255, 255, 255, 0.02);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.03);
-        border-radius: 24px 24px 24px 12px;
-        padding: 30px 35px;
-        margin-bottom: 20px;
-        color: rgba(255,255,255,0.8);
-    }
-    .brochure h2 {
-        color: #FFD700;
-        font-weight: 800;
-        font-size: 1.6rem;
-        border-bottom: 1px solid rgba(255, 215, 0, 0.05);
-        padding-bottom: 12px;
-        margin-bottom: 20px;
-    }
-    .brochure h3 {
-        color: rgba(255,255,255,0.9);
-        font-weight: 700;
-        margin-top: 22px;
+    .chat-message {
+        padding: 12px 18px;
+        border-radius: 14px;
         margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        max-width: 80%;
     }
-    .brochure ul, .brochure ol {
-        padding-right: 25px;
-        line-height: 1.9;
-        color: rgba(255,255,255,0.6);
+    .chat-user {
+        background: rgba(255, 215, 0, 0.08);
+        border: 1px solid rgba(255, 215, 0, 0.05);
+        color: white;
+        margin-right: auto;
     }
-    .brochure li {
-        margin-bottom: 4px;
-    }
-    .brochure table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 16px 0;
-        font-size: 0.9rem;
-    }
-    .brochure th {
-        background: rgba(255, 215, 0, 0.05);
+    .chat-bot {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.03);
         color: rgba(255,255,255,0.8);
-        padding: 10px 14px;
-        text-align: right;
-    }
-    .brochure td {
-        padding: 10px 14px;
-        border-bottom: 1px solid rgba(255,255,255,0.02);
-        color: rgba(255,255,255,0.5);
+        margin-left: auto;
     }
 
-    /* ===== فوتر ===== */
     .footer {
         text-align: center;
         color: rgba(255,255,255,0.15);
@@ -825,40 +568,6 @@ st.markdown("""
         border-top: 1px solid rgba(255,255,255,0.02);
     }
 
-    /* ===== اسکرول ===== */
-    ::-webkit-scrollbar {
-        width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-        background: rgba(255,255,255,0.02);
-        border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: rgba(255, 215, 0, 0.2);
-        border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 215, 0, 0.3);
-    }
-
-    /* ===== داده‌ها ===== */
-    .stDataFrame {
-        color: rgba(255,255,255,0.8);
-    }
-    .stDataFrame thead th {
-        color: rgba(255,255,255,0.6);
-        background: rgba(255,255,255,0.02);
-    }
-    .stDataFrame tbody td {
-        color: rgba(255,255,255,0.7);
-    }
-
-    /* ===== هشدارها ===== */
-    .stAlert {
-        color: rgba(255,255,255,0.8);
-    }
-
-    /* ===== پاسخگویی ===== */
     @media (max-width: 768px) {
         .main-header h1 { font-size: 2rem; }
         .stTabs [data-baseweb="tab"] { padding: 10px 18px !important; font-size: 0.8rem; min-width: 70px; }
@@ -866,24 +575,9 @@ st.markdown("""
         .step-item { min-width: 100%; }
         .result-number { font-size: 2.6rem; }
         .card { padding: 18px 20px; }
-        .brochure { padding: 20px; }
-        .brochure table { font-size: 0.75rem; }
-        .brochure th, .brochure td { padding: 6px 8px; }
         .chat-message { max-width: 95%; }
     }
 </style>
-
-<script>
-    // ===== تغییر تم با کلیک =====
-    function toggleTheme() {
-        const app = document.querySelector('.stApp');
-        if (app.classList.contains('light-mode')) {
-            app.classList.remove('light-mode');
-        } else {
-            app.classList.add('light-mode');
-        }
-    }
-</script>
 """, unsafe_allow_html=True)
 
 # ==========================================
@@ -902,13 +596,40 @@ else:
 
 t = LANG[st.session_state.lang]
 
-# ===== انتخاب تم =====
 theme = st.sidebar.radio("🌓 تم / Theme", ["🌙 دارک", "☀️ روشن"], index=0 if st.session_state.theme == "dark" else 1)
 if theme == "☀️ روشن":
     st.session_state.theme = "light"
     st.markdown("""
     <style>
         .stApp { background: radial-gradient(ellipse at 20% 50%, #F0F4F8, #E2E8F0) !important; color: #0A2540 !important; }
+        .main-header { background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(240,244,248,0.7)) !important; border: 1px solid rgba(10, 37, 64, 0.05) !important; }
+        .main-header h1 { background: linear-gradient(135deg, #0A2540, #1A3A5C) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; }
+        .main-header p { color: #3D5A78 !important; }
+        .main-header .dollar-badge { background: rgba(10, 37, 64, 0.05) !important; border: 1px solid rgba(10, 37, 64, 0.08) !important; color: #0A2540 !important; }
+        .main-header .source-badge { color: #6B85A0 !important; }
+        .card { background: rgba(255, 255, 255, 0.8) !important; border: 1px solid rgba(10, 37, 64, 0.04) !important; color: #0A2540 !important; }
+        .card-title { color: #0A2540 !important; }
+        .stTabs [data-baseweb="tab"] { background: rgba(255, 255, 255, 0.5) !important; border: 1px solid rgba(10, 37, 64, 0.04) !important; color: #3D5A78 !important; }
+        .stTabs [aria-selected="true"] { background: linear-gradient(135deg, rgba(10, 37, 64, 0.06), rgba(10, 37, 64, 0.02)) !important; border-color: rgba(10, 37, 64, 0.1) !important; color: #0A2540 !important; }
+        .result-box { background: linear-gradient(135deg, rgba(10, 37, 64, 0.04), rgba(10, 37, 64, 0.02)) !important; border: 1px solid rgba(10, 37, 64, 0.04) !important; }
+        .result-number { background: linear-gradient(135deg, #0A2540, #1A3A5C) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; }
+        .result-label { color: #3D5A78 !important; }
+        .advisor-box { background: linear-gradient(135deg, rgba(10, 37, 64, 0.04), rgba(255,255,255,0.6)) !important; border: 1px solid rgba(10, 37, 64, 0.04) !important; color: #0A2540 !important; }
+        .advisor-box strong { color: #0A2540 !important; }
+        .future-box { background: linear-gradient(135deg, rgba(10, 37, 64, 0.04), rgba(255,255,255,0.6)) !important; border: 1px solid rgba(10, 37, 64, 0.04) !important; color: #0A2540 !important; }
+        .future-box .title { color: #0A2540 !important; }
+        .step-item { background: rgba(255, 255, 255, 0.5) !important; border: 1px solid rgba(10, 37, 64, 0.04) !important; }
+        .step-item .text { color: #0A2540 !important; }
+        .step-item .desc { color: #6B85A0 !important; }
+        .step-item .num { background: linear-gradient(135deg, rgba(10, 37, 64, 0.08), rgba(10, 37, 64, 0.02)) !important; border: 1px solid rgba(10, 37, 64, 0.06) !important; color: #0A2540 !important; }
+        .stButton > button { background: linear-gradient(135deg, rgba(10, 37, 64, 0.06), rgba(10, 37, 64, 0.02)) !important; border: 1px solid rgba(10, 37, 64, 0.08) !important; color: #0A2540 !important; }
+        .guide-step { background: rgba(255, 255, 255, 0.5) !important; border: 1px solid rgba(10, 37, 64, 0.04) !important; }
+        .guide-step h3 { color: #0A2540 !important; }
+        .guide-step p { color: #3D5A78 !important; }
+        .guide-step .tip { background: rgba(10, 37, 64, 0.02) !important; border-right: 3px solid rgba(10, 37, 64, 0.08) !important; color: #3D5A78 !important; }
+        .chat-user { background: rgba(10, 37, 64, 0.04) !important; border: 1px solid rgba(10, 37, 64, 0.04) !important; color: #0A2540 !important; }
+        .chat-bot { background: rgba(255, 255, 255, 0.6) !important; border: 1px solid rgba(10, 37, 64, 0.04) !important; color: #0A2540 !important; }
+        .footer { color: #94A9C2 !important; border-top: 1px solid rgba(10, 37, 64, 0.04) !important; }
     </style>
     """, unsafe_allow_html=True)
 else:
@@ -979,8 +700,6 @@ def future_analyst(صنف, prices):
     }
     
     dollar = prices['dollar']
-    gold = prices['gold']
-    oil = prices['oil']
     steel = prices['steel']
     inflation = prices['inflation']
     
@@ -1291,37 +1010,35 @@ with st.sidebar:
     st.markdown("""
     <div style="background:rgba(255,255,255,0.02);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,0.05);border-radius:60px 20px 60px 20px;padding:18px;text-align:center;margin-bottom:18px;">
         <h1 style="font-size:2rem;margin:0;background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">iHo<span style="background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Noor</span></h1>
-        <p style="color:rgba(255,255,255,0.3);font-size:0.75rem;margin:0;">✨ v8.0</p>
+        <p style="color:rgba(255,255,255,0.3);font-size:0.75rem;margin:0;">✨ v8.1</p>
     </div>
     """, unsafe_allow_html=True)
     
     صنف = st.selectbox("🏷️ " + t['step1'], industries)
     
     st.markdown("---")
-    st.markdown("""
-    <div style="background:rgba(255,215,0,0.02);border:1px solid rgba(255,215,0,0.03);border-radius:20px 20px 20px 8px;padding:14px 16px;margin-bottom:12px;">
-        <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;margin:0;">📊 وضعیت اقتصادی</p>
-        <p style="color:#FFD700;font-size:0.9rem;margin:4px 0 0 0;">💰 دلار: {prices['dollar']:,}</p>
-        <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;margin:2px 0 0 0;">🏅 طلا: {prices['gold']:,}</p>
-        <p style="color:rgba(255,255,255,0.3);font-size:0.6rem;margin:4px 0 0 0;">📡 {prices['source']} | {prices['date']}</p>
-    </div>
-    """.format(prices['dollar']=prices['dollar'], prices['gold']=prices['gold'], prices['source']=prices['source'], prices['date']=prices['date']), unsafe_allow_html=True)
     
+    # نمایش وضعیت اقتصادی (اصلاح شده)
+    st.markdown("### 📊 وضعیت اقتصادی")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("💰 دلار", f"{prices['dollar']:,}")
+        st.metric("🏅 طلا", f"{prices['gold']:,}")
+    with col2:
+        st.metric("🛢️ نفت", f"{prices['oil']} $")
+        st.metric("🔩 فولاد", f"{prices['steel']} $")
+    st.caption(f"📡 {prices['source']} | {prices['date']}")
+    
+    st.markdown("---")
     فایل = st.file_uploader("📁 " + t['step2'], type=["csv", "xlsx", "xls"])
     
     st.markdown("---")
-    st.markdown("""
-    <div style="display:flex;gap:12px;justify-content:center;">
-        <div style="text-align:center;">
-            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;margin:0;">⭐ امتیاز</p>
-            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;margin:0;">{}</p>
-        </div>
-        <div style="text-align:center;">
-            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;margin:0;">🔥 روز</p>
-            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;margin:0;">{}</p>
-        </div>
-    </div>
-    """.format(st.session_state.score, st.session_state.streak), unsafe_allow_html=True)
+    st.markdown("### 🎖️ امتیاز شما")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("⭐", st.session_state.score)
+    with col2:
+        st.metric("🔥", f"{st.session_state.streak} روز")
 
 # ==========================================
 # 15. بارگذاری دیتا
@@ -1349,7 +1066,7 @@ st.markdown(f"""
         <span class="dollar-badge">💰 دلار: {prices['dollar']:,} تومان</span>
         <span class="dollar-badge">🏅 طلا: {prices['gold']:,}</span>
         <span class="source-badge">📡 {prices['source']}</span>
-        <span class="source-badge">✨ v8.0</span>
+        <span class="source-badge">✨ v8.1</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -1380,7 +1097,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11 = st.tabs([
 ])
 
 # ==========================================
-# تب 1: پیش‌بینی (باقی می‌مونه مثل قبل)
+# تب 1: پیش‌بینی
 # ==========================================
 with tab1:
     col1, col2 = st.columns(2)
@@ -1572,7 +1289,7 @@ with tab2:
     """, unsafe_allow_html=True)
 
 # ==========================================
-# تب 3: راهنمای کامل
+# تب 3: راهنما
 # ==========================================
 with tab3:
     st.markdown("""
@@ -1581,7 +1298,7 @@ with tab3:
             <span class="icon">📖</span> راهنمای کامل iHoNoor
         </div>
         <p style="color:rgba(255,255,255,0.6);">
-            با <strong style="color:#FFD700;">۴ گام ساده</strong> از iHoNoor استفاده کنید و فروش خود را پیش‌بینی کنید.
+            با <strong style="color:#FFD700;">۴ گام ساده</strong> از iHoNoor استفاده کنید.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -1589,56 +1306,27 @@ with tab3:
     st.markdown("""
     <div class="guide-step">
         <h3>📌 گام ۱: صنف خود را انتخاب کنید</h3>
-        <p>از منوی سمت راست، صنف خود را انتخاب کنید. iHoNoor برای هر صنف، تحلیل مخصوص خود را دارد.</p>
-        <div class="tip">💡 <strong>مثال:</strong> اگر فروشگاه مواد غذایی دارید، "خواربارفروشی" را انتخاب کنید.</div>
+        <p>از منوی سمت راست، صنف خود را انتخاب کنید.</p>
+        <div class="tip">💡 <strong>مثال:</strong> فروشگاه مواد غذایی → "خواربارفروشی"</div>
     </div>
-    """, unsafe_allow_html=True)
     
-    st.markdown("""
     <div class="guide-step">
         <h3>📌 گام ۲: فایل خود را آپلود کنید</h3>
-        <p>فایل Excel یا CSV خود را در بخش آپلود بارگذاری کنید.</p>
-        <div class="warning">⚠️ <strong>نکته مهم:</strong> فایل شما باید حداقل شامل دو ستون باشد:
-            <ul style="margin:4px 0;padding-right:20px;">
-                <li><strong>📅 تاریخ:</strong> روزهای مختلف (مثلاً ۱۴۰۳/۰۱/۰۱)</li>
-                <li><strong>💰 فروش:</strong> مقدار فروش در آن روز (عددی)</li>
-            </ul>
-        </div>
-        <div class="tip">💡 <strong>تعداد رکوردهای توصیه شده:</strong> حداقل ۵۰ روز برای پیش‌بینی قابل اعتماد.</div>
+        <p>فایل Excel یا CSV خود را آپلود کنید.</p>
+        <div class="warning">⚠️ فایل باید حداقل شامل ستون‌های "تاریخ" و "فروش" باشد.</div>
+        <div class="tip">💡 حداقل ۵۰ روز داده برای پیش‌بینی قابل اعتماد.</div>
     </div>
-    """, unsafe_allow_html=True)
     
-    st.markdown("""
     <div class="guide-step">
         <h3>📌 گام ۳: ستون هدف را انتخاب کنید</h3>
         <p>ستونی که میخواهید پیش‌بینی کنید را انتخاب کنید.</p>
-        <div class="success">✅ <strong>پیشنهاد iHoNoor:</strong> اگر مطمئن نیستید، گزینه <strong>"💡 پیشنهاد iHoNoor"</strong> را انتخاب کنید.</div>
+        <div class="success">✅ از گزینه <strong>"💡 پیشنهاد iHoNoor"</strong> استفاده کنید.</div>
     </div>
-    """, unsafe_allow_html=True)
     
-    st.markdown("""
     <div class="guide-step">
         <h3>📌 گام ۴: پیش‌بینی را دریافت کنید</h3>
-        <p>روی دکمه <strong>"🚀 پیش‌بینی کن"</strong> کلیک کنید و نتیجه را مشاهده کنید.</p>
-        <div class="tip">📊 <strong>خروجی‌ها:</strong>
-            <ul style="margin:4px 0;padding-right:20px;">
-                <li><strong>عدد پیش‌بینی:</strong> مقدار مورد انتظار برای فردا</li>
-                <li><strong>دقت مدل:</strong> نشان میدهد چقدر میتوانید به نتیجه اعتماد کنید</li>
-                <li><strong>بازه اطمینان:</strong> محدوده احتمالی فروش</li>
-            </ul>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div style="background:linear-gradient(135deg,rgba(255,215,0,0.02),rgba(255,165,0,0.01));border:1px solid rgba(255,215,0,0.03);border-radius:60px 20px 60px 20px;padding:22px 28px;margin-top:16px;">
-        <h3 style="color:#FFD700;margin:0;">💡 نکات کلیدی برای بهترین نتیجه</h3>
-        <ul style="margin-top:10px;line-height:2;color:rgba(255,255,255,0.6);">
-            <li>📊 <strong style="color:rgba(255,255,255,0.8);">حداقل ۵۰ روز داده</strong> داشته باشید</li>
-            <li>📅 داده‌های خود را <strong style="color:rgba(255,255,255,0.8);">هر هفته آپدیت</strong> کنید</li>
-            <li>🎯 ستون هدف حتماً <strong style="color:rgba(255,255,255,0.8);">عددی</strong> باشد</li>
-            <li>🔄 هر بار که داده جدید دارید، پیش‌بینی را <strong style="color:rgba(255,255,255,0.8);">تکرار</strong> کنید</li>
-        </ul>
+        <p>روی <strong>"🚀 پیش‌بینی کن"</strong> کلیک کنید.</p>
+        <div class="tip">📊 خروجی: عدد پیش‌بینی، دقت مدل، بازه اطمینان</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1752,6 +1440,6 @@ with tab11:
 # ==========================================
 st.markdown(f"""
 <div class="footer">
-    ✨ iHoNoor v8.0 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
+    ✨ iHoNoor v8.1 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
 </div>
 """, unsafe_allow_html=True)
