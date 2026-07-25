@@ -144,7 +144,7 @@ LANG = {
 }
 
 # ==========================================
-# 5. طراحی پیشرفته روانشناسی با بیضی و انیمیشن
+# 5. طراحی پیشرفته با پشتیبانی از دارک/روشن
 # ==========================================
 st.markdown("""
 <style>
@@ -155,12 +155,192 @@ st.markdown("""
         direction: rtl;
         box-sizing: border-box;
     }
+    
+    /* ===== تم پیش‌فرض (دارک) ===== */
     .stApp {
         background: radial-gradient(ellipse at 20% 50%, #0A1A2F, #0D2137);
         transition: background 0.8s ease;
+        color: #FFFFFF;
     }
+    
+    /* ===== تم روشن (Light Mode) ===== */
+    .stApp.light-mode {
+        background: radial-gradient(ellipse at 20% 50%, #F0F4F8, #E2E8F0);
+        color: #0A2540;
+    }
+    .stApp.light-mode .main-header {
+        background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(240,244,248,0.7));
+        border: 1px solid rgba(10, 37, 64, 0.05);
+    }
+    .stApp.light-mode .main-header h1 {
+        background: linear-gradient(135deg, #0A2540, #1A3A5C);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .stApp.light-mode .main-header p {
+        color: #3D5A78;
+    }
+    .stApp.light-mode .main-header .dollar-badge {
+        background: rgba(10, 37, 64, 0.05);
+        border: 1px solid rgba(10, 37, 64, 0.08);
+        color: #0A2540;
+    }
+    .stApp.light-mode .main-header .source-badge {
+        color: #6B85A0;
+    }
+    .stApp.light-mode .card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(10, 37, 64, 0.04);
+        color: #0A2540;
+    }
+    .stApp.light-mode .card-title {
+        color: #0A2540;
+    }
+    .stApp.light-mode .card:hover {
+        border-color: rgba(10, 37, 64, 0.08);
+        box-shadow: 0 16px 60px rgba(0,0,0,0.04);
+    }
+    .stApp.light-mode .stTabs [data-baseweb="tab"] {
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(10, 37, 64, 0.04);
+        color: #3D5A78;
+    }
+    .stApp.light-mode .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(10, 37, 64, 0.04);
+        color: #0A2540;
+    }
+    .stApp.light-mode .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, rgba(10, 37, 64, 0.06), rgba(10, 37, 64, 0.02)) !important;
+        border-color: rgba(10, 37, 64, 0.1) !important;
+        color: #0A2540 !important;
+    }
+    .stApp.light-mode .stTabs [aria-selected="true"]::after {
+        background: linear-gradient(90deg, transparent, #0A2540, transparent);
+    }
+    .stApp.light-mode .result-box {
+        background: linear-gradient(135deg, rgba(10, 37, 64, 0.04), rgba(10, 37, 64, 0.02));
+        border: 1px solid rgba(10, 37, 64, 0.04);
+    }
+    .stApp.light-mode .result-number {
+        background: linear-gradient(135deg, #0A2540, #1A3A5C);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .stApp.light-mode .result-label {
+        color: #3D5A78;
+    }
+    .stApp.light-mode .advisor-box {
+        background: linear-gradient(135deg, rgba(10, 37, 64, 0.04), rgba(255,255,255,0.6));
+        border: 1px solid rgba(10, 37, 64, 0.04);
+        color: #0A2540;
+    }
+    .stApp.light-mode .advisor-box strong {
+        color: #0A2540;
+    }
+    .stApp.light-mode .future-box {
+        background: linear-gradient(135deg, rgba(10, 37, 64, 0.04), rgba(255,255,255,0.6));
+        border: 1px solid rgba(10, 37, 64, 0.04);
+        color: #0A2540;
+    }
+    .stApp.light-mode .future-box .title {
+        color: #0A2540;
+    }
+    .stApp.light-mode .step-item {
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(10, 37, 64, 0.04);
+    }
+    .stApp.light-mode .step-item .text {
+        color: #0A2540;
+    }
+    .stApp.light-mode .step-item .desc {
+        color: #6B85A0;
+    }
+    .stApp.light-mode .step-item .num {
+        background: linear-gradient(135deg, rgba(10, 37, 64, 0.08), rgba(10, 37, 64, 0.02));
+        border: 1px solid rgba(10, 37, 64, 0.06);
+        color: #0A2540;
+    }
+    .stApp.light-mode .stButton > button {
+        background: linear-gradient(135deg, rgba(10, 37, 64, 0.06), rgba(10, 37, 64, 0.02)) !important;
+        border: 1px solid rgba(10, 37, 64, 0.08) !important;
+        color: #0A2540 !important;
+    }
+    .stApp.light-mode .stButton > button:hover {
+        border-color: rgba(10, 37, 64, 0.2) !important;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.04) !important;
+    }
+    .stApp.light-mode .chat-user {
+        background: rgba(10, 37, 64, 0.04);
+        border: 1px solid rgba(10, 37, 64, 0.04);
+        color: #0A2540;
+    }
+    .stApp.light-mode .chat-bot {
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(10, 37, 64, 0.04);
+        color: #0A2540;
+    }
+    .stApp.light-mode .guide-step {
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(10, 37, 64, 0.04);
+    }
+    .stApp.light-mode .guide-step h3 {
+        color: #0A2540;
+    }
+    .stApp.light-mode .guide-step p {
+        color: #3D5A78;
+    }
+    .stApp.light-mode .guide-step .tip {
+        background: rgba(10, 37, 64, 0.02);
+        border-right: 3px solid rgba(10, 37, 64, 0.08);
+        color: #3D5A78;
+    }
+    .stApp.light-mode .guide-step .warning {
+        background: rgba(229, 62, 62, 0.02);
+        border-right: 3px solid rgba(229, 62, 62, 0.08);
+        color: #3D5A78;
+    }
+    .stApp.light-mode .guide-step .success {
+        background: rgba(56, 161, 105, 0.02);
+        border-right: 3px solid rgba(56, 161, 105, 0.08);
+        color: #3D5A78;
+    }
+    .stApp.light-mode .footer {
+        color: #94A9C2;
+        border-top: 1px solid rgba(10, 37, 64, 0.04);
+    }
+    .stApp.light-mode .brochure {
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(10, 37, 64, 0.04);
+    }
+    .stApp.light-mode .brochure h2 {
+        color: #0A2540;
+        border-bottom: 1px solid rgba(10, 37, 64, 0.04);
+    }
+    .stApp.light-mode .brochure h3 {
+        color: #0A2540;
+    }
+    .stApp.light-mode .brochure ul, .stApp.light-mode .brochure ol {
+        color: #3D5A78;
+    }
+    .stApp.light-mode .brochure th {
+        background: rgba(10, 37, 64, 0.02);
+        color: #0A2540;
+    }
+    .stApp.light-mode .brochure td {
+        color: #3D5A78;
+        border-bottom: 1px solid rgba(10, 37, 64, 0.02);
+    }
+    .stApp.light-mode .future-box .status-badge.critical { background: #E53E3E; color: white; }
+    .stApp.light-mode .future-box .status-badge.warning { background: #F5A623; color: #0A2540; }
+    .stApp.light-mode .future-box .status-badge.stable { background: #38A169; color: white; }
+    .stApp.light-mode .stDataFrame { color: #0A2540; }
+    .stApp.light-mode .stDataFrame thead th { color: #0A2540; background: rgba(10, 37, 64, 0.02); }
+    .stApp.light-mode .stDataFrame tbody td { color: #3D5A78; }
+    .stApp.light-mode .stAlert { color: #0A2540; }
+    .stApp.light-mode .stMarkdown { color: #0A2540; }
 
-    /* ===== هدر با هاله نورانی ===== */
+    /* ===== هدر اصلی (دارک) ===== */
     .main-header {
         background: linear-gradient(135deg, rgba(10, 26, 47, 0.85), rgba(20, 50, 80, 0.7));
         backdrop-filter: blur(20px);
@@ -243,7 +423,49 @@ st.markdown("""
         color: #94A9C2;
     }
 
-    /* ===== تب‌های بیضی‌شکل با انیمیشن ===== */
+    /* ===== کارت‌ها ===== */
+    .card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 24px 24px 24px 12px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+        color: rgba(255,255,255,0.9);
+    }
+    .card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 24px 24px 24px 12px;
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.02), transparent 50%);
+        pointer-events: none;
+    }
+    .card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 60px rgba(0,0,0,0.3);
+        border-color: rgba(255, 215, 0, 0.1);
+    }
+    .card-title {
+        color: rgba(255,255,255,0.9);
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    .card-title .icon {
+        font-size: 1.5rem;
+        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.05));
+    }
+
+    /* ===== تب‌های بیضی‌شکل ===== */
     .stTabs [data-baseweb="tab-list"] {
         display: flex;
         flex-wrap: wrap;
@@ -269,19 +491,6 @@ st.markdown("""
         overflow: hidden;
         min-width: 100px;
         text-align: center;
-    }
-    .stTabs [data-baseweb="tab"]::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 60px 20px 60px 20px;
-        padding: 1px;
-        background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), transparent, rgba(255, 215, 0, 0.05));
-        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        pointer-events: none;
     }
     .stTabs [data-baseweb="tab"]:hover {
         transform: translateY(-4px) scale(1.02);
@@ -313,48 +522,7 @@ st.markdown("""
         100% { width: 70%; left: 15%; opacity: 1; }
     }
 
-    /* ===== کارت‌های با افکت شیشه‌ای ===== */
-    .card {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 24px 24px 24px 12px;
-        padding: 24px 28px;
-        margin-bottom: 20px;
-        box-shadow: 0 8px 40px rgba(0,0,0,0.2);
-        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        position: relative;
-        overflow: hidden;
-    }
-    .card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 24px 24px 24px 12px;
-        background: linear-gradient(135deg, rgba(255, 215, 0, 0.02), transparent 50%);
-        pointer-events: none;
-    }
-    .card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 16px 60px rgba(0,0,0,0.3);
-        border-color: rgba(255, 215, 0, 0.1);
-    }
-    .card-title {
-        color: rgba(255,255,255,0.9);
-        font-weight: 700;
-        font-size: 1.1rem;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
-    }
-    .card-title .icon {
-        font-size: 1.5rem;
-        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.05));
-    }
-
-    /* ===== جعبه نتیجه با انیمیشن ===== */
+    /* ===== جعبه نتیجه ===== */
     .result-box {
         background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 165, 0, 0.02));
         backdrop-filter: blur(12px);
@@ -442,7 +610,7 @@ st.markdown("""
     .future-box .status-badge.warning { background: #F5A623; color: #0A2540; }
     .future-box .status-badge.stable { background: #38A169; color: white; }
 
-    /* ===== دکمه‌ها با انیمیشن ===== */
+    /* ===== دکمه‌ها ===== */
     .stButton > button {
         background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 165, 0, 0.05)) !important;
         backdrop-filter: blur(8px);
@@ -456,29 +624,17 @@ st.markdown("""
         position: relative;
         overflow: hidden;
     }
-    .stButton > button::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 60px 20px 60px 20px;
-        background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), transparent);
-        opacity: 0;
-        transition: opacity 0.5s ease;
-    }
     .stButton > button:hover {
         transform: translateY(-4px) scale(1.02) !important;
         border-color: rgba(255, 215, 0, 0.3) !important;
         box-shadow: 0 12px 40px rgba(255, 215, 0, 0.08) !important;
         color: #FFD700 !important;
     }
-    .stButton > button:hover::before {
-        opacity: 1;
-    }
     .stButton > button:active {
         transform: scale(0.96) !important;
     }
 
-    /* ===== مراحل با اعداد دایره‌ای ===== */
+    /* ===== مراحل ===== */
     .steps {
         display: flex;
         gap: 16px;
@@ -551,32 +707,6 @@ st.markdown("""
         margin-left: auto;
     }
 
-    /* ===== فوتر ===== */
-    .footer {
-        text-align: center;
-        color: rgba(255,255,255,0.15);
-        font-size: 0.7rem;
-        margin-top: 50px;
-        padding-top: 20px;
-        border-top: 1px solid rgba(255,255,255,0.02);
-    }
-
-    /* ===== اسکرول ===== */
-    ::-webkit-scrollbar {
-        width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-        background: rgba(255,255,255,0.02);
-        border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: rgba(255, 215, 0, 0.2);
-        border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 215, 0, 0.3);
-    }
-
     /* ===== راهنما ===== */
     .guide-step {
         background: rgba(255, 255, 255, 0.02);
@@ -640,6 +770,7 @@ st.markdown("""
         border-radius: 24px 24px 24px 12px;
         padding: 30px 35px;
         margin-bottom: 20px;
+        color: rgba(255,255,255,0.8);
     }
     .brochure h2 {
         color: #FFD700;
@@ -684,6 +815,49 @@ st.markdown("""
         color: rgba(255,255,255,0.5);
     }
 
+    /* ===== فوتر ===== */
+    .footer {
+        text-align: center;
+        color: rgba(255,255,255,0.15);
+        font-size: 0.7rem;
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.02);
+    }
+
+    /* ===== اسکرول ===== */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.02);
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: rgba(255, 215, 0, 0.2);
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 215, 0, 0.3);
+    }
+
+    /* ===== داده‌ها ===== */
+    .stDataFrame {
+        color: rgba(255,255,255,0.8);
+    }
+    .stDataFrame thead th {
+        color: rgba(255,255,255,0.6);
+        background: rgba(255,255,255,0.02);
+    }
+    .stDataFrame tbody td {
+        color: rgba(255,255,255,0.7);
+    }
+
+    /* ===== هشدارها ===== */
+    .stAlert {
+        color: rgba(255,255,255,0.8);
+    }
+
     /* ===== پاسخگویی ===== */
     @media (max-width: 768px) {
         .main-header h1 { font-size: 2rem; }
@@ -698,13 +872,27 @@ st.markdown("""
         .chat-message { max-width: 95%; }
     }
 </style>
+
+<script>
+    // ===== تغییر تم با کلیک =====
+    function toggleTheme() {
+        const app = document.querySelector('.stApp');
+        if (app.classList.contains('light-mode')) {
+            app.classList.remove('light-mode');
+        } else {
+            app.classList.add('light-mode');
+        }
+    }
+</script>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 6. انتخاب زبان
+# 6. انتخاب زبان و تم
 # ==========================================
 if "lang" not in st.session_state:
     st.session_state.lang = "fa"
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"
 
 lang = st.sidebar.selectbox("🌐 زبان / Language", ["فارسی", "English"])
 if lang == "English":
@@ -713,6 +901,23 @@ else:
     st.session_state.lang = "fa"
 
 t = LANG[st.session_state.lang]
+
+# ===== انتخاب تم =====
+theme = st.sidebar.radio("🌓 تم / Theme", ["🌙 دارک", "☀️ روشن"], index=0 if st.session_state.theme == "dark" else 1)
+if theme == "☀️ روشن":
+    st.session_state.theme = "light"
+    st.markdown("""
+    <style>
+        .stApp { background: radial-gradient(ellipse at 20% 50%, #F0F4F8, #E2E8F0) !important; color: #0A2540 !important; }
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    st.session_state.theme = "dark"
+    st.markdown("""
+    <style>
+        .stApp { background: radial-gradient(ellipse at 20% 50%, #0A1A2F, #0D2137) !important; color: #FFFFFF !important; }
+    </style>
+    """, unsafe_allow_html=True)
 
 # ==========================================
 # 7. صنف‌ها
@@ -1086,7 +1291,7 @@ with st.sidebar:
     st.markdown("""
     <div style="background:rgba(255,255,255,0.02);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,0.05);border-radius:60px 20px 60px 20px;padding:18px;text-align:center;margin-bottom:18px;">
         <h1 style="font-size:2rem;margin:0;background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">iHo<span style="background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Noor</span></h1>
-        <p style="color:rgba(255,255,255,0.3);font-size:0.75rem;margin:0;">✨ v7.0</p>
+        <p style="color:rgba(255,255,255,0.3);font-size:0.75rem;margin:0;">✨ v8.0</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -1100,13 +1305,9 @@ with st.sidebar:
         <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;margin:2px 0 0 0;">🏅 طلا: {prices['gold']:,}</p>
         <p style="color:rgba(255,255,255,0.3);font-size:0.6rem;margin:4px 0 0 0;">📡 {prices['source']} | {prices['date']}</p>
     </div>
-    """, unsafe_allow_html=True)
+    """.format(prices['dollar']=prices['dollar'], prices['gold']=prices['gold'], prices['source']=prices['source'], prices['date']=prices['date']), unsafe_allow_html=True)
     
     فایل = st.file_uploader("📁 " + t['step2'], type=["csv", "xlsx", "xls"])
-    
-    حالت_ساده = st.checkbox("📱 حالت ساده (تبلت)", value=False)
-    if حالت_ساده:
-        st.markdown("<style>.stButton>button{padding:16px 32px!important;font-size:1.1rem!important;}</style>", unsafe_allow_html=True)
     
     st.markdown("---")
     st.markdown("""
@@ -1148,7 +1349,7 @@ st.markdown(f"""
         <span class="dollar-badge">💰 دلار: {prices['dollar']:,} تومان</span>
         <span class="dollar-badge">🏅 طلا: {prices['gold']:,}</span>
         <span class="source-badge">📡 {prices['source']}</span>
-        <span class="source-badge">✨ v7.0</span>
+        <span class="source-badge">✨ v8.0</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -1179,7 +1380,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11 = st.tabs([
 ])
 
 # ==========================================
-# تب 1: پیش‌بینی
+# تب 1: پیش‌بینی (باقی می‌مونه مثل قبل)
 # ==========================================
 with tab1:
     col1, col2 = st.columns(2)
@@ -1369,31 +1570,6 @@ with tab2:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    with st.expander("📊 جزئیات تحلیل و نحوه محاسبه"):
-        st.markdown("""
-        **🔍 تحلیلگر آینده چگونه کار میکند؟**
-        
-        این ابزار با ترکیب **۴ عامل کلیدی** وضعیت آینده صنف شما را پیش‌بینی میکند:
-        
-        1. **قیمت دلار**: تأثیر مستقیم بر واردات و قیمت مواد اولیه
-        2. **قیمت طلا**: شاخص تورم و ارزش پول
-        3. **قیمت نفت**: تأثیر بر هزینه‌های انرژی و حمل و نقل
-        4. **قیمت فولاد**: تأثیر بر صنایع ساختمانی و تولیدی
-        5. **نرخ تورم**: تأثیر بر قدرت خرید و هزینه‌ها
-        
-        **📌 هر صنف چه تأثیری می‌پذیرد؟**
-        
-        | صنف | تأثیرپذیری | عامل اصلی |
-        |-----|------------|-----------|
-        | خواربارفروشی | بالا | دلار و تورم |
-        | ساختمان | بسیار بالا | فولاد و دلار |
-        | پوشاک | بالا | دلار |
-        | خودرو | بسیار بالا | دلار و تحریم‌ها |
-        | بهداشت | متوسط | تورم |
-        | فناوری | بالا | دلار |
-        | املاک | بالا | تورم و دلار |
-        """)
 
 # ==========================================
 # تب 3: راهنمای کامل
@@ -1462,17 +1638,6 @@ with tab3:
             <li>📅 داده‌های خود را <strong style="color:rgba(255,255,255,0.8);">هر هفته آپدیت</strong> کنید</li>
             <li>🎯 ستون هدف حتماً <strong style="color:rgba(255,255,255,0.8);">عددی</strong> باشد</li>
             <li>🔄 هر بار که داده جدید دارید، پیش‌بینی را <strong style="color:rgba(255,255,255,0.8);">تکرار</strong> کنید</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div style="background:rgba(255,215,0,0.02);border:1px solid rgba(255,215,0,0.03);border-radius:20px 20px 20px 8px;padding:16px 22px;margin-top:16px;">
-        <strong style="color:#FFD700;">📞 نیاز به کمک دارید؟</strong>
-        <p style="color:rgba(255,255,255,0.4);margin:4px 0;">با ما در ارتباط باشید:</p>
-        <ul style="margin:4px 0;padding-right:20px;color:rgba(255,255,255,0.4);">
-            <li>📧 <strong style="color:rgba(255,255,255,0.6);">ha2021alipur@gmail.com</strong></li>
-            <li>📱 <strong style="color:rgba(255,255,255,0.6);">09019470509</strong></li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
@@ -1587,6 +1752,6 @@ with tab11:
 # ==========================================
 st.markdown(f"""
 <div class="footer">
-    ✨ iHoNoor v7.0 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
+    ✨ iHoNoor v8.0 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
 </div>
 """, unsafe_allow_html=True)
