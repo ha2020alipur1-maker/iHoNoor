@@ -20,11 +20,6 @@ import uuid
 import requests
 import json
 import io
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
 warnings.filterwarnings('ignore')
 
 # ==========================================
@@ -115,19 +110,6 @@ st.markdown("""
         padding-top: 15px;
         border-top: 1px solid #eee;
     }
-    
-    .badge {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 16px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        margin: 2px;
-    }
-    .badge-gold { background: #FFD700; color: #333; }
-    .badge-silver { background: #C0C0C0; color: #333; }
-    .badge-bronze { background: #CD7F32; color: white; }
-    .badge-blue { background: #0D47A1; color: white; }
     
     .steps {
         display: flex;
@@ -230,7 +212,6 @@ def suggest_target_column(df):
     return numeric_cols[0] if numeric_cols else None
 
 def get_avg_industry(صنف):
-    """میانگین ساختگی برای مقایسه صنف"""
     avgs = {
         "خواربارفروشی": 8_000_000,
         "پوشاک": 5_000_000,
@@ -353,7 +334,6 @@ with st.sidebar:
     
     فایل = st.file_uploader("📁 آپلود فایل", type=["csv", "xlsx", "xls"])
     
-    # ===== ویژگی جدید: حالت ساده تبلت =====
     حالت_ساده = st.checkbox("📱 حالت ساده (مناسب تبلت)", value=False)
     if حالت_ساده:
         st.markdown("""
@@ -366,7 +346,6 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # ===== گیمیفیکیشن ساده =====
     if "user_score" not in st.session_state:
         st.session_state.user_score = 0
     if "daily_streak" not in st.session_state:
@@ -410,7 +389,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ===== راهنمای سریع (ویژگی جدید) =====
 st.markdown("""
 <div class="quick-guide">
     🚀 <strong>چگونه کار کنیم؟</strong>
@@ -418,9 +396,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ==========================================
-# قدم‌های راهنما
-# ==========================================
 st.markdown("""
 <div class="steps">
     <div class="step-item"><div class="num">۱</div><div class="text">انتخاب صنف</div><div class="desc">از منوی کناری</div></div>
@@ -430,7 +405,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# تب‌های ساده
+# تب‌ها
 # ==========================================
 tab1, tab2 = st.tabs(["📊 تحلیل و پیش‌بینی", "📜 تاریخچه"])
 
@@ -447,7 +422,6 @@ with tab1:
     
     st.markdown("---")
     
-    # ===== انتخاب ستون هدف با پیشنهاد =====
     all_columns = data.columns.tolist()
     numeric_cols = data.select_dtypes(include=['number']).columns.tolist()
     
@@ -473,127 +447,108 @@ with tab1:
     unit = detect_unit(target)
     st.info(f"✅ واحد: **{unit}**")
     
-    # ===== دکمه‌های پیش‌بینی =====
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🚀 پیش‌بینی کن", type="primary", use_container_width=True):
-            with st.spinner("⏳ در حال پیش‌بینی..."):
-                try:
-                    le = LabelEncoder()
-                    d = data.copy()
-                    for col in d.select_dtypes(include=['object']).columns:
-                        if col != target:
-                            try:
-                                d[col] = le.fit_transform(d[col].astype(str))
-                            except:
-                                pass
+    if st.button("🚀 پیش‌بینی کن", type="primary", use_container_width=True):
+        with st.spinner("⏳ در حال پیش‌بینی..."):
+            try:
+                le = LabelEncoder()
+                d = data.copy()
+                for col in d.select_dtypes(include=['object']).columns:
+                    if col != target:
+                        try:
+                            d[col] = le.fit_transform(d[col].astype(str))
+                        except:
+                            pass
+                
+                X = d.drop(columns=[target])
+                y = d[target]
+                X = X.select_dtypes(include=['number'])
+                
+                if len(X.columns) == 0:
+                    st.error("❌ ویژگی عددی کافی نیست.")
+                    st.stop()
+                
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+                results = train_models(X_train, y_train, X_test, y_test)
+                
+                best_model = None
+                best_score = -1
+                for name, res in results.items():
+                    if 'error' not in res and res['r2'] > best_score:
+                        best_score = res['r2']
+                        best_model = name
+                
+                if best_model:
+                    model = results[best_model]['model']
+                    avg_row = X.mean().values.reshape(1, -1)
+                    pred_value = model.predict(avg_row)[0]
                     
-                    X = d.drop(columns=[target])
-                    y = d[target]
-                    X = X.select_dtypes(include=['number'])
+                    st.session_state.user_score += 5
+                    st.session_state.daily_streak += 1
                     
-                    if len(X.columns) == 0:
-                        st.error("❌ ویژگی عددی کافی نیست.")
-                        st.stop()
+                    emoji, msg = get_emoji(pred_value, unit)
                     
-                    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-                    results = train_models(X_train, y_train, X_test, y_test)
+                    st.markdown(f"""
+                    <div class="result-box">
+                        <div style="font-size:2.5rem;">{emoji}</div>
+                        <div class="result-label">{msg}</div>
+                        <div class="result-number">{pred_value:,.0f}</div>
+                        <div class="result-label">{unit}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
                     
-                    best_model = None
-                    best_score = -1
-                    for name, res in results.items():
-                        if 'error' not in res and res['r2'] > best_score:
-                            best_score = res['r2']
-                            best_model = name
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("🎯 دقت", f"{best_score:.1%}")
+                    with col2:
+                        st.metric(f"🔮 بازه", f"{pred_value*0.85:,.0f} - {pred_value*1.15:,.0f}")
+                    with col3:
+                        st.metric("🏆 مدل", model_names_fa.get(best_model, best_model))
                     
-                    if best_model:
-                        model = results[best_model]['model']
-                        avg_row = X.mean().values.reshape(1, -1)
-                        pred_value = model.predict(avg_row)[0]
-                        
-                        # افزایش امتیاز
-                        st.session_state.user_score += 5
-                        st.session_state.daily_streak += 1
-                        
-                        # ===== ایموجی پویا (ویژگی جدید) =====
-                        emoji, msg = get_emoji(pred_value, unit)
-                        
-                        st.markdown(f"""
-                        <div class="result-box">
-                            <div style="font-size:2.5rem;">{emoji}</div>
-                            <div class="result-label">{msg}</div>
-                            <div class="result-number">{pred_value:,.0f}</div>
-                            <div class="result-label">{unit}</div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            st.metric("🎯 دقت", f"{best_score:.1%}")
-                        with col2:
-                            st.metric(f"🔮 بازه", f"{pred_value*0.85:,.0f} - {pred_value*1.15:,.0f}")
-                        with col3:
-                            st.metric("🏆 مدل", model_names_fa.get(best_model, best_model))
-                        
-                        # ===== مقایسه با میانگین صنف (ویژگی جدید) =====
-                        avg_industry = get_avg_industry(صنف)
-                        if unit == 'تومان' and avg_industry > 0:
-                            diff = ((pred_value / avg_industry) - 1) * 100
-                            if diff > 20:
-                                st.success(f"✅ {diff:.1f}% بالاتر از میانگین صنف!")
-                            elif diff < -20:
-                                st.warning(f"⚠️ {abs(diff):.1f}% پایین‌تر از میانگین صنف")
-                            else:
-                                st.info(f"📊 نزدیک به میانگین صنف ({diff:+.1f}%)")
-                        
-                        # ===== پیشنهاد تخفیف هوشمند (ویژگی جدید) =====
-                        discount = get_discount_suggestion(pred_value, unit)
-                        if discount:
-                            st.info(f"💡 تخفیف پیشنهادی: {discount}")
-                        
-                        # ===== اهمیت ویژگی‌ها =====
-                        if hasattr(model, 'feature_importances_'):
-                            with st.expander("📊 اهمیت ویژگی‌ها"):
-                                imp_df = pd.DataFrame({
-                                    'ویژگی': X.columns,
-                                    'اهمیت': model.feature_importances_
-                                }).sort_values('اهمیت', ascending=False)
-                                st.dataframe(imp_df)
-                        
-                        # ===== مشاور iHoNoor =====
-                        st.markdown("""
-                        <div class="advisor-box">
-                            <strong>✨ مشاور iHoNoor</strong>
-                            <p style="font-size:0.9rem;opacity:0.9;margin-top:5px;">
-                                با توجه به پیش‌بینی، موجودی خود را مدیریت کنید و برای روزهای آینده برنامه‌ریزی داشته باشید.
-                            </p>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        # ===== ذخیره در تاریخچه (ویژگی جدید) =====
-                        if "history" not in st.session_state:
-                            st.session_state.history = []
-                        
-                        st.session_state.history.append({
-                            'تاریخ': datetime.now().strftime("%Y-%m-%d %H:%M"),
-                            'صنف': صنف,
-                            'هدف': target,
-                            'پیش‌بینی': f"{pred_value:,.0f}",
-                            'واحد': unit,
-                            'دقت': f"{best_score:.1%}"
-                        })
-                        
-                except Exception as e:
-                    st.error(f"❌ خطا: {e}")
-    
-    with col2:
-        if st.button("⚡ پیش‌بینی خودکار", use_container_width=True):
-            # خودکار: انتخاب بهترین ستون و بهترین مدل
-            auto_target = suggest_target_column(data)
-            if auto_target:
-                st.info(f"✅ ستون انتخاب شد: {auto_target}")
-                # دوباره اجرا با ستون پیشنهادی
-                # (این بخش ساده شده)
+                    avg_industry = get_avg_industry(صنف)
+                    if unit == 'تومان' and avg_industry > 0:
+                        diff = ((pred_value / avg_industry) - 1) * 100
+                        if diff > 20:
+                            st.success(f"✅ {diff:.1f}% بالاتر از میانگین صنف!")
+                        elif diff < -20:
+                            st.warning(f"⚠️ {abs(diff):.1f}% پایین‌تر از میانگین صنف")
+                        else:
+                            st.info(f"📊 نزدیک به میانگین صنف ({diff:+.1f}%)")
+                    
+                    discount = get_discount_suggestion(pred_value, unit)
+                    if discount:
+                        st.info(f"💡 تخفیف پیشنهادی: {discount}")
+                    
+                    if hasattr(model, 'feature_importances_'):
+                        with st.expander("📊 اهمیت ویژگی‌ها"):
+                            imp_df = pd.DataFrame({
+                                'ویژگی': X.columns,
+                                'اهمیت': model.feature_importances_
+                            }).sort_values('اهمیت', ascending=False)
+                            st.dataframe(imp_df)
+                    
+                    st.markdown("""
+                    <div class="advisor-box">
+                        <strong>✨ مشاور iHoNoor</strong>
+                        <p style="font-size:0.9rem;opacity:0.9;margin-top:5px;">
+                            با توجه به پیش‌بینی، موجودی خود را مدیریت کنید و برای روزهای آینده برنامه‌ریزی داشته باشید.
+                        </p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    if "history" not in st.session_state:
+                        st.session_state.history = []
+                    
+                    st.session_state.history.append({
+                        'تاریخ': datetime.now().strftime("%Y-%m-%d %H:%M"),
+                        'صنف': صنف,
+                        'هدف': target,
+                        'پیش‌بینی': f"{pred_value:,.0f}",
+                        'واحد': unit,
+                        'دقت': f"{best_score:.1%}"
+                    })
+                    
+            except Exception as e:
+                st.error(f"❌ خطا: {e}")
 
 with tab2:
     st.markdown("""
