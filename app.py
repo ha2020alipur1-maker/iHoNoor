@@ -459,6 +459,37 @@ def نمایش_مشاور(تحلیل):
         st.markdown(f"<div style='background:#FFF8E1;padding:12px 18px;border-radius:12px;border-right:4px solid #FFA000;'>{تحلیل['پیام']}</div>", unsafe_allow_html=True)
 
 # ==========================================
+# ===== توابع تشخیص ناهنجاری و تحلیل سلامت =====
+# ==========================================
+
+def detect_anomalies(data):
+    try:
+        num_cols = data.select_dtypes(include=['number']).columns
+        if len(num_cols) < 2:
+            return None, "داده‌های عددی کافی نیست."
+        iso = IsolationForest(contamination=0.05, random_state=42)
+        preds = iso.fit_predict(data[num_cols].fillna(0))
+        anomalies = data[preds == -1]
+        return anomalies, f"{len(anomalies)} ناهنجاری شناسایی شد." if len(anomalies) > 0 else "✅ هیچ ناهنجاری یافت نشد."
+    except Exception as e:
+        return None, f"خطا: {e}"
+
+def analyze_health(data, target_col):
+    msgs = []
+    if len(data) < 50:
+        msgs.append("⚠️ تعداد رکوردها کم است (کمتر از ۵۰).")
+    if data.isnull().sum().sum() > 0:
+        msgs.append(f"⚠️ {data.isnull().sum().sum()} مقدار خالی در داده‌ها وجود دارد.")
+    if target_col in data.columns and 'تاریخ' in data.columns:
+        sorted_data = data.sort_values('تاریخ')
+        if len(sorted_data) >= 20:
+            recent = sorted_data[target_col].tail(20).mean()
+            older = sorted_data[target_col].head(20).mean()
+            if recent < older * 0.85:
+                msgs.append("⚠️ کاهش فروش در داده‌های اخیر مشاهده می‌شود.")
+    return "\n".join(msgs) if msgs else "✅ داده‌ها سالم هستند."
+
+# ==========================================
 # ===== دریافت قیمت دلار از API =====
 # ==========================================
 
@@ -1586,8 +1617,12 @@ with tab2:
                         
                         if st.button("📊 تحلیل خودکار", key="auto_macro_btn", type="primary"):
                             with st.spinner("⏳ در حال دریافت قیمت دلار و تحلیل..."):
-                                گزارش, تغییر_صنف, وضعیت, رنگ = تحلیل_خودکار_کلان_اقتصادی(صنف)
-                                نمایش_تحلیل_خودکار(گزارش, تغییر_صنف, وضعیت, رنگ)
+                                try:
+                                    گزارش, تغییر_صنف, وضعیت, رنگ = تحلیل_خودکار_کلان_اقتصادی(صنف)
+                                    نمایش_تحلیل_خودکار(گزارش, تغییر_صنف, وضعیت, رنگ)
+                                except Exception as e:
+                                    st.error(f"❌ خطا در تحلیل: {e}")
+                                    st.info("💡 لطفاً دوباره تلاش کنید یا بعداً امتحان کنید.")
                     
                     with st.expander("📊 مقایسه مدل‌ها (۶ مدل)"):
                         compare_data = []
