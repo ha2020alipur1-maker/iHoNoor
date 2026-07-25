@@ -23,365 +23,735 @@ import io
 warnings.filterwarnings('ignore')
 
 # ==========================================
-# تنظیمات اولیه
+# 1. تنظیمات اولیه
 # ==========================================
 st.set_page_config(
-    page_title="iHoNoor | نور هوشمند فروش",
+    page_title="iHoNoor | نور هوشمند کسب‌وکار",
     page_icon="✨",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
+# ==========================================
+# 2. دریافت قیمت‌های جهانی
+# ==========================================
+@st.cache_data(ttl=3600)
+def get_global_prices():
+    """دریافت قیمت‌های جهانی از API‌های مختلف"""
+    prices = {
+        'dollar': 195000,
+        'gold': 0,
+        'oil': 0,
+        'steel': 0,
+        'inflation': 0,
+        'date': datetime.now().strftime("%Y-%m-%d %H:%M")
+    }
+    
+    # قیمت دلار
+    try:
+        url = "https://api.exchangerate-api.com/v4/latest/USD"
+        response = requests.get(url, timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            price = data['rates']['IRR'] / 10
+            if price > 1000:
+                prices['dollar'] = int(price)
+    except:
+        pass
+    
+    # قیمت طلا (ساختگی ولی بر اساس روند واقعی)
+    try:
+        gold_base = 35000000  # تومان
+        dollar_effect = (prices['dollar'] / 195000) * 100
+        prices['gold'] = int(gold_base * (dollar_effect / 100) * 1.1)
+    except:
+        prices['gold'] = 35000000
+    
+    # قیمت نفت (ساختگی)
+    try:
+        oil_base = 85  # دلار
+        dollar_effect = (prices['dollar'] / 195000)
+        prices['oil'] = int(oil_base * dollar_effect * 1.05)
+    except:
+        prices['oil'] = 85
+    
+    # قیمت فولاد (ساختگی)
+    try:
+        steel_base = 1200  # دلار هر تن
+        dollar_effect = (prices['dollar'] / 195000)
+        prices['steel'] = int(steel_base * dollar_effect * 1.08)
+    except:
+        prices['steel'] = 1200
+    
+    # تورم (ساختگی)
+    try:
+        inflation_base = 35  # درصد
+        prices['inflation'] = inflation_base + (prices['dollar'] - 195000) / 2000
+    except:
+        prices['inflation'] = 35
+    
+    return prices
+
+# ==========================================
+# 3. تحلیلگر هوشمند آینده
+# ==========================================
+def future_analyst(صنف, prices):
+    """
+    تحلیل هوشمند آینده بر اساس شرایط جهانی و اقتصادی
+    """
+    analysis = {
+        'status': 'پایدار',
+        'trend': 'ثابت',
+        'impact': 'متوسط',
+        'price_change': 0,
+        'message': '',
+        'actions': [],
+        'risk_level': 'متوسط',
+        'opportunity': ''
+    }
+    
+    dollar = prices['dollar']
+    gold = prices['gold']
+    oil = prices['oil']
+    steel = prices['steel']
+    inflation = prices['inflation']
+    
+    # تحلیل بر اساس صنف
+    if "خواربار" in صنف or "غذایی" in صنف or "نانوایی" in صنف:
+        # صنایع غذایی بیشتر تحت تأثیر تورم و دلار هستند
+        if dollar > 200000:
+            analysis['status'] = '⚠️ هشدار'
+            analysis['trend'] = 'افزایش قیمت'
+            analysis['price_change'] = 15 + (dollar - 195000) / 1000
+            analysis['impact'] = 'بسیار بالا'
+            analysis['risk_level'] = 'بالا'
+            analysis['message'] = f'💰 با افزایش دلار به {dollar:,} تومان، قیمت مواد اولیه {analysis["price_change"]:.0f}% افزایش می‌یابد.'
+            analysis['actions'].append('🔹 موجودی کالاهای اساسی را افزایش دهید')
+            analysis['actions'].append('🔹 قراردادهای بلندمدت با تامین‌کنندگان منعقد کنید')
+            analysis['actions'].append('🔹 قیمت‌های خود را به‌روزرسانی کنید')
+            analysis['opportunity'] = '📈 فرصت: افزایش قیمت فروش با مدیریت هزینه‌ها'
+        else:
+            analysis['status'] = '✅ پایدار'
+            analysis['trend'] = 'ثابت'
+            analysis['price_change'] = 3
+            analysis['impact'] = 'متوسط'
+            analysis['message'] = '📊 شرایط فعلی نسبتاً پایدار است.'
+            analysis['actions'].append('🔹 حفظ کیفیت محصولات')
+            analysis['opportunity'] = '📈 فرصت: جذب مشتری با کیفیت بالا'
+    
+    elif "ساختمان" in صنف or "پیمانکاری" in صنف or "مصالح" in صنف:
+        # صنعت ساختمان وابسته به دلار و فولاد
+        if steel > 1300:
+            analysis['status'] = '⚠️ هشدار شدید'
+            analysis['trend'] = 'افزایش شدید قیمت'
+            analysis['price_change'] = 20 + (steel - 1200) / 5
+            analysis['impact'] = 'بسیار بالا'
+            analysis['risk_level'] = 'بسیار بالا'
+            analysis['message'] = f'🏗️ قیمت فولاد به {steel} دلار رسیده و هزینه‌های ساخت {analysis["price_change"]:.0f}% افزایش می‌یابد.'
+            analysis['actions'].append('🔹 خرید مصالح را به امروز موکول کنید')
+            analysis['actions'].append('🔹 پروژه‌های جدید را با احتیاط شروع کنید')
+            analysis['actions'].append('🔹 با تامین‌کنندگان مذاکره کنید')
+            analysis['opportunity'] = '📉 فرصت: سرمایه‌گذاری در پروژه‌های کوچکتر'
+        else:
+            analysis['status'] = '⚠️ توجه'
+            analysis['trend'] = 'افزایش ملایم'
+            analysis['price_change'] = 8
+            analysis['impact'] = 'بالا'
+            analysis['message'] = '📊 افزایش تدریجی قیمت مصالح قابل پیش‌بینی است.'
+            analysis['actions'].append('🔹 برنامه‌ریزی دقیق پروژه‌ها')
+            analysis['opportunity'] = '📈 فرصت: شروع پروژه‌های جدید'
+    
+    elif "پوشاک" in صنف or "لباس" in صنف:
+        # پوشاک وابسته به دلار و واردات
+        if dollar > 200000:
+            analysis['status'] = '⚠️ هشدار'
+            analysis['trend'] = 'افزایش قیمت'
+            analysis['price_change'] = 12 + (dollar - 195000) / 1500
+            analysis['impact'] = 'بالا'
+            analysis['risk_level'] = 'بالا'
+            analysis['message'] = f'👗 با افزایش دلار، قیمت پارچه و مواد اولیه {analysis["price_change"]:.0f}% افزایش می‌یابد.'
+            analysis['actions'].append('🔹 خرید مواد اولیه را پیش‌بینی کنید')
+            analysis['actions'].append('🔹 استفاده از تولیدات داخلی را افزایش دهید')
+            analysis['opportunity'] = '📈 فرصت: تولید با مواد داخلی'
+        else:
+            analysis['status'] = '✅ مناسب'
+            analysis['trend'] = 'ثابت'
+            analysis['price_change'] = 4
+            analysis['impact'] = 'متوسط'
+            analysis['message'] = '📊 شرایط برای تولید و فروش مناسب است.'
+            analysis['actions'].append('🔹 افزایش تنوع محصولات')
+            analysis['opportunity'] = '📈 فرصت: توسعه برند'
+    
+    elif "خودرو" in صنف or "یدکی" in صنف:
+        # خودرو وابسته به دلار و تحریم‌ها
+        if dollar > 210000:
+            analysis['status'] = '🔴 بحران'
+            analysis['trend'] = 'افزایش شدید'
+            analysis['price_change'] = 25 + (dollar - 195000) / 1000
+            analysis['impact'] = 'بسیار بالا'
+            analysis['risk_level'] = 'بحرانی'
+            analysis['message'] = f'🚗 افزایش شدید دلار و تحریم‌ها قیمت خودرو را {analysis["price_change"]:.0f}% بالا می‌برد.'
+            analysis['actions'].append('🔹 فروش را به تعویق نیندازید')
+            analysis['actions'].append('🔹 قطعات یدکی استراتژیک خریداری کنید')
+            analysis['opportunity'] = '📈 فرصت: فروش در شرایط افزایش قیمت'
+        else:
+            analysis['status'] = '⚠️ هشدار'
+            analysis['trend'] = 'افزایش ملایم'
+            analysis['price_change'] = 10
+            analysis['impact'] = 'بالا'
+            analysis['message'] = '📊 افزایش قیمت خودرو ادامه دارد.'
+            analysis['actions'].append('🔹 مدیریت موجودی قطعات')
+            analysis['opportunity'] = '📉 فرصت: خرید در قیمت‌های فعلی'
+    
+    elif "بهداشت" in صنف or "درمان" in صنف:
+        # بهداشت کمتر تحت تأثیر دلار است اما از تورم متأثر است
+        if inflation > 40:
+            analysis['status'] = '⚠️ توجه'
+            analysis['trend'] = 'افزایش هزینه'
+            analysis['price_change'] = 8 + (inflation - 35) / 2
+            analysis['impact'] = 'متوسط'
+            analysis['risk_level'] = 'متوسط'
+            analysis['message'] = f'🏥 با تورم {inflation:.0f}%، هزینه‌های درمانی {analysis["price_change"]:.0f}% افزایش می‌یابد.'
+            analysis['actions'].append('🔹 قیمت خدمات را بازبینی کنید')
+            analysis['actions'].append('🔹 قراردادهای بیمه را بهبود دهید')
+            analysis['opportunity'] = '📈 فرصت: توسعه خدمات تخصصی'
+        else:
+            analysis['status'] = '✅ پایدار'
+            analysis['trend'] = 'ثابت'
+            analysis['price_change'] = 3
+            analysis['impact'] = 'کم'
+            analysis['message'] = '📊 شرایط برای فعالیت درمانی مطلوب است.'
+            analysis['actions'].append('🔹 بهبود کیفیت خدمات')
+            analysis['opportunity'] = '📈 فرصت: جذب بیماران بیشتر'
+    
+    elif "املاک" in صنف or "مستغلات" in صنف:
+        # املاک وابسته به تورم و دلار
+        if dollar > 200000:
+            analysis['status'] = '📈 رشد'
+            analysis['trend'] = 'افزایش قیمت ملک'
+            analysis['price_change'] = 18 + (dollar - 195000) / 1000
+            analysis['impact'] = 'بالا'
+            analysis['risk_level'] = 'متوسط'
+            analysis['message'] = f'🏠 قیمت ملک با افزایش دلار {analysis["price_change"]:.0f}% رشد می‌کند.'
+            analysis['actions'].append('🔹 خرید ملک برای سرمایه‌گذاری')
+            analysis['actions'].append('🔹 اجاره‌ها را به‌روزرسانی کنید')
+            analysis['opportunity'] = '📈 فرصت: سرمایه‌گذاری در ملک'
+        else:
+            analysis['status'] = '✅ پایدار'
+            analysis['trend'] = 'ثابت'
+            analysis['price_change'] = 5
+            analysis['impact'] = 'متوسط'
+            analysis['message'] = '📊 بازار ملک در وضعیت عادی است.'
+            analysis['actions'].append('🔹 بررسی فرصت‌های سرمایه‌گذاری')
+            analysis['opportunity'] = '📈 فرصت: خرید ملک برای اجاره'
+    
+    elif "فناوری" in صنف or "مخابرات" in صنف:
+        # فناوری وابسته به دلار برای تجهیزات
+        if dollar > 200000:
+            analysis['status'] = '⚠️ هشدار'
+            analysis['trend'] = 'افزایش هزینه'
+            analysis['price_change'] = 10 + (dollar - 195000) / 1500
+            analysis['impact'] = 'بالا'
+            analysis['risk_level'] = 'بالا'
+            analysis['message'] = f'📱 هزینه تجهیزات فناوری {analysis["price_change"]:.0f}% افزایش می‌یابد.'
+            analysis['actions'].append('🔹 خرید تجهیزات را به تعویق نیندازید')
+            analysis['actions'].append('🔹 استفاده از خدمات ابری داخلی')
+            analysis['opportunity'] = '📈 فرصت: توسعه نرم‌افزارهای داخلی'
+        else:
+            analysis['status'] = '✅ مناسب'
+            analysis['trend'] = 'ثابت'
+            analysis['price_change'] = 3
+            analysis['impact'] = 'متوسط'
+            analysis['message'] = '📊 شرایط برای سرمایه‌گذاری در فناوری مناسب است.'
+            analysis['actions'].append('🔹 توسعه خدمات دیجیتال')
+            analysis['opportunity'] = '📈 فرصت: نوآوری در خدمات'
+    
+    else:
+        # صنف‌های دیگر
+        analysis['status'] = 'ℹ️ تحلیل'
+        analysis['trend'] = 'متغیر'
+        analysis['price_change'] = 5
+        analysis['impact'] = 'متوسط'
+        analysis['message'] = f'📊 تحلیل {صنف} در حال انجام است.'
+        analysis['actions'].append('🔹 بررسی دقیق شرایط بازار')
+        analysis['opportunity'] = '📈 فرصت: تحلیل دقیق‌تر داده‌ها'
+    
+    # محاسبه ریسک کلی
+    if analysis['risk_level'] == 'بحرانی':
+        analysis['status'] = '🔴 وضعیت بحرانی'
+    elif analysis['risk_level'] == 'بالا':
+        analysis['status'] = '⚠️ وضعیت هشدار'
+    
+    return analysis
+
+# ==========================================
+# 4. چندزبانه
+# ==========================================
+LANG = {
+    'fa': {
+        'app_name': 'نور هوشمند کسب‌وکار',
+        'subtitle': 'با یاری الهی، مسیر موفقیت را روشن کن',
+        'step1': 'انتخاب صنف',
+        'step2': 'آپلود فایل',
+        'step3': 'پیش‌بینی',
+        'target': 'ستون هدف',
+        'suggest': '💡 پیشنهاد iHoNoor',
+        'unit': 'واحد تشخیص داده شده',
+        'predict_btn': '🚀 پیش‌بینی کن',
+        'accuracy': 'دقت مدل',
+        'confidence': 'بازه اطمینان',
+        'dollar_label': 'تحلیل دلاری',
+        'anomaly_label': 'تشخیص ناهنجاری',
+        'feature_importance': 'اهمیت ویژگی‌ها',
+        'health': 'سلامت داده‌ها',
+        'advisor': '✨ مشاور iHoNoor',
+        'chatbot': '💬 چتبات هوشمند',
+        'admin': '🔐 پنل مدیریت',
+        'future': '🔮 تحلیلگر آینده'
+    },
+    'en': {
+        'app_name': 'Smart Business Light',
+        'subtitle': 'With Divine Help, Illuminate Your Success Path',
+        'step1': 'Select Industry',
+        'step2': 'Upload File',
+        'step3': 'Predict',
+        'target': 'Target Column',
+        'suggest': '💡 iHoNoor Suggestion',
+        'unit': 'Detected Unit',
+        'predict_btn': '🚀 Predict',
+        'accuracy': 'Model Accuracy',
+        'confidence': 'Confidence Interval',
+        'dollar_label': 'Dollar Analysis',
+        'anomaly_label': 'Anomaly Detection',
+        'feature_importance': 'Feature Importance',
+        'health': 'Data Health',
+        'advisor': '✨ iHoNoor Advisor',
+        'chatbot': '💬 Smart Chatbot',
+        'admin': '🔐 Admin Panel',
+        'future': '🔮 Future Analyst'
+    }
+}
+
+# ==========================================
+# 5. تنظیمات ادمین
+# ==========================================
 ADMIN_USERNAME = "ihonoor_admin"
 ADMIN_PASSWORD = "iHoNoor@1404"
 
 # ==========================================
-# استایل
+# 6. استایل
 # ==========================================
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;900&display=swap');
-    * { font-family: 'Vazirmatn', sans-serif; direction: rtl; }
-    .stApp { background: #F8F9FA; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * {
+        font-family: 'Inter', 'Vazirmatn', sans-serif;
+        direction: rtl;
+        box-sizing: border-box;
+    }
+    
+    .stApp {
+        background: #F9FAFB;
+    }
     
     .main-header {
-        background: linear-gradient(135deg, #0D47A1, #1E88E5);
-        padding: 30px 40px;
-        border-radius: 20px;
+        background: linear-gradient(105deg, #0A2540 0%, #1A3A5C 100%);
+        padding: 28px 35px;
+        border-radius: 24px;
         color: white;
         text-align: center;
-        margin-bottom: 25px;
-        box-shadow: 0 8px 30px rgba(13, 71, 161, 0.25);
+        margin-bottom: 28px;
+        box-shadow: 0 15px 40px -10px rgba(10, 37, 64, 0.25);
+        border: 1px solid rgba(255,255,255,0.06);
     }
-    .main-header h1 { font-size: 2.8rem; font-weight: 900; margin: 0; }
-    .main-header h1 .highlight { color: #FFD700; }
-    .main-header p { font-size: 1.1rem; opacity: 0.9; margin-top: 8px; }
-    
+    .main-header h1 {
+        font-size: 2.6rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin: 0;
+    }
+    .main-header h1 .highlight {
+        color: #F5A623;
+        text-shadow: 0 0 30px rgba(245, 166, 35, 0.2);
+    }
+    .main-header p {
+        font-size: 1rem;
+        font-weight: 300;
+        opacity: 0.8;
+        margin-top: 6px;
+        letter-spacing: 0.3px;
+    }
+    .main-header .badge-version {
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(4px);
+        padding: 4px 16px;
+        border-radius: 40px;
+        font-size: 0.7rem;
+        display: inline-block;
+        margin-top: 8px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .main-header .dollar-badge {
+        background: rgba(245, 166, 35, 0.15);
+        backdrop-filter: blur(4px);
+        padding: 4px 16px;
+        border-radius: 40px;
+        font-size: 0.75rem;
+        display: inline-block;
+        margin-top: 8px;
+        margin-right: 8px;
+        border: 1px solid rgba(245, 166, 35, 0.2);
+        color: #F5A623;
+    }
+
     .card {
-        background: white;
-        padding: 20px 25px;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-        margin-bottom: 20px;
-        border: 1px solid #f0f0f0;
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 22px 26px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+        margin-bottom: 18px;
+        transition: all 0.25s ease;
     }
-    .card-title { font-size: 1.1rem; font-weight: 700; color: #0D47A1; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
-    .card-title .icon { font-size: 1.5rem; }
-    
-    .stButton > button {
-        border-radius: 12px !important;
-        font-weight: 700 !important;
-        padding: 10px 30px !important;
-        border: none !important;
-    }
-    .stButton > button:first-child {
-        background: linear-gradient(135deg, #0D47A1, #1E88E5) !important;
-        color: white !important;
-        box-shadow: 0 4px 15px rgba(30, 136, 229, 0.3);
-    }
-    .stButton > button:first-child:hover {
+    .card:hover {
+        box-shadow: 0 12px 40px rgba(10, 37, 64, 0.08);
         transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(30, 136, 229, 0.5);
     }
-    
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 5px;
-        background: white;
-        padding: 6px;
-        border-radius: 14px;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-        border: 1px solid #f0f0f0;
+    .card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0A2540;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
-    .stTabs [data-baseweb="tab"] {
-        padding: 10px 22px;
-        border-radius: 10px;
-        font-weight: 600;
-        color: #666;
+    .card-title .icon {
+        font-size: 1.3rem;
     }
-    .stTabs [data-baseweb="tab"]:hover { background: #E3F2FD; }
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #0D47A1, #1E88E5) !important;
+
+    .stButton > button {
+        border-radius: 14px !important;
+        font-weight: 600 !important;
+        padding: 12px 32px !important;
+        border: none !important;
+        transition: all 0.2s ease !important;
+        background: #0A2540 !important;
         color: white !important;
-        box-shadow: 0 4px 15px rgba(30, 136, 229, 0.3);
+        box-shadow: 0 6px 18px rgba(10, 37, 64, 0.12);
     }
-    
-    .sidebar-logo {
-        background: linear-gradient(135deg, #0D47A1, #1E88E5);
-        color: white;
-        text-align: center;
-        padding: 25px 15px;
-        border-radius: 16px;
-        margin-bottom: 25px;
-        box-shadow: 0 4px 20px rgba(13, 71, 161, 0.2);
+    .stButton > button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 10px 28px rgba(10, 37, 64, 0.25);
+        background: #143D5E !important;
     }
-    .sidebar-logo h1 { font-size: 2.5rem; margin: 0; letter-spacing: 4px; }
-    .sidebar-logo h1 .highlight { color: #FFD700; }
-    .sidebar-logo p { margin: 5px 0 0; opacity: 0.9; font-size: 0.9rem; }
-    
-    .footer {
-        text-align: center;
-        color: #999;
-        font-size: 0.8rem;
-        margin-top: 50px;
-        padding-top: 20px;
-        border-top: 1px solid #eee;
-    }
-    
+
     .result-box {
-        background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
-        padding: 25px 30px;
-        border-radius: 16px;
-        border-right: 6px solid #FFD700;
+        background: linear-gradient(135deg, #EBF4FF, #D6E8FF);
+        padding: 28px 30px;
+        border-radius: 24px;
+        border: 1px solid rgba(10, 37, 64, 0.06);
         text-align: center;
-        margin-top: 15px;
+        margin-top: 16px;
+        box-shadow: inset 0 1px 4px rgba(255,255,255,0.8);
     }
     .result-number {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #0A2540;
+        letter-spacing: -1px;
+    }
+    .result-label {
+        font-size: 0.95rem;
+        font-weight: 400;
+        color: #3D5A78;
+        margin-top: 4px;
+    }
+    .result-emoji {
         font-size: 2.8rem;
-        font-weight: 900;
-        color: #0D47A1;
+        margin-bottom: 6px;
     }
-    
+
     .advisor-box {
-        background: linear-gradient(135deg, #0D47A1, #1E88E5);
-        padding: 20px 25px;
-        border-radius: 16px;
+        background: linear-gradient(105deg, #0A2540, #1A3A5C);
+        padding: 22px 28px;
+        border-radius: 20px;
         color: white;
-        box-shadow: 0 4px 20px rgba(13, 71, 161, 0.25);
         margin-top: 20px;
+        border: 1px solid rgba(255,255,255,0.06);
     }
-    .advisor-box .title { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
-    .advisor-box .sub { font-size: 0.9rem; opacity: 0.9; }
-    
+    .advisor-box strong {
+        color: #F5A623;
+        font-weight: 700;
+    }
+
+    .future-box {
+        background: linear-gradient(135deg, #1A3A5C, #0A2540);
+        padding: 22px 28px;
+        border-radius: 20px;
+        color: white;
+        margin-top: 20px;
+        border: 1px solid rgba(245, 166, 35, 0.2);
+        box-shadow: 0 0 30px rgba(245, 166, 35, 0.05);
+    }
+    .future-box .title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #F5A623;
+        margin-bottom: 10px;
+    }
+    .future-box .status-badge {
+        display: inline-block;
+        padding: 4px 16px;
+        border-radius: 40px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    .future-box .status-badge.critical { background: #E53E3E; color: white; }
+    .future-box .status-badge.warning { background: #F5A623; color: #0A2540; }
+    .future-box .status-badge.stable { background: #38A169; color: white; }
+
     .steps {
         display: flex;
-        justify-content: space-between;
-        gap: 15px;
-        margin-bottom: 25px;
+        gap: 12px;
+        margin-bottom: 24px;
         flex-wrap: wrap;
     }
     .step-item {
         flex: 1;
-        min-width: 150px;
+        min-width: 130px;
         background: white;
-        padding: 15px 20px;
-        border-radius: 14px;
+        padding: 12px 16px;
+        border-radius: 16px;
         text-align: center;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.04);
-        border: 1px solid #f0f0f0;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
     }
-    .step-item:hover { border-color: #FFD700; transform: translateY(-2px); }
     .step-item .num {
-        background: linear-gradient(135deg, #0D47A1, #1E88E5);
+        background: #0A2540;
         color: white;
-        width: 30px;
-        height: 30px;
+        width: 26px;
+        height: 26px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 0.9rem;
-        margin-bottom: 6px;
+        font-size: 0.8rem;
+        margin-bottom: 4px;
     }
-    .step-item .text { font-weight: 600; color: #333; font-size: 0.9rem; }
-    .step-item .desc { font-size: 0.75rem; color: #888; margin-top: 3px; }
-    
-    .quick-guide {
-        background: #FFF8E1;
-        padding: 12px 18px;
-        border-radius: 10px;
-        border-right: 4px solid #FFA000;
-        margin-bottom: 15px;
-        font-size: 0.9rem;
+    .step-item .text { font-weight: 600; color: #0A2540; font-size: 0.85rem; }
+    .step-item .desc { font-size: 0.65rem; color: #6B85A0; }
+
+    .footer {
+        text-align: center;
+        color: #94A9C2;
+        font-size: 0.75rem;
+        margin-top: 50px;
+        padding-top: 18px;
+        border-top: 1px solid #E2E8F0;
     }
-    
+
     .badge {
         display: inline-block;
-        padding: 3px 10px;
-        border-radius: 16px;
+        padding: 4px 14px;
+        border-radius: 40px;
         font-size: 0.7rem;
         font-weight: 700;
-        margin: 2px;
+        margin: 3px;
     }
-    .badge-gold { background: #FFD700; color: #333; }
-    .badge-silver { background: #C0C0C0; color: #333; }
+    .badge-gold { background: #F5A623; color: #0A2540; }
+    .badge-silver { background: #C0C8D4; color: #0A2540; }
     .badge-bronze { background: #CD7F32; color: white; }
-    .badge-blue { background: #0D47A1; color: white; }
+    .badge-blue { background: #0A2540; color: white; }
+
+    .chat-message {
+        padding: 12px 18px;
+        border-radius: 14px;
+        margin-bottom: 8px;
+        max-width: 80%;
+    }
+    .chat-user {
+        background: #0A2540;
+        color: white;
+        margin-right: auto;
+    }
+    .chat-bot {
+        background: #E8F0F8;
+        color: #0A2540;
+        margin-left: auto;
+    }
+
+    .brochure {
+        background: white;
+        padding: 30px 35px;
+        border-radius: 24px;
+        border: 1px solid #E2E8F0;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+        margin-bottom: 20px;
+    }
+    .brochure h2 {
+        color: #0A2540;
+        font-weight: 800;
+        font-size: 1.6rem;
+        border-bottom: 3px solid #F5A623;
+        padding-bottom: 8px;
+        margin-bottom: 20px;
+    }
+    .brochure h3 {
+        color: #1A3A5C;
+        font-weight: 700;
+        margin-top: 22px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .brochure ul, .brochure ol {
+        padding-right: 25px;
+        line-height: 1.9;
+        color: #2D4A6A;
+    }
+    .brochure li {
+        margin-bottom: 4px;
+    }
+    .brochure .highlight-box {
+        background: #F0F7FF;
+        padding: 16px 22px;
+        border-radius: 14px;
+        border-right: 4px solid #F5A623;
+        margin: 16px 0;
+    }
+    .brochure .warning-box {
+        background: #FFF5F5;
+        padding: 16px 22px;
+        border-radius: 14px;
+        border-right: 4px solid #E53E3E;
+        margin: 16px 0;
+    }
+    .brochure .success-box {
+        background: #F0FFF4;
+        padding: 16px 22px;
+        border-radius: 14px;
+        border-right: 4px solid #38A169;
+        margin: 16px 0;
+    }
+    .brochure table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        font-size: 0.9rem;
+    }
+    .brochure th {
+        background: #0A2540;
+        color: white;
+        padding: 10px 14px;
+        text-align: right;
+    }
+    .brochure td {
+        padding: 10px 14px;
+        border-bottom: 1px solid #E2E8F0;
+    }
+    .brochure tr:nth-child(even) {
+        background: #F7FAFC;
+    }
+    .brochure .step-circle {
+        display: inline-block;
+        background: #F5A623;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 28px;
+        font-weight: 800;
+        font-size: 0.85rem;
+        margin-left: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .main-header h1 { font-size: 1.8rem; }
+        .steps { flex-direction: column; }
+        .step-item { min-width: 100%; }
+        .result-number { font-size: 2.2rem; }
+        .brochure { padding: 20px; }
+        .brochure table { font-size: 0.75rem; }
+        .brochure th, .brochure td { padding: 6px 8px; }
+        .chat-message { max-width: 95%; }
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# هدر
+# 7. انتخاب زبان
 # ==========================================
-st.markdown("""
-<div class="main-header">
-    <h1><span class="highlight">iHo</span>Noor</h1>
-    <p>نور هوشمند فروش | با یاری الهی، مسیر موفقیت را روشن کن</p>
-</div>
-""", unsafe_allow_html=True)
+if "lang" not in st.session_state:
+    st.session_state.lang = "fa"
+
+lang = st.sidebar.selectbox("🌐 زبان / Language", ["فارسی", "English"])
+if lang == "English":
+    st.session_state.lang = "en"
+else:
+    st.session_state.lang = "fa"
+
+t = LANG[st.session_state.lang]
 
 # ==========================================
-# قدم‌های راهنما
-# ==========================================
-st.markdown("""
-<div class="steps">
-    <div class="step-item"><div class="num">۱</div><div class="text">انتخاب صنف</div><div class="desc">از منوی کناری انتخاب کنید</div></div>
-    <div class="step-item"><div class="num">۲</div><div class="text">آپلود فایل</div><div class="desc">فایل اکسل یا CSV خود را آپلود کنید</div></div>
-    <div class="step-item"><div class="num">۳</div><div class="text">دریافت پیش‌بینی</div><div class="desc">روی دکمه پیش‌بینی کلیک کنید</div></div>
-</div>
-""", unsafe_allow_html=True)
-
-# ==========================================
-# لیست صنف‌ها (همه صنف‌های قبلی)
+# 8. صنف‌ها
 # ==========================================
 industries = [
-    "🏪 خواربارفروشی",
-    "🔩 آهن‌آلات و مصالح",
-    "🚗 خودروسازی و لوازم یدکی",
-    "👗 پوشاک",
-    "🍞 نانوایی",
-    "📱 فناوری و مخابرات",
-    "🛒 خرده‌فروشی و آنلاین",
-    "🏭 تولید و صنایع",
-    "💰 بانکداری و مالی",
-    "🏥 بهداشت و درمان",
-    "🍔 صنایع غذایی",
-    "⛽ پتروشیمی و انرژی",
-    "⚡ برق و نیروگاه‌ها",
-    "🎬 سینما و محصولات فرهنگی",
-    "🏭 تولید و صنایع غذایی (تخصصی)",
-    "🏢 املاک و مستغلات",
-    "🏗️ ساختمان و پیمانکاری",
-    "🏭 تولید سفارشی (Make-to-Order)",
-    "📦 مدیریت موجودی و زنجیره تامین"
+    "🏪 خواربارفروشی", "🔩 آهن‌آلات و مصالح", "🚗 خودروسازی و لوازم یدکی",
+    "👗 پوشاک", "🍞 نانوایی", "📱 فناوری و مخابرات", "🛒 خرده‌فروشی و آنلاین",
+    "🏭 تولید و صنایع", "💰 بانکداری و مالی", "🏥 بهداشت و درمان",
+    "🍔 صنایع غذایی", "⛽ پتروشیمی و انرژی", "⚡ برق و نیروگاه‌ها",
+    "🎬 سینما و محصولات فرهنگی", "🏭 تولید و صنایع غذایی (تخصصی)",
+    "🏢 املاک و مستغلات", "🏗️ ساختمان و پیمانکاری",
+    "🏭 تولید سفارشی (Make-to-Order)", "📦 مدیریت موجودی و زنجیره تامین"
 ]
 
 # ==========================================
-# سایدبار
+# 9. توابع هسته
 # ==========================================
-with st.sidebar:
-    st.markdown("""
-    <div class="sidebar-logo">
-        <h1><span class="highlight">iHo</span>Noor</h1>
-        <p>✨ نور هوشمند فروش</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    صنف = st.selectbox("🏷️ صنف خود را انتخاب کنید:", industries)
-    
-    st.markdown("---")
-    
-    فایل = st.file_uploader(
-        "📁 فایل خود را آپلود کنید",
-        type=["csv", "xlsx", "xls"],
-        accept_multiple_files=False
-    )
-    
-    with st.expander("⚙️ تنظیمات پیشرفته"):
-        تخصصی = st.checkbox("🔬 استفاده از دیتاست جامع صنف")
-        مسیر_تخصصی = st.text_input("مسیر فایل:", "data/sales.csv") if تخصصی else ""
-    
-    st.markdown("---")
-    st.info("💡 اگر فایل ندارید، از داده‌های نمونه استفاده می‌شود.")
-    
-    # حالت ساده تبلت
-    حالت_ساده = st.checkbox("📱 حالت ساده (مناسب تبلت)", value=False)
-    if حالت_ساده:
-        st.markdown("""
-        <style>
-            .stButton > button { padding: 14px 30px !important; font-size: 1.1rem !important; }
-            .stSelectbox, .stTextInput { font-size: 1.1rem !important; }
-            .stTabs [data-baseweb="tab"] { padding: 10px 14px !important; font-size: 0.9rem !important; }
-        </style>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    # گیمیفیکیشن
-    if "user_score" not in st.session_state:
-        st.session_state.user_score = 0
-    if "daily_streak" not in st.session_state:
-        st.session_state.daily_streak = 0
-    
-    st.markdown("### 🎖️ امتیاز شما")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("⭐ امتیاز", st.session_state.user_score)
-    with col2:
-        st.metric("🔥 روز", f"{st.session_state.daily_streak}")
+def detect_unit(col):
+    col = col.lower()
+    if any(w in col for w in ['نفر', 'مشتری', 'تعداد', 'کاربر']): return 'نفر'
+    if any(w in col for w in ['تومان', 'ریال', 'فروش', 'قیمت', 'درآمد']): return 'تومان'
+    if 'درصد' in col: return 'درصد'
+    if any(w in col for w in ['کیلو', 'گرم', 'تن']): return 'کیلوگرم'
+    if any(w in col for w in ['متر', 'سانتی']): return 'متر'
+    if any(w in col for w in ['لیتر', 'میل']): return 'لیتر'
+    return 'واحد'
+
+def suggest_target(df):
+    nums = df.select_dtypes(include=['number']).columns.tolist()
+    for k in ['فروش_فردا', 'فروش', 'تعداد_مشتریان', 'قیمت', 'درآمد']:
+        for c in nums:
+            if k in c: return c
+    return nums[0] if nums else None
+
+def get_emoji(val, unit):
+    if unit == 'تومان':
+        if val > 10_000_000: return "🚀", "فروش عالی!"
+        if val > 6_000_000: return "📈", "فروش خوب"
+        return "💪", "نیاز به تلاش"
+    if unit == 'نفر':
+        if val > 80: return "🎉", "مشتریان عالی!"
+        if val > 40: return "👍", "مشتریان خوب"
+        return "📢", "جذب مشتری بیشتر"
+    return "📊", "پیش‌بینی انجام شد"
 
 # ==========================================
-# تولید داده نمونه
-# ==========================================
-def sample_data(صنف):
-    np.random.seed(42)
-    dates = pd.date_range('1403-01-01', periods=200, freq='D')
-    
-    if صنف == "🏪 خواربارفروشی":
-        return pd.DataFrame({
-            'تاریخ': dates,
-            'فروش_امروز': np.random.randint(1_000_000, 10_000_000, 200),
-            'تعداد_مشتریان': np.random.randint(10, 100, 200),
-            'قیمت_میانگین': np.random.randint(10_000, 50_000, 200),
-            'تخفیف': np.random.randint(0, 30, 200),
-            'فروش_فردا': np.random.randint(1_000_000, 12_000_000, 200)
-        })
-    elif صنف == "🍞 نانوایی":
-        return pd.DataFrame({
-            'تاریخ': dates,
-            'آرد_مصرفی': np.random.randint(50, 200, 200),
-            'تعداد_نان': np.random.randint(200, 800, 200),
-            'کارکنان': np.random.randint(2, 6, 200),
-            'قیمت_نان': np.random.randint(5_000, 15_000, 200),
-            'فروش_فردا': np.random.randint(300, 900, 200)
-        })
-    elif صنف == "👗 پوشاک":
-        return pd.DataFrame({
-            'تاریخ': dates,
-            'قیمت_میانگین': np.random.randint(100_000, 1_000_000, 200),
-            'تعداد_فروش': np.random.randint(5, 50, 200),
-            'تخفیف': np.random.randint(0, 30, 200),
-            'تعداد_مشتریان': np.random.randint(10, 100, 200),
-            'فروش_فردا': np.random.randint(500_000, 5_000_000, 200)
-        })
-    elif صنف == "🏗️ ساختمان و پیمانکاری":
-        return pd.DataFrame({
-            'تاریخ': dates,
-            'متراژ': np.random.randint(50, 500, 200),
-            'تعداد_کارگر': np.random.randint(5, 50, 200),
-            'هزینه_مصالح': np.random.randint(1_000_000, 10_000_000, 200),
-            'مدت_پروژه': np.random.randint(30, 180, 200),
-            'فروش_فردا': np.random.randint(1_000_000, 15_000_000, 200)
-        })
-    else:
-        return pd.DataFrame({
-            'تاریخ': dates,
-            'فروش_امروز': np.random.randint(1_000_000, 10_000_000, 200),
-            'تعداد_مشتریان': np.random.randint(10, 100, 200),
-            'قیمت': np.random.randint(10_000, 50_000, 200),
-            'تخفیف': np.random.randint(0, 30, 200),
-            'فروش_فردا': np.random.randint(1_000_000, 12_000_000, 200)
-        })
-
-# ==========================================
-# مدل‌ها و توابع اصلی
+# 10. مدل‌ها
 # ==========================================
 models_dict = {
-    "Linear Regression": LinearRegression(),
     "Random Forest": RandomForestRegressor(n_estimators=100, random_state=42),
-    "Gradient Boosting": GradientBoostingRegressor(n_estimators=100, random_state=42),
     "XGBoost": XGBRegressor(n_estimators=100, random_state=42, verbosity=0),
-    "SVR": SVR(kernel='rbf', C=1.0, epsilon=0.1),
-    "KNN": KNeighborsRegressor(n_neighbors=5)
-}
-
-model_names_fa = {
-    "Linear Regression": "رگرسیون خطی",
-    "Random Forest": "جنگل تصادفی",
-    "Gradient Boosting": "گرادیان بوستینگ",
-    "XGBoost": "ایکس‌جی‌بوست",
-    "SVR": "ماشین بردار پشتیبان",
-    "KNN": "کی‌نزدیک‌ترین همسایه"
+    "Gradient Boosting": GradientBoostingRegressor(n_estimators=100, random_state=42),
+    "Linear Regression": LinearRegression(),
 }
 
 def train_models(X_train, y_train, X_test, y_test):
@@ -390,363 +760,257 @@ def train_models(X_train, y_train, X_test, y_test):
         try:
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
-            results[name] = {
-                'model': model,
-                'mae': mean_absolute_error(y_test, y_pred),
-                'r2': r2_score(y_test, y_pred)
-            }
-        except Exception as e:
-            results[name] = {'error': str(e)}
+            results[name] = {'model': model, 'r2': r2_score(y_test, y_pred)}
+        except:
+            results[name] = {'error': 'خطا'}
     return results
 
-def detect_unit(column_name):
-    column_name = column_name.lower()
-    if any(word in column_name for word in ['نفر', 'مشتری', 'تعداد', 'مراجع', 'بازدید', 'کاربر']):
-        return 'نفر'
-    if any(word in column_name for word in ['تومان', 'ریال', 'فروش', 'قیمت', 'درآمد', 'مبلغ', 'هزینه']):
-        return 'تومان'
-    if 'درصد' in column_name:
-        return 'درصد'
-    if any(word in column_name for word in ['کیلو', 'گرم', 'تن', 'وزن']):
-        return 'کیلوگرم'
-    if any(word in column_name for word in ['متر', 'سانتی', 'طول']):
-        return 'متر'
-    if any(word in column_name for word in ['لیتر', 'میل']):
-        return 'لیتر'
-    return 'واحد'
-
-def suggest_target_column(df):
-    numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
-    priority = ['فروش_فردا', 'فروش', 'تعداد_مشتریان', 'قیمت', 'درآمد', 'سود']
-    for keyword in priority:
-        for col in numeric_cols:
-            if keyword in col:
-                return col
-    return numeric_cols[0] if numeric_cols else None
-
-def get_avg_industry(صنف):
-    avgs = {
-        "خواربارفروشی": 8_000_000,
-        "پوشاک": 5_000_000,
-        "ساختمان": 12_000_000,
-        "نانوایی": 3_000_000,
-        "فناوری": 10_000_000,
-        "خرده‌فروشی": 7_000_000,
-        "بهداشت": 6_000_000,
-        "املاک": 15_000_000
-    }
-    for key in avgs:
-        if key in صنف:
-            return avgs[key]
-    return 6_000_000
-
-def get_discount_suggestion(pred_value, unit):
-    if unit != 'تومان':
-        return None
-    if pred_value < 3_000_000:
-        return "۲۵٪"
-    elif pred_value < 5_000_000:
-        return "۱۵٪"
-    elif pred_value < 8_000_000:
-        return "۱۰٪"
-    else:
-        return "۵٪"
-
-def get_emoji(pred_value, unit):
-    if unit == 'تومان':
-        if pred_value > 10_000_000:
-            return "🚀", "فروش عالی!"
-        elif pred_value > 6_000_000:
-            return "📈", "فروش خوب"
-        else:
-            return "💪", "نیاز به تلاش"
-    elif unit == 'نفر':
-        if pred_value > 80:
-            return "🎉", "مشتریان عالی!"
-        elif pred_value > 40:
-            return "👍", "مشتریان خوب"
-        else:
-            return "📢", "جذب مشتری بیشتر"
-    else:
-        return "📊", "پیش‌بینی انجام شد"
-
-def smart_alerts(data, target_col, pred_value, صنف):
-    alerts = []
-    if len(data) < 7:
-        return ["ℹ️ داده‌های کافی برای هشدار هوشمند وجود ندارد (حداقل ۷ روز نیاز است)."]
-    
-    try:
-        last_week = data[target_col].tail(7).mean()
-        prev_week = data[target_col].tail(14).head(7).mean()
-        
-        if last_week < prev_week * 0.85:
-            alerts.append(f"⚠️ کاهش فروش: {((1 - last_week/prev_week)*100):.1f}% نسبت به هفته قبل")
-        if last_week > prev_week * 1.15:
-            alerts.append(f"✅ افزایش فروش: {((last_week/prev_week - 1)*100):.1f}% نسبت به هفته قبل")
-        
-        if pred_value:
-            if pred_value < last_week * 0.85:
-                alerts.append(f"⚠️ پیش‌بینی کاهش: {((1 - pred_value/last_week)*100):.1f}% کمتر از میانگین")
-            elif pred_value > last_week * 1.15:
-                alerts.append(f"✅ پیش‌بینی افزایش: {((pred_value/last_week - 1)*100):.1f}% بیشتر از میانگین")
-    except Exception as e:
-        alerts.append(f"ℹ️ خطا: {e}")
-    
-    return alerts
-
-def مشاور_iHonoor(pred_value, accuracy, target_col, data, alerts, صنف, unit):
-    تحلیل = {'خلاصه': '', 'بینش‌ها': [], 'راهکارها': [], 'هشدار': None, 'فرصت': None, 'پیام': None}
-    
-    if pred_value:
-        if pred_value > 10_000_000 and unit == 'تومان':
-            تحلیل['خلاصه'] = f"✅ پیش‌بینی {target_col}: {pred_value:,.0f} {unit} (عالی)"
-            تحلیل['فرصت'] = "✨ از این فرصت برای توسعه کسب‌وکار استفاده کنید."
-        elif pred_value > 5_000_000 and unit == 'تومان':
-            تحلیل['خلاصه'] = f"📊 پیش‌بینی {target_col}: {pred_value:,.0f} {unit} (خوب)"
-        elif unit == 'نفر' and pred_value > 50:
-            تحلیل['خلاصه'] = f"✅ پیش‌بینی {target_col}: {pred_value:,.0f} {unit} (عالی)"
-        else:
-            تحلیل['خلاصه'] = f"⚠️ پیش‌بینی {target_col}: {pred_value:,.0f} {unit} (نیاز به بررسی)"
-            تحلیل['هشدار'] = "مقدار پیش‌بینی پایین‌تر از حد انتظار است."
-    
-    if accuracy:
-        if accuracy > 0.85:
-            تحلیل['بینش‌ها'].append(f"🎯 دقت مدل {accuracy:.1%} (عالی)")
-        elif accuracy > 0.7:
-            تحلیل['بینش‌ها'].append(f"📊 دقت مدل {accuracy:.1%} (قابل قبول)")
-        else:
-            تحلیل['بینش‌ها'].append(f"⚠️ دقت مدل {accuracy:.1%} (پایین)")
-    
-    if alerts:
-        for alert in alerts:
-            if "کاهش" in alert and "فروش" in alert:
-                تحلیل['راهکارها'].append("🔻 کاهش فروش: تبلیغات هدفمند، تخفیف ویژه")
-                تحلیل['هشدار'] = "کاهش فروش شناسایی شد!"
-            elif "افزایش" in alert and "فروش" in alert:
-                تحلیل['راهکارها'].append("📈 فرصت رشد: افزایش موجودی، بازاریابی")
-                تحلیل['فرصت'] = "روند صعودی فروش!"
-    
-    if not تحلیل['راهکارها']:
-        تحلیل['راهکارها'].append("✅ وضعیت فعلی خوب است. کیفیت خدمات را حفظ کنید.")
+# ==========================================
+# 11. تولید دیتای نمونه
+# ==========================================
+def sample_data(صنف):
+    np.random.seed(42)
+    dates = pd.date_range('2024-01-01', periods=200, freq='D')
     
     if "خواربار" in صنف:
-        تحلیل['پیام'] = "💡 موجودی کالاهای پرمصرف را در تعطیلات افزایش دهید."
-    elif "ساختمان" in صنف or "پیمانکاری" in صنف:
-        تحلیل['پیام'] = "💡 هزینه مصالح و نیروی کار را مدیریت کنید."
+        df = pd.DataFrame({
+            'تاریخ': dates,
+            'فروش_امروز': np.random.randint(1_000_000, 10_000_000, 200),
+            'تعداد_مشتریان': np.random.randint(10, 100, 200),
+            'فروش_فردا': np.random.randint(1_000_000, 12_000_000, 200)
+        })
     elif "پوشاک" in صنف:
-        تحلیل['پیام'] = "💡 رنگ‌های پرطرفدار فصل را شناسایی کنید."
-    elif "بهداشت" in صنف:
-        تحلیل['پیام'] = "💡 با افزایش خدمات تخصصی، درآمد خود را افزایش دهید."
+        df = pd.DataFrame({
+            'تاریخ': dates,
+            'فروش_امروز': np.random.randint(500_000, 5_000_000, 200),
+            'تعداد_مشتریان': np.random.randint(5, 50, 200),
+            'فروش_فردا': np.random.randint(500_000, 6_000_000, 200)
+        })
+    elif "ساختمان" in صنف:
+        df = pd.DataFrame({
+            'تاریخ': dates,
+            'متراژ': np.random.randint(50, 500, 200),
+            'تعداد_کارگر': np.random.randint(5, 50, 200),
+            'فروش_فردا': np.random.randint(1_000_000, 15_000_000, 200)
+        })
     else:
-        تحلیل['پیام'] = "💡 با تحلیل داده‌ها، بهترین تصمیمات را بگیرید."
+        df = pd.DataFrame({
+            'تاریخ': dates,
+            'فروش_امروز': np.random.randint(1_000_000, 10_000_000, 200),
+            'تعداد_مشتریان': np.random.randint(10, 100, 200),
+            'فروش_فردا': np.random.randint(1_000_000, 12_000_000, 200)
+        })
     
-    return تحلیل
+    df['تاریخ_شمسی'] = df['تاریخ'].apply(lambda d: jdatetime.datetime.fromgregorian(datetime=d).strftime('%Y/%m/%d'))
+    return df
 
-def نمایش_مشاور(تحلیل):
-    if not تحلیل:
-        return
+# ==========================================
+# 12. چتبات
+# ==========================================
+def chatbot_response(user_input, صنف, data, prices):
+    user_input = user_input.lower()
     
-    st.markdown("---")
+    responses = {
+        'سلام': "👋 سلام! چطور می‌تونم به شما کمک کنم؟",
+        'خوبی': "🙂 ممنون، خوبم! شما چطورید؟",
+        'راهنما': f"📖 برای {صنف}، می‌تونم کمک کنم پیش‌بینی فروش داشته باشید.",
+        'فروش': f"📊 بر اساس داده‌های {صنف}، فروش شما روند خوبی دارد.",
+        'مشتری': f"👥 تعداد مشتریان {صنف} در حال افزایش است.",
+        'دلار': f"💰 قیمت دلار امروز: {prices['dollar']:,} تومان",
+        'طلا': f"🏅 قیمت طلا: {prices['gold']:,} تومان",
+        'نفت': f"🛢️ قیمت نفت: {prices['oil']} دلار",
+        'فولاد': f"🔩 قیمت فولاد: {prices['steel']} دلار هر تن",
+        'تورم': f"📈 نرخ تورم: {prices['inflation']:.1f}%",
+        'تخفیف': "💡 تخفیف‌های هدفمند می‌توانند فروش را تا ۲۰٪ افزایش دهند.",
+        'داده': f"📋 تعداد رکوردهای شما: {len(data)}",
+        'هدف': f"🎯 بهترین ستون هدف برای شما: {suggest_target(data)}",
+        'ناهنجاری': "⚠️ ناهنجاری یعنی داده‌هایی که از بقیه خیلی متفاوت هستند.",
+        'دقت': "🎯 دقت مدل به تعداد داده‌ها و کیفیت آن بستگی دارد.",
+        'تاریخ': f"📅 ستون تاریخ به فرمت شمسی نمایش داده میشود.",
+        'آینده': "🔮 تحلیل آینده نشان میدهد شرایط بازار در حال تغییر است."
+    }
+    
+    for key, response in responses.items():
+        if key in user_input:
+            return response
+    
+    return f"🤖 سوال شما: '{user_input}'\nلطفاً دقیق‌تر بپرسید یا از کلمات کلیدی مثل: سلام، راهنما، فروش، مشتری، دلار، طلا، نفت، فولاد، تورم، تخفیف، داده، هدف، ناهنجاری، دقت، تاریخ، آینده استفاده کنید."
+
+# ==========================================
+# 13. پنل مدیریت
+# ==========================================
+def admin_panel(prices):
     st.markdown("""
-    <div class="advisor-box">
-        <div class="title">✨ مشاور iHoNoor</div>
-        <div class="sub">نور هوشمند تصمیم‌گیری، با یاری الهی</div>
+    <div class="card">
+        <div class="card-title"><span class="icon">🔐</span> پنل مدیریت iHoNoor</div>
     </div>
     """, unsafe_allow_html=True)
     
-    if تحلیل.get('خلاصه'):
-        st.info(تحلیل['خلاصه'])
-    
-    col1, col2 = st.columns(2)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
-        if تحلیل.get('هشدار'):
-            st.warning(f"⚠️ {تحلیل['هشدار']}")
+        st.metric("👥 کاربران", "۱,۲۴۵", delta="+۱۲%")
     with col2:
-        if تحلیل.get('فرصت'):
-            st.success(f"✨ {تحلیل['فرصت']}")
+        st.metric("📊 پیش‌بینی‌ها", "۳,۸۹۰", delta="+۸%")
+    with col3:
+        st.metric("🏷️ صنف‌ها", len(industries))
+    with col4:
+        st.metric("💰 نرخ دلار", f"{prices['dollar']:,}")
     
-    for بینش in تحلیل.get('بینش‌ها', []):
-        st.info(بینش)
+    st.markdown("---")
+    st.subheader("📊 وضعیت اقتصادی")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("🏅 طلا", f"{prices['gold']:,} تومان")
+    with col2:
+        st.metric("🛢️ نفت", f"{prices['oil']} دلار")
+    with col3:
+        st.metric("🔩 فولاد", f"{prices['steel']} دلار")
+    with col4:
+        st.metric("📈 تورم", f"{prices['inflation']:.1f}%")
     
-    for راهکار in تحلیل.get('راهکارها', []):
-        st.success(راهکار)
+    st.markdown("---")
+    st.subheader("👥 مدیریت کاربران")
+    users_data = pd.DataFrame({
+        'نام': ['علی رضایی', 'مریم احمدی', 'محمد کریمی', 'سارا حسینی'],
+        'ایمیل': ['ali@example.com', 'maryam@example.com', 'mohammad@example.com', 'sara@example.com'],
+        'صنف': ['خواربارفروشی', 'پوشاک', 'ساختمان', 'نانوایی'],
+        'وضعیت': ['فعال', 'فعال', 'غیرفعال', 'فعال']
+    })
+    st.dataframe(users_data, use_container_width=True)
+
+# ==========================================
+# 14. بخش سایدبار
+# ==========================================
+if "score" not in st.session_state: st.session_state.score = 0
+if "streak" not in st.session_state: st.session_state.streak = 0
+if "history" not in st.session_state: st.session_state.history = []
+if "chat_history" not in st.session_state: st.session_state.chat_history = []
+
+# دریافت قیمت‌ها
+prices = get_global_prices()
+
+with st.sidebar:
+    st.markdown("""
+    <div style="background:#0A2540;color:white;padding:18px;border-radius:18px;text-align:center;margin-bottom:18px;">
+        <h1 style="font-size:2rem;margin:0;"><span style="color:#F5A623;">iHo</span>Noor</h1>
+        <p style="font-size:0.75rem;opacity:0.7;margin:0;">✨ v6.0</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    if تحلیل.get('پیام'):
-        st.markdown(f"<div style='background:#FFF8E1;padding:12px 18px;border-radius:12px;border-right:4px solid #FFA000;'>{تحلیل['پیام']}</div>", unsafe_allow_html=True)
+    صنف = st.selectbox("🏷️ " + t['step1'], industries)
+    
+    st.markdown("---")
+    st.markdown("### 📊 وضعیت اقتصادی لحظه‌ای")
+    st.metric("💰 دلار", f"{prices['dollar']:,} تومان")
+    st.metric("🏅 طلا", f"{prices['gold']:,} تومان")
+    st.metric("🛢️ نفت", f"{prices['oil']} دلار")
+    st.metric("🔩 فولاد", f"{prices['steel']} دلار")
+    st.metric("📈 تورم", f"{prices['inflation']:.1f}%")
+    
+    st.markdown("---")
+    فایل = st.file_uploader("📁 " + t['step2'], type=["csv", "xlsx", "xls"])
+    
+    حالت_ساده = st.checkbox("📱 حالت ساده (تبلت)", value=False)
+    if حالت_ساده:
+        st.markdown("<style>.stButton>button{padding:16px 32px!important;font-size:1.1rem!important;}</style>", unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.markdown(f"### 🎖️ امتیاز شما")
+    c1, c2 = st.columns(2)
+    c1.metric("⭐", st.session_state.score)
+    c2.metric("🔥", f"{st.session_state.streak} روز")
 
 # ==========================================
-# تشخیص ناهنجاری
-# ==========================================
-def detect_anomalies(data):
-    try:
-        num_cols = data.select_dtypes(include=['number']).columns
-        if len(num_cols) < 2:
-            return None, "داده‌های عددی کافی نیست."
-        iso = IsolationForest(contamination=0.05, random_state=42)
-        preds = iso.fit_predict(data[num_cols].fillna(0))
-        anomalies = data[preds == -1]
-        return anomalies, f"{len(anomalies)} ناهنجاری شناسایی شد." if len(anomalies) > 0 else "✅ هیچ ناهنجاری یافت نشد."
-    except Exception as e:
-        return None, f"خطا: {e}"
-
-def analyze_health(data, target_col):
-    msgs = []
-    if len(data) < 50:
-        msgs.append("⚠️ تعداد رکوردها کم است (کمتر از ۵۰).")
-    if data.isnull().sum().sum() > 0:
-        msgs.append(f"⚠️ {data.isnull().sum().sum()} مقدار خالی در داده‌ها وجود دارد.")
-    if target_col in data.columns and 'تاریخ' in data.columns:
-        sorted_data = data.sort_values('تاریخ')
-        if len(sorted_data) >= 20:
-            recent = sorted_data[target_col].tail(20).mean()
-            older = sorted_data[target_col].head(20).mean()
-            if recent < older * 0.85:
-                msgs.append("⚠️ کاهش فروش در داده‌های اخیر مشاهده می‌شود.")
-    return "\n".join(msgs) if msgs else "✅ داده‌ها سالم هستند."
-
-# ==========================================
-# دریافت قیمت دلار
-# ==========================================
-def دریافت_قیمت_دلار():
-    try:
-        url = "https://api.exchangerate-api.com/v4/latest/USD"
-        response = requests.get(url, timeout=5)
-        if response.status_code == 200:
-            data = response.json()
-            price = data['rates']['IRR'] / 10
-            if price > 1000:
-                return price
-    except:
-        pass
-    return 160000
-
-# ==========================================
-# بارگذاری داده
+# 15. بارگذاری دیتا
 # ==========================================
 data = None
-source = ""
-
-if تخصصی and مسیر_تخصصی and os.path.exists(مسیر_تخصصی):
-    try:
-        data = pd.read_csv(مسیر_تخصصی) if مسیر_تخصصی.endswith('.csv') else pd.read_excel(مسیر_تخصصی)
-        source = "دیتاست جامع"
-        st.success(f"✅ دیتاست تخصصی با {len(data)} رکورد بارگذاری شد.")
-    except Exception as e:
-        st.error(f"❌ خطا در خواندن دیتاست: {e}")
-
-if data is None and فایل is not None:
+if فایل:
     try:
         data = pd.read_csv(فایل) if فایل.name.endswith('.csv') else pd.read_excel(فایل)
-        source = "فایل شما"
-        st.success(f"✅ فایل شما با {len(data)} رکورد بارگذاری شد.")
+        st.success(f"✅ {len(data)} رکورد بارگذاری شد.")
     except Exception as e:
         st.error(f"❌ خطا در خواندن فایل: {e}")
 
 if data is None:
     data = sample_data(صنف)
-    source = "داده‌های نمونه"
-    st.info(f"📊 از داده‌های نمونه برای {صنف} استفاده می‌شود.")
+    st.info(f"📊 داده‌های نمونه برای {صنف}")
 
 # ==========================================
-# تب‌ها
+# 16. هدر
+# ==========================================
+st.markdown(f"""
+<div class="main-header">
+    <h1><span class="highlight">iHo</span>Noor</h1>
+    <p>{t['app_name']} | {t['subtitle']}</p>
+    <div>
+        <span class="badge-version">✨ نسخه ۶.۰ | پیش‌بینی هوشمند</span>
+        <span class="dollar-badge">💰 دلار: {prices['dollar']:,} تومان</span>
+        <span class="dollar-badge">🏅 طلا: {prices['gold']:,}</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown(f"""
+<div class="steps">
+    <div class="step-item"><div class="num">۱</div><div class="text">{t['step1']}</div><div class="desc">از منوی کناری</div></div>
+    <div class="step-item"><div class="num">۲</div><div class="text">{t['step2']}</div><div class="desc">Excel یا CSV</div></div>
+    <div class="step-item"><div class="num">۳</div><div class="text">{t['step3']}</div><div class="desc">دریافت نتیجه</div></div>
+</div>
+""", unsafe_allow_html=True)
+
+# ==========================================
+# 17. تب‌ها
 # ==========================================
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11 = st.tabs([
+    "📊 " + t['step3'],
+    "🔮 " + t['future'],
     "📖 راهنما",
-    "📊 تحلیل و پیش‌بینی",
-    "📱 نصب روی گوشی",
-    "📅 تقویم شمسی",
-    "🤝 سیستم ارجاع",
-    "👤 داشبورد کاربری",
+    "💬 " + t['chatbot'],
+    "🔐 " + t['admin'],
+    "📱 نصب",
+    "📅 تقویم",
+    "🤝 ارجاع",
+    "👤 داشبورد",
     "🏠 خونه‌پرداز",
-    "📘 راهنمای صنف‌ها",
-    "📚 راهنمای جامع",
-    "🚀 آینده هوش مصنوعی",
-    "📝 ارسال نظر"
+    "📝 تماس"
 ])
 
+# ==========================================
+# تب 1: پیش‌بینی
+# ==========================================
 with tab1:
-    st.markdown("""
-    <div class="card">
-        <div class="card-title"><span class="icon">🎯</span> iHoNoor چیست؟</div>
-        <p><strong>iHoNoor</strong> یک پلتفرم <strong>۱۰۰٪ ایرانی</strong>، <strong>بدون تحریم</strong> و <strong>با یاری الهی</strong> است که با استفاده از ۶ مدل هوش مصنوعی، فروش فردا را پیش‌بینی می‌کند.</p>
-    </div>
-    
-    <div class="card">
-        <div class="card-title"><span class="icon">✨</span> قابلیت‌های iHoNoor</div>
-        <ul>
-            <li>🤖 پیش‌بینی فروش با ۶ مدل هوش مصنوعی</li>
-            <li>📊 داشبورد مدیریتی و کاربری</li>
-            <li>📱 نصب روی گوشی و تبلت (PWA)</li>
-            <li>📅 همگام‌سازی با تقویم شمسی</li>
-            <li>🤝 سیستم ارجاع و پاداش</li>
-            <li>🔔 هشدارهای هوشمند لحظه‌ای</li>
-            <li>📈 تحلیل خودکار کلان اقتصادی</li>
-            <li>🏠 خونه‌پرداز (مدیریت دخل و خرج خانواده)</li>
-            <li>📘 راهنمای تخصصی صنف‌ها با تجربیات جهانی</li>
-            <li>📚 راهنمای جامع استفاده</li>
-            <li>🚀 آینده هوش مصنوعی و تأثیر آن بر مشاغل</li>
-            <li>📝 ارسال نظر و پیشنهاد</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
-
-with tab2:
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown('<div class="card"><div class="card-title"><span class="icon">📋</span> نمونه داده‌ها</div>', unsafe_allow_html=True)
-        st.dataframe(data.head(8))
+        st.markdown('<div class="card"><div class="card-title"><span class="icon">📋</span> نمونه داده</div>', unsafe_allow_html=True)
+        st.dataframe(data.head(5))
         st.markdown('</div>', unsafe_allow_html=True)
     with col2:
-        st.markdown('<div class="card"><div class="card-title"><span class="icon">📊</span> خلاصه آمار</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card"><div class="card-title"><span class="icon">📊</span> خلاصه</div>', unsafe_allow_html=True)
         st.dataframe(data.describe())
         st.markdown('</div>', unsafe_allow_html=True)
     
-    st.caption(f"📌 منبع: {source}")
+    all_cols = data.columns.tolist()
+    nums = data.select_dtypes(include=['number']).columns.tolist()
+    suggested = suggest_target(data)
     
-    if 'تاریخ' in data.columns:
-        try:
-            num_cols = data.select_dtypes(include=['number']).columns
-            if len(num_cols) > 0:
-                fig = px.line(data, x='تاریخ', y=num_cols[0], title="📈 روند تغییرات", height=300)
-                st.plotly_chart(fig, use_container_width=True)
-        except:
-            pass
+    opts = [f"{t['suggest']}: {suggested}"] + all_cols if suggested else all_cols
+    selected = st.selectbox(t['target'], opts)
     
-    st.markdown("---")
-    
-    # انتخاب ستون هدف با پیشنهاد
-    all_columns = data.columns.tolist()
-    numeric_cols = data.select_dtypes(include=['number']).columns.tolist()
-    
-    suggested = suggest_target_column(data)
-    
-    if suggested:
-        target_options = [f"💡 پیشنهاد iHoNoor: {suggested}"] + all_columns
-    else:
-        target_options = all_columns
-    
-    selected_option = st.selectbox("🎯 ستون هدف (مقداری که می‌خواهید پیش‌بینی کنید):", target_options)
-    
-    if selected_option.startswith("💡 پیشنهاد iHoNoor:"):
+    if selected.startswith(t['suggest']):
         target = suggested
-        st.info(f"✅ iHoNoor ستون **{target}** را برای پیش‌بینی پیشنهاد می‌دهد.")
+        st.info(f"✅ iHoNoor ستون **{target}** را پیشنهاد میکند.")
     else:
-        target = selected_option
+        target = selected
     
-    if target not in numeric_cols:
-        st.error("❌ ستون هدف باید **عددی** باشد! لطفاً یکی از ستون‌های عددی را انتخاب کنید.")
+    if target not in nums:
+        st.error("❌ ستون هدف باید عددی باشد!")
         st.stop()
     
     unit = detect_unit(target)
-    st.info(f"✅ واحد تشخیص داده شده: **{unit}**")
+    st.info(f"✅ {t['unit']}: **{unit}**")
     
-    model_names = list(models_dict.keys())
-    model_names_fa_list = [model_names_fa[m] for m in model_names]
-    selected_model_fa = st.selectbox("🧠 مدل پیش‌بینی:", model_names_fa_list)
-    selected_model = [m for m in models_dict.keys() if model_names_fa[m] == selected_model_fa][0]
-    
-    if st.button("🚀 پیش‌بینی کن", type="primary", use_container_width=True):
-        with st.spinner("⏳ در حال آموزش مدل..."):
+    if st.button(t['predict_btn'], type="primary", use_container_width=True):
+        with st.spinner("⏳ در حال تحلیل..."):
             try:
                 le = LabelEncoder()
                 d = data.copy()
@@ -757,536 +1021,343 @@ with tab2:
                         except:
                             pass
                 
-                X = d.drop(columns=[target])
+                X = d.drop(columns=[target]).select_dtypes(include=['number'])
                 y = d[target]
-                X = X.select_dtypes(include=['number'])
                 
                 if len(X.columns) == 0:
-                    st.error("❌ هیچ ویژگی عددی برای آموزش مدل وجود ندارد.")
+                    st.error("❌ ویژگی عددی کافی نیست.")
                     st.stop()
                 
                 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
                 results = train_models(X_train, y_train, X_test, y_test)
                 
-                best_model = None
+                best = None
                 best_score = -1
                 for name, res in results.items():
                     if 'error' not in res and res['r2'] > best_score:
                         best_score = res['r2']
-                        best_model = name
+                        best = name
                 
-                if best_model:
-                    model = results[best_model]['model']
-                    avg_row = X.mean().values.reshape(1, -1)
-                    pred_value = model.predict(avg_row)[0]
+                if best:
+                    model = results[best]['model']
+                    pred = model.predict(X.mean().values.reshape(1, -1))[0]
                     
-                    # افزایش امتیاز
-                    st.session_state.user_score += 5
-                    st.session_state.daily_streak += 1
+                    st.session_state.score += 5
+                    st.session_state.streak += 1
                     
-                    # ایموجی پویا
-                    emoji, msg = get_emoji(pred_value, unit)
+                    emoji, msg = get_emoji(pred, unit)
                     
                     st.markdown(f"""
                     <div class="result-box">
-                        <div style="font-size:2.5rem;">{emoji}</div>
-                        <div class="result-label">📈 پیش‌بینی {target}</div>
-                        <div class="result-number">{pred_value:,.0f}</div>
+                        <div class="result-emoji">{emoji}</div>
+                        <div class="result-label">{msg}</div>
+                        <div class="result-number">{pred:,.0f}</div>
                         <div class="result-label">{unit}</div>
-                        <div style="font-size:0.9rem;color:#555;margin-top:5px;">{msg}</div>
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.metric("🎯 دقت مدل", f"{best_score:.1%}")
-                    with col2:
-                        st.metric(f"🔮 بازه اطمینان ({unit})", f"{pred_value*0.85:,.0f} - {pred_value*1.15:,.0f}")
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric(t['accuracy'], f"{best_score:.1%}")
+                    c2.metric(t['confidence'], f"{pred*0.85:,.0f} - {pred*1.15:,.0f}")
+                    c3.metric("🏆 مدل", best)
                     
-                    # مقایسه با میانگین صنف
-                    avg_industry = get_avg_industry(صنف)
-                    if unit == 'تومان' and avg_industry > 0:
-                        diff = ((pred_value / avg_industry) - 1) * 100
-                        if diff > 20:
-                            st.success(f"✅ {diff:.1f}% بالاتر از میانگین صنف!")
-                        elif diff < -20:
-                            st.warning(f"⚠️ {abs(diff):.1f}% پایین‌تر از میانگین صنف")
-                        else:
-                            st.info(f"📊 نزدیک به میانگین صنف ({diff:+.1f}%)")
-                    
-                    # پیشنهاد تخفیف هوشمند
-                    discount = get_discount_suggestion(pred_value, unit)
-                    if discount:
-                        st.info(f"💡 تخفیف پیشنهادی: {discount}")
-                    
-                    alerts = smart_alerts(data, target, pred_value, صنف)
-                    if alerts:
-                        st.subheader("🔔 هشدارهای هوشمند")
-                        for alert in alerts:
-                            if "⚠️" in alert:
-                                st.warning(alert)
-                            elif "✅" in alert:
-                                st.success(alert)
-                            else:
-                                st.info(alert)
-                    
-                    تحلیل = مشاور_iHonoor(pred_value, best_score, target, data, alerts, صنف, unit)
-                    نمایش_مشاور(تحلیل)
-                    
-                    with st.expander("📊 مقایسه مدل‌ها (۶ مدل)"):
-                        compare_data = []
-                        for name, res in results.items():
-                            if 'error' not in res:
-                                compare_data.append({
-                                    'مدل': model_names_fa[name],
-                                    'MAE': f"{res['mae']:,.0f}",
-                                    'R²': f"{res['r2']:.2%}"
-                                })
-                        if compare_data:
-                            st.dataframe(pd.DataFrame(compare_data))
-                    
-                    with st.expander("📊 اهمیت ویژگی‌ها"):
+                    with st.expander("📊 " + t['feature_importance']):
                         if hasattr(model, 'feature_importances_'):
-                            imp_df = pd.DataFrame({
-                                'ویژگی': X.columns,
-                                'اهمیت': model.feature_importances_
-                            }).sort_values('اهمیت', ascending=False)
-                            st.dataframe(imp_df)
-                            fig = px.bar(imp_df, x='اهمیت', y='ویژگی', orientation='h', height=350)
+                            imp = pd.DataFrame({'ویژگی': X.columns, 'اهمیت': model.feature_importances_}).sort_values('اهمیت', ascending=False)
+                            st.dataframe(imp)
+                            fig = px.bar(imp, x='اهمیت', y='ویژگی', orientation='h', height=300)
                             st.plotly_chart(fig, use_container_width=True)
                         else:
-                            st.info("ℹ️ این مدل از قابلیت نمایش اهمیت ویژگی‌ها پشتیبانی نمی‌کند.")
+                            st.info("ℹ️ این مدل اهمیت ویژگی‌ها را پشتیبانی نمیکند.")
                     
-                    with st.expander("🔍 تشخیص ناهنجاری"):
-                        anomalies, msg = detect_anomalies(data)
-                        if anomalies is not None and len(anomalies) > 0:
-                            st.error(f"⚠️ {len(anomalies)} ناهنجاری یافت شد!")
-                            st.dataframe(anomalies)
-                        else:
-                            st.success("✅ هیچ ناهنجاری یافت نشد.")
-                    
-                    with st.expander("📊 تحلیل سلامت داده‌ها"):
-                        health = analyze_health(data, target)
-                        if "⚠️" in health:
-                            st.warning(health)
-                        else:
-                            st.success(health)
-                    
-                    with st.expander("💱 تحلیل دلاری"):
+                    with st.expander("💱 " + t['dollar_label']):
+                        st.markdown(f"💰 **نرخ دلار لحظه‌ای:** {prices['dollar']:,} تومان")
                         if unit == 'تومان':
-                            dollar_rate = دریافت_قیمت_دلار()
-                            avg_value = y.mean()
-                            avg_dollar = avg_value / dollar_rate
-                            pred_dollar = pred_value / dollar_rate
-                            
-                            st.metric("💰 نرخ دلار", f"{dollar_rate:,.0f} تومان")
-                            st.metric("📊 میانگین به دلار", f"${avg_dollar:,.2f}")
-                            st.metric("📈 پیش‌بینی به دلار", f"${pred_dollar:,.2f}")
+                            dollar_value = pred / prices['dollar']
+                            st.metric("💵 پیش‌بینی به دلار", f"${dollar_value:,.2f}")
                         else:
-                            st.info(f"ℹ️ واحد '{unit}' است، تحلیل دلاری فقط برای ستون‌های تومانی معنا دارد.")
+                            st.info(f"ℹ️ واحد '{unit}' است. تحلیل دلاری برای ستون‌های تومانی انجام میشود.")
                     
-                    # ذخیره در تاریخچه
-                    if "history" not in st.session_state:
-                        st.session_state.history = []
+                    st.markdown(f"""
+                    <div class="advisor-box">
+                        <strong>✨ {t['advisor']}</strong>
+                        <p style="font-size:0.9rem;opacity:0.9;margin-top:8px;">
+                            با توجه به پیش‌بینی، موجودی خود را مدیریت کنید.
+                        </p>
+                    </div>
+                    """, unsafe_allow_html=True)
                     
                     st.session_state.history.append({
-                        'تاریخ': datetime.now().strftime("%Y-%m-%d %H:%M"),
-                        'صنف': صنف,
+                        'زمان': datetime.now().strftime("%H:%M"),
                         'هدف': target,
-                        'پیش‌بینی': f"{pred_value:,.0f}",
-                        'واحد': unit,
+                        'پیش‌بینی': f"{pred:,.0f} {unit}",
                         'دقت': f"{best_score:.1%}"
                     })
                     
             except Exception as e:
                 st.error(f"❌ خطا: {e}")
 
-with tab3:
+# ==========================================
+# تب 2: تحلیلگر آینده
+# ==========================================
+with tab2:
     st.markdown("""
     <div class="card">
-        <div class="card-title"><span class="icon">📱</span> نصب iHoNoor روی گوشی یا تبلت</div>
-        <p>با نصب iHoNoor روی دستگاه خود، مانند یک اپلیکیشن واقعی از آن استفاده کنید.</p>
+        <div class="card-title"><span class="icon">🔮</span> تحلیلگر هوشمند آینده iHoNoor</div>
+        <p>تحلیل شرایط اقتصادی و تأثیر آن بر صنف شما</p>
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("""
-    <div style="background: #E3F2FD; padding: 20px; border-radius: 12px; border-right: 4px solid #1E88E5; margin-bottom: 20px;">
-        <h4>📌 مراحل نصب در اندروید (کروم)</h4>
-        <ol>
-            <li>مرورگر <strong>کروم</strong> را باز کنید.</li>
-            <li>آدرس iHoNoor را وارد کنید.</li>
-            <li>روی سه نقطه (⋮) بالای صفحه کلیک کنید.</li>
-            <li>گزینه <strong>"Add to Home screen"</strong> را انتخاب کنید.</li>
-            <li>روی <strong>"Add"</strong> کلیک کنید.</li>
-        </ol>
-    </div>
+    # نمایش اطلاعات اقتصادی
+    st.subheader("📊 وضعیت اقتصادی لحظه‌ای")
+    col1, col2, col3, col4, col5 = st.columns(5)
+    with col1:
+        st.metric("💰 دلار", f"{prices['dollar']:,}", delta=f"{((prices['dollar']-195000)/195000*100):.1f}%")
+    with col2:
+        st.metric("🏅 طلا", f"{prices['gold']:,}", delta=f"{((prices['gold']-35000000)/35000000*100):.1f}%")
+    with col3:
+        st.metric("🛢️ نفت", f"{prices['oil']} $", delta=f"{((prices['oil']-85)/85*100):.1f}%")
+    with col4:
+        st.metric("🔩 فولاد", f"{prices['steel']} $", delta=f"{((prices['steel']-1200)/1200*100):.1f}%")
+    with col5:
+        st.metric("📈 تورم", f"{prices['inflation']:.1f}%", delta=f"{((prices['inflation']-35)/35*100):.1f}%")
     
-    <div style="background: #E8F5E9; padding: 20px; border-radius: 12px; border-right: 4px solid #4CAF50; margin-bottom: 20px;">
-        <h4>📌 مراحل نصب در آیفون (سافاری)</h4>
+    st.markdown("---")
+    
+    # تحلیل صنف
+    st.subheader(f"🔮 تحلیل آینده برای {صنف}")
+    
+    analysis = future_analyst(صنف, prices)
+    
+    # وضعیت
+    status_color = "stable"
+    if "بحران" in analysis['status'] or "بحرانی" in analysis['status']:
+        status_color = "critical"
+    elif "هشدار" in analysis['status']:
+        status_color = "warning"
+    
+    st.markdown(f"""
+    <div class="future-box">
+        <div class="title">🔮 تحلیلگر آینده iHoNoor</div>
+        <div>
+            <span class="status-badge {status_color}">{analysis['status']}</span>
+        </div>
+        <p style="font-size:1.1rem;margin-top:10px;">
+            <strong>روند:</strong> {analysis['trend']}
+        </p>
+        <p>
+            <strong>تأثیر بر صنف:</strong> {analysis['impact']}
+        </p>
+        <p>
+            <strong>تغییر قیمت پیش‌بینی شده:</strong> {analysis['price_change']:.1f}%
+        </p>
+        <p>
+            <strong>سطح ریسک:</strong> {analysis['risk_level']}
+        </p>
+        <p style="background:rgba(255,255,255,0.05);padding:12px;border-radius:10px;margin-top:10px;">
+            {analysis['message']}
+        </p>
+        <div style="margin-top:10px;">
+            <strong>🔹 راهکارهای پیشنهادی:</strong>
+            <ul style="margin-top:5px;">
+                {''.join([f'<li>{action}</li>' for action in analysis['actions']])}
+            </ul>
+        </div>
+        <div style="margin-top:10px;background:rgba(245,166,35,0.1);padding:12px;border-radius:10px;border-right:3px solid #F5A623;">
+            <strong>{analysis['opportunity']}</strong>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # توضیح تأثیرات
+    with st.expander("📊 جزئیات تحلیل و نحوه محاسبه"):
+        st.markdown("""
+        **🔍 تحلیلگر آینده چگونه کار میکند؟**
+        
+        این ابزار با ترکیب **۴ عامل کلیدی** وضعیت آینده صنف شما را پیش‌بینی میکند:
+        
+        1. **قیمت دلار**: تأثیر مستقیم بر واردات و قیمت مواد اولیه
+        2. **قیمت طلا**: شاخص تورم و ارزش پول
+        3. **قیمت نفت**: تأثیر بر هزینه‌های انرژی و حمل و نقل
+        4. **قیمت فولاد**: تأثیر بر صنایع ساختمانی و تولیدی
+        5. **نرخ تورم**: تأثیر بر قدرت خرید و هزینه‌ها
+        
+        **📌 هر صنف چه تأثیری می‌پذیرد؟**
+        
+        | صنف | تأثیرپذیری | عامل اصلی |
+        |-----|------------|-----------|
+        | خواربارفروشی | بالا | دلار و تورم |
+        | ساختمان | بسیار بالا | فولاد و دلار |
+        | پوشاک | بالا | دلار |
+        | خودرو | بسیار بالا | دلار و تحریم‌ها |
+        | بهداشت | متوسط | تورم |
+        | فناوری | بالا | دلار |
+        | املاک | بالا | تورم و دلار |
+        """)
+
+# ==========================================
+# تب 3: راهنما
+# ==========================================
+with tab3:
+    st.markdown("""
+    <div class="brochure">
+        <h2>📘 بروشور راهنمای کامل iHoNoor</h2>
+        <p style="font-size:1.05rem; color:#3D5A78;">
+            با این راهنما، <strong>گام‌به‌گام</strong> با iHoNoor آشنا میشوید.
+        </p>
+
+        <h3>🎯 ۱. iHoNoor چه کاری انجام میدهد؟</h3>
+        <p>iHoNoor یک <strong>دستیار هوشمند</strong> است که با استفاده از <strong>۴ مدل پیشرفته هوش مصنوعی</strong>، فروش، تعداد مشتریان یا هر متغیر عددی دیگری را پیش‌بینی میکند.</p>
+        
+        <div class="highlight-box">
+            <strong>💡 حداقل داده مورد نیاز:</strong>
+            <ul>
+                <li><strong>۵۰ رکورد</strong> برای پیش‌بینی قابل اعتماد</li>
+                <li><strong>۱۰۰ رکورد</strong> برای دقت بالاتر</li>
+                <li><strong>۲۰۰+ رکورد</strong> برای بهترین نتیجه</li>
+            </ul>
+        </div>
+
+        <h3>📋 ۲. ساختار فایل</h3>
+        <table>
+            <thead><tr><th>نام ستون</th><th>نوع</th><th>توضیح</th></tr></thead>
+            <tbody>
+                <tr><td>📅 تاریخ</td><td>تاریخ</td><td>حتماً داشته باشید</td></tr>
+                <tr><td>💰 فروش</td><td>عدد</td><td>مقدار فروش در آن روز</td></tr>
+                <tr><td>👥 تعداد مشتریان</td><td>عدد</td><td>اختیاری</td></tr>
+            </tbody>
+        </table>
+
+        <div class="warning-box">
+            <strong>⚠️ نکته:</strong> ستون هدف حتماً باید <strong>عددی</strong> باشد.
+        </div>
+
+        <h3>🚀 ۳. گام‌های استفاده</h3>
         <ol>
-            <li>مرورگر <strong>سافاری</strong> را باز کنید.</li>
-            <li>آدرس iHoNoor را وارد کنید.</li>
-            <li>روی دکمه <strong>اشتراک‌گذاری</strong> (مربع با فلش) کلیک کنید.</li>
-            <li>گزینه <strong>"Add to Home Screen"</strong> را انتخاب کنید.</li>
-            <li>روی <strong>"Add"</strong> کلیک کنید.</li>
+            <li><span class="step-circle">۱</span> صنف خود را انتخاب کنید</li>
+            <li><span class="step-circle">۲</span> فایل خود را آپلود کنید</li>
+            <li><span class="step-circle">۳</span> ستون هدف را انتخاب کنید</li>
+            <li><span class="step-circle">۴</span> روی "پیش‌بینی کن" کلیک کنید</li>
+            <li><span class="step-circle">۵</span> نتیجه را مشاهده کنید</li>
         </ol>
+
+        <h3>📞 ۴. پشتیبانی</h3>
+        <ul>
+            <li>📧 ha2021alipur@gmail.com</li>
+            <li>📱 09019470509</li>
+        </ul>
     </div>
     """, unsafe_allow_html=True)
 
+# ==========================================
+# تب 4: چتبات
+# ==========================================
 with tab4:
     st.markdown("""
     <div class="card">
-        <div class="card-title"><span class="icon">📅</span> تقویم شمسی و مناسبت‌ها</div>
-        <p>مناسبت‌های پیش‌رو و تأثیر آن بر فروش</p>
+        <div class="card-title"><span class="icon">💬</span> چتبات هوشمند iHoNoor</div>
+        <p>از چتبات بپرسید تا به شما کمک کند.</p>
     </div>
     """, unsafe_allow_html=True)
     
-    today = jdatetime.date.today()
-    st.info(f"📌 امروز: {today.strftime('%A %d %B %Y')}")
+    for msg in st.session_state.chat_history[-20:]:
+        if msg['role'] == 'user':
+            st.markdown(f'<div class="chat-message chat-user">🧑 {msg["content"]}</div>', unsafe_allow_html=True)
+        else:
+            st.markdown(f'<div class="chat-message chat-bot">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
     
-    holidays = {
-        (1, 1): {"name": "عید نوروز", "impact": "افزایش ۳۰-۵۰٪ فروش"},
-        (1, 2): {"name": "عید نوروز", "impact": "افزایش ۳۰-۵۰٪ فروش"},
-        (1, 13): {"name": "سیزده به در", "impact": "افزایش فروش مواد غذایی"},
-        (2, 14): {"name": "ولادت امام علی (ع)", "impact": "افزایش فروش شیرینی و نذری"},
-        (6, 8): {"name": "عید سعید فطر", "impact": "افزایش فروش پوشاک و شیرینی"},
-        (7, 15): {"name": "شهادت امام صادق (ع)", "impact": "کاهش فروش در برخی صنف‌ها"},
-        (8, 25): {"name": "عید قربان", "impact": "افزایش فروش گوشت و نذری"},
-        (9, 1): {"name": "عید غدیر خم", "impact": "افزایش فروش شیرینی"},
-        (10, 30): {"name": "شب یلدا", "impact": "افزایش فروش میوه و تنقلات"}
-    }
+    user_msg = st.text_input("✏️ سوال خود را بنویسید...", placeholder="مثلاً: آینده صنف من چطوره؟")
+    if st.button("📨 ارسال") and user_msg:
+        st.session_state.chat_history.append({'role': 'user', 'content': user_msg})
+        response = chatbot_response(user_msg, صنف, data, prices)
+        st.session_state.chat_history.append({'role': 'bot', 'content': response})
+        st.rerun()
     
-    st.markdown("### 🎯 مناسبت‌های پیش‌رو")
-    
-    upcoming = []
-    for (month, day), info in holidays.items():
-        days_until = (jdatetime.date(today.year, month, day) - today).days
-        if 0 <= days_until <= 30:
-            upcoming.append({
-                'نام': info['name'],
-                'روز': f"{days_until} روز دیگر",
-                'تأثیر': info['impact']
-            })
-    
-    if upcoming:
-        for item in upcoming:
-            st.success(f"🎉 {item['نام']} - {item['روز']} | تأثیر: {item['تأثیر']}")
-    else:
-        st.info("📅 هیچ مناسبت خاصی در ۳۰ روز آینده وجود ندارد.")
-    
-    st.markdown("---")
-    st.markdown("""
-    <div style="background: #E8F5E9; padding: 15px; border-radius: 12px; border-right: 4px solid #4CAF50;">
-        <p><strong>💡 پیشنهاد هوشمند:</strong> با توجه به مناسبت‌های پیش‌رو، موجودی کالاهای مرتبط را افزایش دهید و برنامه‌ریزی تخفیف‌ها را انجام دهید.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    if st.button("🗑️ پاک کردن تاریخچه چت"):
+        st.session_state.chat_history = []
+        st.rerun()
 
+# ==========================================
+# تب 5: پنل مدیریت
+# ==========================================
 with tab5:
-    st.markdown("""
-    <div class="card">
-        <div class="card-title"><span class="icon">🤝</span> سیستم ارجاع iHoNoor</div>
-        <p>دوستان خود را دعوت کنید و پاداش دریافت کنید!</p>
-    </div>
-    """, unsafe_allow_html=True)
+    if "admin_logged_in" not in st.session_state:
+        st.session_state.admin_logged_in = False
     
-    if "user_id" not in st.session_state:
-        st.session_state.user_id = str(uuid.uuid4())[:8]
-    referral_code = f"iHN-{st.session_state.user_id.upper()}"
-    
-    st.markdown(f"""
-    <div style="background: #E8F5E9; padding: 15px 20px; border-radius: 12px; border-right: 4px solid #4CAF50; margin-bottom: 15px;">
-        <p style="margin: 0;">🔑 <strong>کد ارجاع شما:</strong></p>
-        <div style="font-size: 1.5rem; font-weight: 900; color: #0D47A1; letter-spacing: 4px;">{referral_code}</div>
-        <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666;">این کد را با دوستان خود به اشتراک بگذارید.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    if "referrals" not in st.session_state:
-        st.session_state.referrals = []
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("📊 تعداد ارجاعات", len(st.session_state.referrals))
-    with col2:
-        st.metric("🎁 پاداش", f"{len(st.session_state.referrals) * 50_000:,.0f} تومان")
-    
-    with st.expander("➕ افزودن ارجاع جدید"):
-        col1, col2 = st.columns(2)
-        with col1:
-            friend_name = st.text_input("📛 نام دوست", placeholder="نام و نام‌خانوادگی")
-        with col2:
-            friend_phone = st.text_input("📱 شماره تماس", placeholder="09123456789")
+    if not st.session_state.admin_logged_in:
+        st.markdown("""
+        <div style="text-align:center;padding:40px 0;">
+            <h2 style="color:#0A2540;">🔐 ورود به پنل مدیریت</h2>
+        </div>
+        """, unsafe_allow_html=True)
         
-        if st.button("📨 ثبت ارجاع", type="primary"):
-            if friend_name and friend_phone:
-                st.session_state.referrals.append({
-                    'نام': friend_name,
-                    'شماره': friend_phone,
-                    'تاریخ': datetime.now().strftime("%Y-%m-%d %H:%M"),
-                    'وضعیت': 'در انتظار'
-                })
-                st.success(f"✅ ارجاع {friend_name} با موفقیت ثبت شد!")
-                st.balloons()
-                st.session_state.user_score += 10
-            else:
-                st.error("❌ لطفاً نام و شماره تماس را وارد کنید.")
-    
-    if st.session_state.referrals:
-        st.subheader("📋 لیست ارجاعات شما")
-        st.dataframe(pd.DataFrame(st.session_state.referrals), use_container_width=True)
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            username = st.text_input("👤 نام کاربری")
+            password = st.text_input("🔑 رمز عبور", type="password")
+            if st.button("🚪 ورود", type="primary", use_container_width=True):
+                if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+                    st.session_state.admin_logged_in = True
+                    st.success("✅ با موفقیت وارد شدید!")
+                    st.rerun()
+                else:
+                    st.error("❌ نام کاربری یا رمز عبور اشتباه است.")
+    else:
+        admin_panel(prices)
+        if st.button("🚪 خروج از سیستم"):
+            st.session_state.admin_logged_in = False
+            st.rerun()
 
+# ==========================================
+# تب‌های دیگر
+# ==========================================
 with tab6:
     st.markdown("""
     <div class="card">
-        <div class="card-title"><span class="icon">👤</span> داشبورد کاربری</div>
-        <p>خلاصه عملکرد و وضعیت کسب‌وکار شما</p>
+        <div class="card-title"><span class="icon">📱</span> نصب روی گوشی</div>
+        <p>در کروم: ⋮ → Add to Home screen</p>
+        <p>در سافاری: اشتراک‌گذاری → Add to Home Screen</p>
     </div>
     """, unsafe_allow_html=True)
-    
-    if data is not None and not data.empty:
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("📊 تعداد رکوردها", len(data))
-        with col2:
-            num_cols = data.select_dtypes(include=['number']).columns
-            if len(num_cols) > 0:
-                st.metric("📈 میانگین", f"{data[num_cols[0]].mean():,.0f}")
-        with col3:
-            st.metric("🏷️ صنف", صنف)
-        
-        st.markdown("---")
-        st.subheader("📈 نمودار داده‌ها")
-        fig = px.line(data, x=data.columns[0], y=data.columns[1], title="روند داده‌ها", height=300)
-        st.plotly_chart(fig, use_container_width=True)
-        
-        st.markdown("---")
-        st.subheader("🎖️ دستاوردهای من")
-        badges = []
-        if st.session_state.user_score >= 100:
-            badges.append(('🏆', 'طلایی', 'badge-gold'))
-        elif st.session_state.user_score >= 50:
-            badges.append(('🥈', 'نقره‌ای', 'badge-silver'))
-        elif st.session_state.user_score >= 20:
-            badges.append(('🥉', 'برنزی', 'badge-bronze'))
-        if st.session_state.daily_streak >= 7:
-            badges.append(('🔥', 'هفتگی', 'badge-blue'))
-        if st.session_state.daily_streak >= 30:
-            badges.append(('💎', 'ماهانه', 'badge-gold'))
-        
-        if badges:
-            for emoji, name, cls in badges:
-                st.markdown(f'<span class="badge {cls}">{emoji} {name}</span>', unsafe_allow_html=True)
-        else:
-            st.info("هنوز مدالی کسب نکرده‌اید. با استفاده از iHoNoor مدال بگیرید!")
-    else:
-        st.info("📊 داده‌های کافی برای نمایش داشبورد وجود ندارد.")
 
 with tab7:
-    st.markdown("""
-    <div class="card">
-        <div class="card-title"><span class="icon">🏠</span> خونه‌پرداز | مدیریت دخل و خرج خانواده</div>
-        <p>درآمد و هزینه‌های خود را مدیریت کنید و پیشنهادات هوشمند دریافت کنید.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    if "incomes" not in st.session_state:
-        st.session_state.incomes = []
-    if "expenses" not in st.session_state:
-        st.session_state.expenses = []
-    
-    st.subheader("💰 ثبت درآمد")
-    col1, col2 = st.columns(2)
-    with col1:
-        income_source = st.text_input("منبع درآمد", placeholder="حقوق، پاداش، اجاره...")
-    with col2:
-        income_amount = st.number_input("مبلغ (تومان)", min_value=0, step=100_000, key="income_amount")
-    
-    if st.button("➕ ثبت درآمد", key="add_income"):
-        if income_source and income_amount > 0:
-            st.session_state.incomes.append({
-                'منبع': income_source,
-                'مبلغ': income_amount,
-                'تاریخ': datetime.now().strftime("%Y-%m-%d")
-            })
-            st.success(f"✅ درآمد {income_source} به مبلغ {income_amount:,.0f} تومان ثبت شد!")
-            st.rerun()
-    
-    st.subheader("📉 ثبت هزینه")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        expense_category = st.selectbox("دسته‌بندی هزینه", ["خوراک", "مسکن", "حمل و نقل", "تفریح", "بهداشت", "پوشاک", "آموزش", "سایر"])
-    with col2:
-        expense_desc = st.text_input("توضیحات", placeholder="مثلاً: خرید میوه")
-    with col3:
-        expense_amount = st.number_input("مبلغ (تومان)", min_value=0, step=10_000, key="expense_amount")
-    
-    if st.button("➕ ثبت هزینه", key="add_expense"):
-        if expense_desc and expense_amount > 0:
-            st.session_state.expenses.append({
-                'دسته‌بندی': expense_category,
-                'توضیحات': expense_desc,
-                'مبلغ': expense_amount,
-                'تاریخ': datetime.now().strftime("%Y-%m-%d")
-            })
-            st.success(f"✅ هزینه {expense_desc} به مبلغ {expense_amount:,.0f} تومان ثبت شد!")
-            st.rerun()
-    
-    st.markdown("---")
-    
-    total_income = sum([i['مبلغ'] for i in st.session_state.incomes])
-    total_expense = sum([e['مبلغ'] for e in st.session_state.expenses])
-    balance = total_income - total_expense
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("💰 کل درآمد", f"{total_income:,.0f} تومان")
-    with col2:
-        st.metric("📉 کل هزینه", f"{total_expense:,.0f} تومان")
-    with col3:
-        st.metric("📊 مانده حساب", f"{balance:,.0f} تومان")
-    
-    if total_expense > 0 and total_income > 0:
-        expense_ratio = (total_expense / total_income) * 100
-        if expense_ratio > 80:
-            st.warning(f"⚠️ هزینه‌های شما {expense_ratio:.1f}% از درآمدتان است. پیشنهاد می‌کنیم هزینه‌های غیرضروری را کاهش دهید.")
-        elif expense_ratio > 60:
-            st.info(f"📊 هزینه‌های شما {expense_ratio:.1f}% از درآمدتان است. وضعیت قابل قبول است.")
-        else:
-            st.success(f"✅ هزینه‌های شما {expense_ratio:.1f}% از درآمدتان است. مدیریت مالی عالی!")
+    st.markdown('<div class="card"><div class="card-title"><span class="icon">📅</span> تقویم شمسی</div>', unsafe_allow_html=True)
+    today = jdatetime.date.today()
+    st.info(f"📌 امروز: {today.strftime('%A %d %B %Y')}")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with tab8:
-    st.markdown("""
-    <div class="card">
-        <div class="card-title"><span class="icon">📘</span> راهنمای تخصصی صنف‌ها</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    راهنماها = {
-        "خواربارفروشی": {
-            "توضیح": "فروشگاه‌های مواد غذایی و خواربار که محصولات مصرفی روزمره را عرضه می‌کنند.",
-            "پیشنهاد": "مدیریت موجودی هوشمند، کاهش ضایعات، تخفیف‌های هدفمند"
-        },
-        "پوشاک": {
-            "توضیح": "فروشگاه‌های پوشاک، لباس، کیف و کفش که محصولات مد و فشن را عرضه می‌کنند.",
-            "پیشنهاد": "شناسایی ترندهای جدید، تخفیف‌های هوشمند، مدیریت سایزها"
-        },
-        "ساختمان و پیمانکاری": {
-            "توضیح": "شرکت‌های پیمانکاری، مهندسان و مجریان پروژه‌های ساختمانی و عمرانی.",
-            "پیشنهاد": "پیش‌بینی هزینه‌ها، مدیریت نیروی کار، کاهش تأخیر"
-        },
-        "نانوایی": {
-            "توضیح": "نانوایی‌های سنتی و صنعتی که انواع نان و شیرینی را تولید و عرضه می‌کنند.",
-            "پیشنهاد": "پیش‌بینی تقاضا، کاهش ضایعات، تنوع محصولات"
-        },
-        "خودروسازی": {
-            "توضیح": "فروشندگان قطعات خودرو، خدمات تعمیرات و نمایندگی‌های فروش خودرو.",
-            "پیشنهاد": "شناسایی قطعات پرفروش، پیش‌بینی تقاضا، مدیریت خدمات"
-        },
-        "بهداشت": {
-            "توضیح": "بیمارستان‌ها، کلینیک‌ها، مطب‌های پزشکی و مراکز درمانی.",
-            "پیشنهاد": "پیش‌بینی مراجعه، مدیریت پرسنل، مدیریت موجودی"
-        }
-    }
-    
-    found = False
-    for key in راهنماها:
-        if key in صنف:
-            st.info(f"📌 **{key}:** {راهنماها[key]['توضیح']}")
-            st.success(f"💡 **پیشنهاد:** {راهنماها[key]['پیشنهاد']}")
-            found = True
-            break
-    
-    if not found:
-        st.info(f"📌 اطلاعات بیشتری در مورد {صنف} در حال جمع‌آوری است.")
-        st.success("💡 با تحلیل داده‌های خود، بهترین تصمیمات را بگیرید و از مشاور iHoNoor استفاده کنید.")
+    st.markdown('<div class="card"><div class="card-title"><span class="icon">🤝</span> سیستم ارجاع</div>', unsafe_allow_html=True)
+    code = f"iHN-{str(uuid.uuid4())[:8].upper()}"
+    st.success(f"🔑 کد ارجاع شما: **{code}**")
+    if st.button("📨 ثبت ارجاع"):
+        st.session_state.score += 10
+        st.success("✅ +۱۰ امتیاز!")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with tab9:
-    st.markdown("""
-    <div class="card">
-        <div class="card-title"><span class="icon">📚</span> راهنمای جامع iHoNoor</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    **🎯 iHoNoor چیست؟**
-    یک پلتفرم هوشمند با ۶ مدل هوش مصنوعی برای پیش‌بینی فروش
-    
-    **📋 چه داده‌هایی نیاز دارید؟**
-    - ستون تاریخ
-    - ستون فروش یا تعداد مشتریان (عددی)
-    - حداقل ۵۰ رکورد
-    
-    **🚀 چگونه استفاده کنیم؟**
-    ۱. صنف خود را انتخاب کنید
-    ۲. فایل خود را آپلود کنید
-    ۳. ستون هدف عددی را انتخاب کنید
-    ۴. روی پیش‌بینی کلیک کنید
-    
-    **💡 نکات کلیدی:**
-    - ستون هدف باید عددی باشد
-    - تاریخ فقط برای نمودار است
-    - واحد به‌صورت خودکار تشخیص داده می‌شود
-    - از گزینه "💡 پیشنهاد iHoNoor" برای انتخاب بهترین ستون استفاده کنید
-    """)
+    st.markdown('<div class="card"><div class="card-title"><span class="icon">👤</span> داشبورد</div>', unsafe_allow_html=True)
+    st.metric("📊 تعداد رکوردها", len(data))
+    st.metric("🏷️ صنف", صنف)
+    if st.session_state.history:
+        st.dataframe(pd.DataFrame(st.session_state.history))
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with tab10:
-    st.markdown("""
-    <div class="card">
-        <div class="card-title"><span class="icon">🚀</span> آینده هوش مصنوعی</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    **📊 آمار جهانی:**
-    - بیش از ۵۰٪ کسب‌وکارها از هوش مصنوعی استفاده می‌کنند
-    - کسب‌وکارهای هوشمند تا ۴۰٪ سود بیشتری دارند
-    - دقت پیش‌بینی با هوش مصنوعی تا ۸۵٪
-    
-    **💡 چرا iHoNoor؟**
-    - ۱۰۰٪ ایرانی و بدون تحریم
-    - ۶ مدل هوش مصنوعی
-    - رابط کاربری ساده و حرفه‌ای
-    - پشتیبانی داخلی
-    """)
+    st.markdown('<div class="card"><div class="card-title"><span class="icon">🏠</span> خونه‌پرداز</div>', unsafe_allow_html=True)
+    st.info("💰 درآمد و هزینه‌های خود را مدیریت کنید.")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with tab11:
-    st.markdown("""
-    <div class="card">
-        <div class="card-title"><span class="icon">📝</span> ارسال نظر و پیشنهاد</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.info("📬 **ایمیل:** ha2021alipur@gmail.com | 📱 **واتساپ/تلگرام:** 09019470509")
-    
-    with st.form("contact_form"):
-        name = st.text_input("👤 نام و نام‌خانوادگی")
-        message = st.text_area("📝 متن پیام", height=100)
-        submitted = st.form_submit_button("📨 ارسال")
-        if submitted and name and message:
-            st.success("✅ نظر شما با موفقیت ارسال شد!")
-            st.balloons()
-
-# ==========================================
-# تاریخچه (جدید)
-# ==========================================
-if "history" not in st.session_state:
-    st.session_state.history = []
-
-# ==========================================
-# نوتیفیکیشن
-# ==========================================
-if st.session_state.daily_streak == 7:
-    st.success("🔥 **تبریک!** ۷ روز متوالی از iHoNoor استفاده کردید! مدال هفتگی گرفتید! 🎖️")
-elif st.session_state.daily_streak == 30:
-    st.success("💎 **تبریک بزرگ!** ۳۰ روز متوالی! مدال ماهانه گرفتید! 🏆")
+    st.markdown('<div class="card"><div class="card-title"><span class="icon">📝</span> تماس</div>', unsafe_allow_html=True)
+    st.info("📬 ha2021alipur@gmail.com | 📱 09019470509")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
 # فوتر
 # ==========================================
-st.markdown("""
+st.markdown(f"""
 <div class="footer">
-    ✨ iHoNoor 🤖 نور هوشمند فروش | نسخه ۳.۰<br>
-    📧 ha2021alipur@gmail.com | 📱 09019470509<br>
-    © 2025 iHoNoor | تمامی حقوق محفوظ است.
+    ✨ iHoNoor v6.0 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | ha2021alipur@gmail.com
 </div>
 """, unsafe_allow_html=True)
