@@ -4,6 +4,6 @@ numpy
 scikit-learn
 plotly
 xgboost
-openpyxl
 jdatetime
 requests
+openpyxl
