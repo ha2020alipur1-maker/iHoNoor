@@ -268,181 +268,20 @@ st.session_state.lang = "fa" if lang == "فارسی" else "en"
 t = LANG[st.session_state.lang]
 
 # ==========================================
-# 8. صنف‌ها با قابلیت‌های اختصاصی
+# 8. صنف‌ها
 # ==========================================
-INDUSTRY_TOOLS = {
-    "🏪 خواربارفروشی": {
-        "icon": "🛒",
-        "tools": [
-            {"name": "مدیریت موجودی", "icon": "📦", "desc": "مدیریت موجودی کالاها و پیش‌بینی نیاز"},
-            {"name": "پیش‌بینی تاریخ انقضا", "icon": "📅", "desc": "پیش‌بینی تاریخ انقضای کالاها"},
-            {"name": "تحلیل سبد خرید", "icon": "🧺", "desc": "تحلیل محصولات پرفروش و کم‌فروش"},
-            {"name": "مدیریت تخفیف‌ها", "icon": "🏷️", "desc": "طراحی تخفیف‌های هوشمند"}
-        ]
-    },
-    "🔩 آهن‌آلات و مصالح": {
-        "icon": "🔧",
-        "tools": [
-            {"name": "مدیریت قیمت مصالح", "icon": "💰", "desc": "پیش‌بینی قیمت فولاد و آهن"},
-            {"name": "مدیریت موجودی انبار", "icon": "🏗️", "desc": "مدیریت موجودی مصالح ساختمانی"},
-            {"name": "پیش‌بینی تقاضا", "icon": "📈", "desc": "پیش‌بینی تقاضای مصالح"},
-            {"name": "مدیریت تامین‌کنندگان", "icon": "🤝", "desc": "ارزیابی و مدیریت تامین‌کنندگان"}
-        ]
-    },
-    "🚗 خودروسازی و لوازم یدکی": {
-        "icon": "🚗",
-        "tools": [
-            {"name": "مدیریت قطعات یدکی", "icon": "🔩", "desc": "مدیریت موجودی قطعات یدکی"},
-            {"name": "پیش‌بینی تعمیرات", "icon": "🔧", "desc": "پیش‌بینی نیاز به تعمیرات"},
-            {"name": "تحلیل قیمت روز", "icon": "📊", "desc": "تحلیل قیمت خودرو و قطعات"},
-            {"name": "مدیریت خدمات پس از فروش", "icon": "🛠️", "desc": "مدیریت خدمات و گارانتی"}
-        ]
-    },
-    "👗 پوشاک": {
-        "icon": "👔",
-        "tools": [
-            {"name": "تحلیل ترند فصل", "icon": "📈", "desc": "شناسایی ترندهای مد و رنگ"},
-            {"name": "مدیریت سایزها", "icon": "📏", "desc": "مدیریت موجودی سایزهای مختلف"},
-            {"name": "پیش‌بینی رنگ‌ها", "icon": "🎨", "desc": "پیش‌بینی رنگ‌های پرطرفدار"},
-            {"name": "تحلیل فروش فصلی", "icon": "📊", "desc": "تحلیل فروش در فصل‌های مختلف"}
-        ]
-    },
-    "📱 فناوری و مخابرات": {
-        "icon": "📱",
-        "tools": [
-            {"name": "مدیریت اشتراک‌ها", "icon": "📋", "desc": "مدیریت اشتراک‌های کاربران"},
-            {"name": "پیش‌بینی کاربران", "icon": "👥", "desc": "پیش‌بینی تعداد کاربران جدید"},
-            {"name": "تحلیل نسخه‌ها", "icon": "📲", "desc": "تحلیل عملکرد نسخه‌های مختلف"},
-            {"name": "مدیریت پهنای باند", "icon": "🌐", "desc": "مدیریت و بهینه‌سازی پهنای باند"}
-        ]
-    },
-    "🛒 خرده‌فروشی و آنلاین": {
-        "icon": "🛍️",
-        "tools": [
-            {"name": "مدیریت فروشگاه", "icon": "🏪", "desc": "مدیریت فروشگاه‌های فیزیکی و آنلاین"},
-            {"name": "تحلیل سبد خرید", "icon": "🛒", "desc": "تحلیل سبد خرید مشتریان"},
-            {"name": "مدیریت تبلیغات", "icon": "📢", "desc": "مدیریت کمپین‌های تبلیغاتی"},
-            {"name": "پیش‌بینی فروش", "icon": "📈", "desc": "پیش‌بینی فروش روزانه و هفتگی"}
-        ]
-    },
-    "🏭 تولید و صنایع": {
-        "icon": "🏭",
-        "tools": [
-            {"name": "مدیریت تولید", "icon": "⚙️", "desc": "برنامه‌ریزی و مدیریت تولید"},
-            {"name": "کنترل کیفیت", "icon": "✅", "desc": "مدیریت کیفیت محصولات"},
-            {"name": "پیش‌بینی تولید", "icon": "📊", "desc": "پیش‌بینی میزان تولید"},
-            {"name": "مدیریت ماشین‌آلات", "icon": "🔧", "desc": "مدیریت و نگهداری ماشین‌آلات"}
-        ]
-    },
-    "💰 بانکداری و مالی": {
-        "icon": "💰",
-        "tools": [
-            {"name": "مدیریت تراکنش‌ها", "icon": "💳", "desc": "مدیریت و تحلیل تراکنش‌های مالی"},
-            {"name": "پیش‌بینی ریسک", "icon": "⚠️", "desc": "پیش‌بینی ریسک‌های مالی"},
-            {"name": "تحلیل سرمایه‌گذاری", "icon": "📈", "desc": "تحلیل فرصت‌های سرمایه‌گذاری"},
-            {"name": "مدیریت مشتریان", "icon": "👥", "desc": "مدیریت و تحلیل مشتریان"}
-        ]
-    },
-    "🏥 بهداشت و درمان": {
-        "icon": "🏥",
-        "tools": [
-            {"name": "مدیریت نوبت‌دهی", "icon": "📅", "desc": "مدیریت نوبت‌های بیماران"},
-            {"name": "پیش‌بینی مراجعه", "icon": "👥", "desc": "پیش‌بینی تعداد مراجعه‌کنندگان"},
-            {"name": "تحلیل بیمه", "icon": "📋", "desc": "مدیریت و تحلیل بیمه‌ها"},
-            {"name": "مدیریت تجهیزات", "icon": "🩺", "desc": "مدیریت تجهیزات پزشکی"}
-        ]
-    },
-    "🍔 صنایع غذایی": {
-        "icon": "🍔",
-        "tools": [
-            {"name": "مدیریت مواد اولیه", "icon": "📦", "desc": "مدیریت مواد اولیه و انبار"},
-            {"name": "پیش‌بینی تقاضا", "icon": "📈", "desc": "پیش‌بینی تقاضای محصولات"},
-            {"name": "مدیریت تولید", "icon": "🏭", "desc": "برنامه‌ریزی تولید مواد غذایی"},
-            {"name": "کنترل کیفیت", "icon": "✅", "desc": "کنترل کیفیت محصولات غذایی"}
-        ]
-    },
-    "⛽ پتروشیمی و انرژی": {
-        "icon": "⛽",
-        "tools": [
-            {"name": "مدیریت قیمت انرژی", "icon": "💰", "desc": "پیش‌بینی قیمت نفت و گاز"},
-            {"name": "مدیریت منابع", "icon": "🛢️", "desc": "مدیریت منابع انرژی"},
-            {"name": "پیش‌بینی تقاضا", "icon": "📈", "desc": "پیش‌بینی تقاضای انرژی"},
-            {"name": "مدیریت تامین‌کنندگان", "icon": "🤝", "desc": "مدیریت تامین‌کنندگان انرژی"}
-        ]
-    },
-    "⚡ برق و نیروگاه‌ها": {
-        "icon": "⚡",
-        "tools": [
-            {"name": "مدیریت مصرف", "icon": "📊", "desc": "مدیریت و بهینه‌سازی مصرف برق"},
-            {"name": "پیش‌بینی بار", "icon": "📈", "desc": "پیش‌بینی بار مصرفی"},
-            {"name": "مدیریت تولید", "icon": "🏭", "desc": "مدیریت تولید برق"},
-            {"name": "نگهداری تجهیزات", "icon": "🔧", "desc": "مدیریت نگهداری تجهیزات"}
-        ]
-    },
-    "🎬 سینما و محصولات فرهنگی": {
-        "icon": "🎬",
-        "tools": [
-            {"name": "مدیریت اکران", "icon": "📽️", "desc": "مدیریت زمان‌بندی اکران"},
-            {"name": "پیش‌بینی فروش بلیت", "icon": "🎫", "desc": "پیش‌بینی فروش بلیت"},
-            {"name": "تحلیل محتوا", "icon": "📊", "desc": "تحلیل محتوای محصولات فرهنگی"},
-            {"name": "مدیریت بازاریابی", "icon": "📢", "desc": "مدیریت کمپین‌های بازاریابی"}
-        ]
-    },
-    "🏭 تولید و صنایع غذایی (تخصصی)": {
-        "icon": "🏭",
-        "tools": [
-            {"name": "مدیریت تولید", "icon": "⚙️", "desc": "برنامه‌ریزی تولید صنایع غذایی"},
-            {"name": "کنترل کیفیت", "icon": "✅", "desc": "کنترل کیفیت محصولات غذایی"},
-            {"name": "مدیریت زنجیره تامین", "icon": "🔗", "desc": "مدیریت زنجیره تامین مواد غذایی"},
-            {"name": "پیش‌بینی تقاضا", "icon": "📈", "desc": "پیش‌بینی تقاضای محصولات غذایی"}
-        ]
-    },
-    "🏢 املاک و مستغلات": {
-        "icon": "🏢",
-        "tools": [
-            {"name": "مدیریت ملک", "icon": "🏠", "desc": "مدیریت املاک و مستغلات"},
-            {"name": "پیش‌بینی قیمت", "icon": "📈", "desc": "پیش‌بینی قیمت ملک"},
-            {"name": "تحلیل اجاره", "icon": "📋", "desc": "تحلیل بازار اجاره"},
-            {"name": "مدیریت سرمایه‌گذاری", "icon": "💰", "desc": "مدیریت سرمایه‌گذاری در ملک"}
-        ]
-    },
-    "🏗️ ساختمان و پیمانکاری": {
-        "icon": "🏗️",
-        "tools": [
-            {"name": "کنترل پروژه", "icon": "📋", "desc": "مدیریت زمان و هزینه پروژه"},
-            {"name": "مدیریت متراژ", "icon": "📐", "desc": "مدیریت متراژ ساخت و ساز"},
-            {"name": "پیش‌بینی هزینه مصالح", "icon": "💰", "desc": "پیش‌بینی هزینه مصالح ساختمانی"},
-            {"name": "مدیریت تعداد کارگر", "icon": "👷", "desc": "برنامه‌ریزی نیروی کار"},
-            {"name": "گانت چارت پروژه", "icon": "📊", "desc": "مدیریت زمان‌بندی پروژه"}
-        ]
-    },
-    "🏭 تولید سفارشی (Make-to-Order)": {
-        "icon": "🏭",
-        "tools": [
-            {"name": "مدیریت سفارشات", "icon": "📋", "desc": "مدیریت سفارشات مشتریان"},
-            {"name": "برنامه‌ریزی تولید", "icon": "⚙️", "desc": "برنامه‌ریزی تولید بر اساس سفارش"},
-            {"name": "مدیریت مواد اولیه", "icon": "📦", "desc": "مدیریت مواد اولیه سفارشات"},
-            {"name": "تحلیل هزینه", "icon": "💰", "desc": "تحلیل هزینه هر سفارش"}
-        ]
-    },
-    "📦 مدیریت موجودی و زنجیره تامین": {
-        "icon": "📦",
-        "tools": [
-            {"name": "مدیریت موجودی", "icon": "📦", "desc": "مدیریت موجودی انبار"},
-            {"name": "پیش‌بینی موجودی", "icon": "📈", "desc": "پیش‌بینی نیاز به موجودی"},
-            {"name": "مدیریت تامین‌کنندگان", "icon": "🤝", "desc": "مدیریت تامین‌کنندگان زنجیره تامین"},
-            {"name": "بهینه‌سازی لجستیک", "icon": "🚚", "desc": "بهینه‌سازی حمل و نقل و توزیع"}
-        ]
-    }
-}
+industries = [
+    "🏪 خواربارفروشی", "🔩 آهن‌آلات و مصالح", "🚗 خودروسازی و لوازم یدکی",
+    "👗 پوشاک", "📱 فناوری و مخابرات", "🛒 خرده‌فروشی و آنلاین",
+    "🏭 تولید و صنایع", "💰 بانکداری و مالی", "🏥 بهداشت و درمان",
+    "🍔 صنایع غذایی", "⛽ پتروشیمی و انرژی", "⚡ برق و نیروگاه‌ها",
+    "🎬 سینما و محصولات فرهنگی", "🏭 تولید و صنایع غذایی (تخصصی)",
+    "🏢 املاک و مستغلات", "🏗️ ساختمان و پیمانکاری",
+    "🏭 تولید سفارشی (Make-to-Order)", "📦 مدیریت موجودی و زنجیره تامین"
+]
 
 # ==========================================
-# 9. صنف‌ها (لیست)
-# ==========================================
-industries = list(INDUSTRY_TOOLS.keys())
-
-# ==========================================
-# 10. توابع هسته
+# 9. توابع هسته
 # ==========================================
 def detect_unit(col):
     col = col.lower()
@@ -473,7 +312,7 @@ def get_emoji(val, unit):
     return "📊", "پیش‌بینی انجام شد"
 
 # ==========================================
-# 11. تحلیلگر آینده
+# 10. تحلیلگر آینده
 # ==========================================
 def future_analyst(صنف, prices):
     analysis = {
@@ -541,7 +380,6 @@ def future_analyst(صنف, prices):
         analysis['dollar_prediction'] = 'کاهشی 📉'
         analysis['risk_level'] = 'کم'
     
-    # تحلیل بر اساس صنف
     if "خواربار" in صنف or "غذایی" in صنف:
         if dollar > 190000:
             analysis['status'] = '🔴 وضعیت هشدار شدید'
@@ -584,27 +422,6 @@ def future_analyst(صنف, prices):
             analysis['actions'] = ['🔹 برنامه‌ریزی دقیق پروژه‌ها']
             analysis['opportunity'] = '📈 فرصت: شروع پروژه‌های جدید'
     
-    elif "پوشاک" in صنف or "لباس" in صنف:
-        if dollar > 190000:
-            analysis['status'] = '⚠️ وضعیت هشدار'
-            analysis['trend'] = 'افزایش قیمت پارچه'
-            analysis['price_change'] = 14 + (dollar - 190000) / 1200
-            analysis['impact'] = 'بالا'
-            analysis['risk_level'] = 'بالا'
-            analysis['message'] = f'👗 قیمت پارچه {analysis["price_change"]:.0f}% افزایش می‌یابد.'
-            analysis['alert'] = '🚨 خرید پارچه را پیش‌بینی کنید.'
-            analysis['actions'] = ['🔹 خرید مواد اولیه ۲ ماه', '🔹 افزایش تولید داخلی', '🔹 تنوع محصولات']
-            analysis['opportunity'] = '📈 فرصت: تولید داخلی'
-        else:
-            analysis['status'] = '✅ وضعیت مناسب'
-            analysis['trend'] = 'ثابت'
-            analysis['price_change'] = 4
-            analysis['impact'] = 'متوسط'
-            analysis['message'] = '📊 شرایط برای تولید و فروش مناسب است.'
-            analysis['alert'] = '✅ وضعیت مناسب برای سرمایه‌گذاری'
-            analysis['actions'] = ['🔹 افزایش تنوع محصولات']
-            analysis['opportunity'] = '📈 فرصت: توسعه برند'
-    
     else:
         analysis['status'] = 'ℹ️ تحلیل'
         analysis['trend'] = 'متغیر'
@@ -627,7 +444,7 @@ def future_analyst(صنف, prices):
     return analysis
 
 # ==========================================
-# 12. مدل‌ها
+# 11. مدل‌ها
 # ==========================================
 models_dict = {
     "Random Forest": RandomForestRegressor(n_estimators=100, random_state=42),
@@ -709,7 +526,7 @@ def admin_panel(prices):
     st.caption(f"📡 {prices['source']} | ⏱️ {prices['date']}")
 
 # ==========================================
-# 13. بخش سایدبار
+# 12. بخش سایدبار
 # ==========================================
 if "score" not in st.session_state: st.session_state.score = 0
 if "streak" not in st.session_state: st.session_state.streak = 0
@@ -720,7 +537,7 @@ with st.sidebar:
     st.markdown("""
     <div style="background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,0.05);border-radius:50px 15px 50px 15px;padding:18px;text-align:center;margin-bottom:18px;">
         <h1 style="font-size:2rem;margin:0;background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">iHo<span style="background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Noor</span></h1>
-        <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">✨ v14.0</p>
+        <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">✨ v14.2</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -741,10 +558,10 @@ with st.sidebar:
     st.markdown("### 🎖️ امتیاز شما")
     col1, col2 = st.sidebar.columns(2)
     with col1: st.metric("⭐", st.session_state.score)
-    with col2: st.metric("🔥", f"{st.session_state.streak} días")
+    with col2: st.metric("🔥", f"{st.session_state.streak} روز")
 
 # ==========================================
-# 14. بارگذاری دیتا
+# 13. بارگذاری دیتا
 # ==========================================
 data = None
 if فایل:
@@ -758,7 +575,7 @@ if data is None:
     st.info(f"📊 داده‌های نمونه برای {صنف}")
 
 # ==========================================
-# 15. هدر
+# 14. هدر
 # ==========================================
 st.markdown(f"""
 <div class="main-header">
@@ -769,7 +586,7 @@ st.markdown(f"""
         <span class="dollar-badge">🏅 طلای ۱۸ عیار: {prices['gold_18']:,}</span>
         <span class="dollar-badge">🛢️ نفت: {prices['oil']} $</span>
         <span class="source-badge">📡 {prices['source']}</span>
-        <span class="source-badge">✨ v14.0</span>
+        <span class="source-badge">✨ v14.2</span>
         <span class="source-badge">⏱️ {prices['date']}</span>
     </div>
     <div style="font-size:0.6rem;color:rgba(255,255,255,0.2);margin-top:8px;">
@@ -787,7 +604,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 16. تب‌ها
+# 15. تب‌ها
 # ==========================================
 tab_colors = [
     ("📊 " + t['step3'], "#FF6B6B"),
@@ -851,7 +668,6 @@ with tab1:
     unit = detect_unit(target)
     st.info(f"✅ {t['unit']}: **{unit}**")
     
-    # انتخاب بازه زمانی
     st.subheader("📅 بازه زمانی پیش‌بینی")
     forecast_days = st.selectbox(
         "چند روز آینده را پیش‌بینی کنید؟",
@@ -959,7 +775,7 @@ with tab1:
                 st.error(f"❌ خطا: {e}")
 
 # ==========================================
-# تب 2: ابزارهای تخصصی هر صنف
+# تب 2: ابزارهای تخصصی (کاملاً عملی)
 # ==========================================
 with tab2:
     st.markdown(f"""
@@ -968,102 +784,820 @@ with tab2:
             <span class="icon">🛠️</span> ابزارهای تخصصی {صنف}
         </div>
         <p style="color:rgba(255,255,255,0.6);">
-            <strong style="color:#4ECDC4;">{len(INDUSTRY_TOOLS[صنف]['tools'])} ابزار</strong> ویژه برای مدیریت و تحلیل {صنف}
+            <strong style="color:#4ECDC4;">۴ ابزار عملی</strong> برای مدیریت و تحلیل {صنف}
         </p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # نمایش ابزارهای هر صنف
-    tools = INDUSTRY_TOOLS[صنف]['tools']
-    
-    # نمایش به صورت گرید
-    cols = st.columns(2)
-    for i, tool in enumerate(tools):
-        with cols[i % 2]:
-            st.markdown(f"""
-            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;margin-bottom:12px;transition:all 0.3s ease;">
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <span style="font-size:2rem;">{tool['icon']}</span>
-                    <div>
-                        <p style="color:#FFD700;font-weight:700;margin:0;">{tool['name']}</p>
-                        <p style="color:rgba(255,255,255,0.4);font-size:0.8rem;margin:4px 0 0 0;">{tool['desc']}</p>
+
+    # ==========================================
+    # ۱. خواربارفروشی
+    # ==========================================
+    if "خواربار" in صنف or "غذایی" in صنف:
+        st.subheader("🛒 ابزارهای تخصصی خواربارفروشی")
+        
+        with st.expander("📦 ۱. مدیریت موجودی و پیش‌بینی نیاز", expanded=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                product_name = st.text_input("نام کالا", key="grocery_product", placeholder="برنج، روغن، شکر...")
+                current_stock = st.number_input("موجودی فعلی (واحد)", min_value=0, step=10, key="grocery_stock", value=100)
+            with col2:
+                daily_usage = st.number_input("مصرف روزانه (واحد)", min_value=1, step=1, key="grocery_usage", value=10)
+                safety_stock = st.number_input("موجودی امن (واحد)", min_value=0, step=5, key="grocery_safety", value=20)
+            
+            if st.button("📊 تحلیل موجودی", key="grocery_analyze"):
+                if product_name:
+                    days_left = (current_stock - safety_stock) // daily_usage if daily_usage > 0 else 0
+                    reorder_point = safety_stock + (daily_usage * 3)
+                    order_qty = (daily_usage * 7) + safety_stock - current_stock
+                    
+                    st.markdown(f"""
+                    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                        <h4 style="color:#FFD700;">📊 گزارش موجودی {product_name}</h4>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
+                            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">روز تا اتمام</p>
+                                <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{days_left} روز</p>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">نقطه سفارش</p>
+                                <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{reorder_point}</p>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">مقدار سفارش</p>
+                                <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{max(0, order_qty)}</p>
+                            </div>
+                        </div>
+                        <div style="margin-top:10px;padding:10px;border-radius:8px;border-right:3px solid {'#4ECDC4' if current_stock > reorder_point else '#E53E3E'};background:rgba(255,255,255,0.02);">
+                            <p style="color:rgba(255,255,255,0.7);font-size:0.9rem;">
+                                {'✅ وضعیت موجودی مناسب است.' if current_stock > reorder_point else f'⚠️ هشدار: {order_qty} واحد {product_name} سفارش دهید.'}
+                            </p>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+        
+        with st.expander("📈 ۲. پیش‌بینی فروش روزانه"):
+            col1, col2 = st.columns(2)
+            with col1:
+                last_7_days = st.text_area("فروش ۷ روز گذشته (با کاما جدا کنید)", "10,12,8,15,11,9,13", key="grocery_sales")
+            with col2:
+                day_of_week = st.selectbox("روز هفته", ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"])
+            
+            if st.button("📊 پیش‌بینی فروش", key="grocery_forecast"):
+                sales_list = [int(x.strip()) for x in last_7_days.split(",") if x.strip()]
+                if len(sales_list) == 7:
+                    avg = sum(sales_list) / 7
+                    max_sales = max(sales_list)
+                    min_sales = min(sales_list)
+                    day_multiplier = [0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 0.85]
+                    day_index = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"].index(day_of_week)
+                    prediction = avg * day_multiplier[day_index]
+                    
+                    st.markdown(f"""
+                    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                        <h4 style="color:#FFD700;">📊 پیش‌بینی فروش</h4>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
+                            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">میانگین فروش</p>
+                                <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{avg:.0f}</p>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">پیش‌بینی {day_of_week}</p>
+                                <p style="color:#4ECDC4;font-size:1.3rem;font-weight:700;">{prediction:.0f}</p>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">محدوده</p>
+                                <p style="color:rgba(255,255,255,0.7);font-size:1rem;">{min_sales} - {max_sales}</p>
+                            </div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+        
+        with st.expander("🧺 ۳. تحلیل سبد خرید"):
+            col1, col2 = st.columns(2)
+            with col1:
+                basket_size = st.number_input("تعداد اقلام در سبد", min_value=1, step=1, key="grocery_basket", value=5)
+            with col2:
+                avg_price = st.number_input("قیمت متوسط هر قلم (تومان)", min_value=1000, step=1000, key="grocery_price", value=15000)
+            
+            if st.button("📊 تحلیل سبد", key="grocery_basket_analyze"):
+                total_basket = basket_size * avg_price
+                discount = 0
+                if basket_size > 10:
+                    discount = 0.15
+                elif basket_size > 5:
+                    discount = 0.08
+                final_price = total_basket * (1 - discount)
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">🧺 تحلیل سبد خرید</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">مبلغ کل</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{total_basket:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">تخفیف</p>
+                            <p style="color:#4ECDC4;font-size:1.2rem;font-weight:700;">{discount*100:.0f}%</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">قیمت نهایی</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{final_price:,.0f}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    # ابزار اختصاصی برای صنف ساختمان (کنترل پروژه)
-    if "ساختمان" in صنف or "پیمانکاری" in صنف:
-        st.subheader("📋 کنترل پروژه - گانت چارت")
-        st.caption("مدیریت زمان و هزینه پروژه‌های ساختمانی")
+                """, unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            project_name = st.text_input("نام پروژه", placeholder="پروژه مسکونی...")
-        with col2:
-            start_date = st.date_input("تاریخ شروع", datetime.now())
-        with col3:
-            end_date = st.date_input("تاریخ پایان", datetime.now() + timedelta(days=90))
+        with st.expander("🏷️ ۴. مدیریت تخفیف‌های هوشمند"):
+            col1, col2 = st.columns(2)
+            with col1:
+                product_price = st.number_input("قیمت محصول (تومان)", min_value=1000, step=1000, key="grocery_product_price", value=50000)
+            with col2:
+                discount_percent = st.slider("درصد تخفیف", 0, 50, 10, key="grocery_discount")
+            
+            if st.button("📊 تحلیل تخفیف", key="grocery_discount_analyze"):
+                discounted_price = product_price * (1 - discount_percent/100)
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">🏷️ تحلیل تخفیف</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">قیمت پس از تخفیف</p>
+                            <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{discounted_price:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">کاهش قیمت</p>
+                            <p style="color:#4ECDC4;font-size:1.3rem;font-weight:700;">{product_price - discounted_price:,.0f}</p>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px;padding:10px;border-radius:8px;background:rgba(78,205,196,0.03);border-right:2px solid #4ECDC4;">
+                        <p style="color:rgba(255,255,255,0.7);font-size:0.9rem;">
+                            💡 پیشنهاد: برای افزایش فروش، تخفیف {discount_percent}% تا {discount_percent+10}% را امتحان کنید.
+                        </p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+    # ==========================================
+    # ۲. ساختمان و پیمانکاری
+    # ==========================================
+    elif "ساختمان" in صنف or "پیمانکاری" in صنف:
+        st.subheader("🏗️ ابزارهای تخصصی ساختمان و پیمانکاری")
         
-        if st.button("📊 ثبت پروژه", type="primary"):
-            if project_name:
-                days = (end_date - start_date).days
-                st.success(f"✅ پروژه '{project_name}' با {days} روز زمان ثبت شد!")
+        with st.expander("📋 ۱. کنترل پروژه و زمان‌بندی", expanded=True):
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                project_name = st.text_input("نام پروژه", key="const_project", placeholder="پروژه مسکونی...")
+            with col2:
+                area_m2 = st.number_input("متراژ (متر مربع)", min_value=10, step=10, key="const_area", value=100)
+            with col3:
+                workers_count = st.number_input("تعداد کارگر", min_value=1, step=1, key="const_workers", value=5)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                cost_per_m2 = st.number_input("هزینه هر متر مربع (تومان)", min_value=1_000_000, step=100_000, key="const_cost", value=5_000_000)
+            with col2:
+                duration_days = st.number_input("مدت زمان (روز)", min_value=7, step=7, key="const_duration", value=90)
+            
+            if st.button("📊 محاسبه پروژه", key="const_calc"):
+                if project_name:
+                    total_cost = area_m2 * cost_per_m2
+                    daily_cost = total_cost / duration_days
+                    workers_cost = workers_count * 500_000 * duration_days
+                    
+                    st.markdown(f"""
+                    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                        <h4 style="color:#FFD700;">📊 خلاصه پروژه {project_name}</h4>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
+                            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">هزینه کل</p>
+                                <p style="color:#FFD700;font-size:1.1rem;font-weight:700;">{total_cost:,.0f}</p>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">هزینه روزانه</p>
+                                <p style="color:#FFD700;font-size:1.1rem;font-weight:700;">{daily_cost:,.0f}</p>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">هزینه کارگر</p>
+                                <p style="color:#FFD700;font-size:1.1rem;font-weight:700;">{workers_cost:,.0f}</p>
+                            </div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+        with st.expander("💰 ۲. برآورد هزینه مصالح"):
+            materials = {
+                "سیمان (تن)": 1_500_000,
+                "فولاد (تن)": 20_000_000,
+                "آجر (هزار عدد)": 2_500_000,
+                "شن و ماسه (تن)": 800_000,
+                "بلوک (عدد)": 15_000
+            }
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                selected_material = st.selectbox("نوع مصالح", list(materials.keys()), key="const_material")
+            with col2:
+                quantity = st.number_input("مقدار", min_value=1, step=1, key="const_quantity", value=10)
+            
+            if st.button("📊 برآورد هزینه", key="const_cost_est"):
+                unit_price = materials[selected_material]
+                total = unit_price * quantity
                 
-                # نمایش گانت چارت ساده
-                fig = go.Figure()
-                fig.add_trace(go.Bar(
-                    x=[days],
-                    y=[project_name],
-                    orientation='h',
-                    marker=dict(color='#4ECDC4'),
-                    text=[f"{days} روز"],
-                    textposition='outside'
-                ))
-                fig.update_layout(
-                    title=f"زمان‌بندی پروژه {project_name}",
-                    xaxis_title="روز",
-                    yaxis_title="پروژه",
-                    height=200,
-                    plot_bgcolor='rgba(255,255,255,0.02)',
-                    paper_bgcolor='rgba(255,255,255,0.02)',
-                    font=dict(color='rgba(255,255,255,0.8)')
-                )
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.error("❌ لطفاً نام پروژه را وارد کنید.")
-    
-    # ابزار اختصاصی برای صنف خواربارفروشی (مدیریت موجودی)
-    elif "خواربار" in صنف or "غذایی" in صنف:
-        st.subheader("📦 مدیریت موجودی کالاها")
-        st.caption("مدیریت موجودی و پیش‌بینی نیاز")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            product_name = st.text_input("نام کالا", placeholder="برنج، روغن، شکر...")
-        with col2:
-            quantity = st.number_input("مقدار موجودی", min_value=0, step=10)
-        
-        if st.button("➕ افزودن کالا", type="primary"):
-            if product_name and quantity > 0:
-                st.success(f"✅ کالا '{product_name}' با {quantity} واحد ثبت شد!")
-                st.info(f"💡 پیشنهاد: برای {product_name} حداقل موجودی {int(quantity * 0.3)} واحد است.")
-            else:
-                st.error("❌ لطفاً نام کالا و مقدار را وارد کنید.")
-    
-    # ابزار اختصاصی برای صنف پوشاک (تحلیل ترند)
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">💰 برآورد هزینه {selected_material}</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">قیمت واحد</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{unit_price:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">هزینه کل</p>
+                            <p style="color:#4ECDC4;font-size:1.2rem;font-weight:700;">{total:,.0f}</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("📐 ۳. مدیریت متراژ و مساحت"):
+            col1, col2 = st.columns(2)
+            with col1:
+                length = st.number_input("طول (متر)", min_value=1, step=1, key="const_length", value=10)
+            with col2:
+                width = st.number_input("عرض (متر)", min_value=1, step=1, key="const_width", value=8)
+            
+            if st.button("📐 محاسبه مساحت", key="const_area_calc"):
+                area = length * width
+                perimeter = 2 * (length + width)
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">📐 محاسبات متراژ</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">مساحت</p>
+                            <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{area} متر مربع</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">محیط</p>
+                            <p style="color:#4ECDC4;font-size:1.3rem;font-weight:700;">{perimeter} متر</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("👷 ۴. مدیریت نیروی کار"):
+            col1, col2 = st.columns(2)
+            with col1:
+                total_workers = st.number_input("تعداد کل کارگران", min_value=1, step=1, key="const_total_workers", value=10)
+            with col2:
+                shift_hours = st.number_input("ساعت کاری روزانه", min_value=4, step=1, key="const_shift", value=8)
+            
+            if st.button("📊 تحلیل نیروی کار", key="const_workers_analyze"):
+                weekly_hours = total_workers * shift_hours * 6
+                monthly_hours = weekly_hours * 4
+                total_cost = total_workers * 500_000 * 25  # ۵۰۰ هزار تومان حقوق روزانه
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">👷 تحلیل نیروی کار</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">ساعت کار هفتگی</p>
+                            <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{weekly_hours}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">ساعت کار ماهانه</p>
+                            <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{monthly_hours}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">هزینه ماهانه</p>
+                            <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{total_cost:,.0f}</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+    # ==========================================
+    # ۳. پوشاک
+    # ==========================================
     elif "پوشاک" in صنف or "لباس" in صنف:
-        st.subheader("🎨 تحلیل ترند فصل")
-        st.caption("شناسایی رنگ‌ها و طرح‌های پرطرفدار")
+        st.subheader("👗 ابزارهای تخصصی پوشاک")
         
-        colors = ["سفید", "مشکی", "آبی", "قرمز", "سبز", "طلایی", "نقره‌ای", "بنفش"]
-        selected_color = st.selectbox("رنگ مورد نظر", colors)
+        with st.expander("🎨 ۱. تحلیل ترند و رنگ", expanded=True):
+            colors = ["سفید", "مشکی", "آبی", "قرمز", "سبز", "طلایی", "نقره‌ای", "بنفش", "صورتی", "زرد"]
+            col1, col2 = st.columns(2)
+            with col1:
+                selected_color = st.selectbox("رنگ مورد نظر", colors, key="fashion_color")
+            with col2:
+                season = st.selectbox("فصل", ["بهار", "تابستان", "پاییز", "زمستان"], key="fashion_season")
+            
+            if st.button("🔍 تحلیل ترند", key="fashion_trend"):
+                popularity = np.random.randint(40, 95)
+                trend = "صعودی" if popularity > 70 else "ثابت" if popularity > 50 else "نزولی"
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">🎨 تحلیل رنگ {selected_color}</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">محبوبیت</p>
+                            <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{popularity}%</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">روند</p>
+                            <p style="color:{"#38A169" if trend == "صعودی" else "#F5A623" if trend == "ثابت" else "#E53E3E"};font-size:1.3rem;font-weight:700;">{trend}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">فصل مناسب</p>
+                            <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{season}</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("📏 ۲. مدیریت سایزها"):
+            sizes = ["XS", "S", "M", "L", "XL", "XXL"]
+            col1, col2 = st.columns(2)
+            with col1:
+                size = st.selectbox("سایز", sizes, key="fashion_size")
+            with col2:
+                stock_count = st.number_input("تعداد موجودی", min_value=0, step=1, key="fashion_stock", value=50)
+            
+            if st.button("📊 تحلیل سایز", key="fashion_size_analyze"):
+                demand = np.random.randint(20, 80)
+                status = "کافی" if stock_count > demand else "نیاز به افزایش"
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">📏 تحلیل سایز {size}</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">تقاضا</p>
+                            <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{demand} واحد</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">وضعیت</p>
+                            <p style="color:{"#38A169" if status == "کافی" else "#E53E3E"};font-size:1.3rem;font-weight:700;">{status}</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("💰 ۳. تحلیل قیمت‌گذاری"):
+            col1, col2 = st.columns(2)
+            with col1:
+                cost_price = st.number_input("قیمت تمام شده (تومان)", min_value=1000, step=1000, key="fashion_cost", value=100000)
+            with col2:
+                markup = st.slider("درصد سود", 10, 200, 50, key="fashion_markup")
+            
+            if st.button("📊 تحلیل قیمت", key="fashion_price_analyze"):
+                selling_price = cost_price * (1 + markup/100)
+                profit = selling_price - cost_price
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">💰 تحلیل قیمت‌گذاری</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">قیمت فروش</p>
+                            <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{selling_price:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">سود هر واحد</p>
+                            <p style="color:#4ECDC4;font-size:1.3rem;font-weight:700;">{profit:,.0f}</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("📊 ۴. پیش‌بینی فروش فصلی"):
+            col1, col2 = st.columns(2)
+            with col1:
+                last_season_sales = st.number_input("فروش فصل گذشته", min_value=0, step=1, key="fashion_last", value=1000)
+            with col2:
+                growth_rate = st.slider("نرخ رشد پیش‌بینی (%)", -20, 50, 10, key="fashion_growth")
+            
+            if st.button("📊 پیش‌بینی فروش", key="fashion_forecast"):
+                next_season = last_season_sales * (1 + growth_rate/100)
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">📊 پیش‌بینی فروش فصل آینده</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">فروش پیش‌بینی</p>
+                            <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{next_season:.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">تغییرات</p>
+                            <p style="color:{"#38A169" if growth_rate > 0 else "#E53E3E"};font-size:1.3rem;font-weight:700;">{growth_rate:+.1f}%</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+    # ==========================================
+    # ۴. خودرو و لوازم یدکی
+    # ==========================================
+    elif "خودرو" in صنف or "یدکی" in صنف:
+        st.subheader("🚗 ابزارهای تخصصی خودرو و لوازم یدکی")
         
-        if st.button("🔍 تحلیل ترند", type="primary"):
-            st.success(f"✅ رنگ '{selected_color}' در فصل جاری {np.random.randint(60, 95)}% محبوبیت دارد.")
-            st.info(f"💡 پیشنهاد: تولید {np.random.randint(20, 50)}٪ از محصولات با رنگ {selected_color}")
+        with st.expander("🔩 ۱. مدیریت قطعات یدکی", expanded=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                part_name = st.text_input("نام قطعه", key="auto_part", placeholder="لنت ترمز، فیلتر روغن...")
+            with col2:
+                part_life = st.number_input("عمر مفید (کیلومتر)", min_value=1000, step=1000, key="auto_life", value=20000)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                current_km = st.number_input("کیلومتر فعلی", min_value=0, step=1000, key="auto_km", value=5000)
+            with col2:
+                part_price = st.number_input("قیمت قطعه (تومان)", min_value=1000, step=1000, key="auto_price", value=500000)
+            
+            if st.button("📊 تحلیل قطعه", key="auto_analyze"):
+                if part_name:
+                    remaining = max(0, part_life - current_km)
+                    status = "مناسب" if remaining > 5000 else "نیاز به تعویض" if remaining > 1000 else "بحرانی"
+                    cost_per_km = part_price / part_life
+                    
+                    st.markdown(f"""
+                    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                        <h4 style="color:#FFD700;">🔩 تحلیل قطعه {part_name}</h4>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
+                            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">کیلومتر باقیمانده</p>
+                                <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{remaining:,}</p>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">وضعیت</p>
+                                <p style="color:{"#38A169" if status == "مناسب" else "#F5A623" if status == "نیاز به تعویض" else "#E53E3E"};font-size:1.2rem;font-weight:700;">{status}</p>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                                <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">هزینه هر کیلومتر</p>
+                                <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{cost_per_km:.1f}</p>
+                            </div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+        with st.expander("🛠️ ۲. مدیریت تعمیرات"):
+            col1, col2 = st.columns(2)
+            with col1:
+                repair_type = st.selectbox("نوع تعمیر", ["دوره‌ای", "اضطراری", "بازسازی"], key="auto_repair_type")
+            with col2:
+                repair_cost = st.number_input("هزینه تعمیر (تومان)", min_value=1000, step=1000, key="auto_repair_cost", value=200000)
+            
+            if st.button("📊 تحلیل تعمیرات", key="auto_repair_analyze"):
+                yearly_cost = repair_cost * 4  # ۴ تعمیر در سال
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">🛠️ تحلیل هزینه تعمیرات</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">هزینه هر تعمیر</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{repair_cost:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">هزینه سالانه تعمیرات</p>
+                            <p style="color:#4ECDC4;font-size:1.2rem;font-weight:700;">{yearly_cost:,.0f}</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("📊 ۳. تحلیل قیمت روز"):
+            car_models = ["پراید", "تیبا", "دنا", "شاهین", "تارا", "پژو ۲۰۶", "پژو ۲۰۷"]
+            col1, col2 = st.columns(2)
+            with col1:
+                car_model = st.selectbox("مدل خودرو", car_models, key="auto_model")
+            with col2:
+                car_year = st.number_input("سال ساخت", min_value=1380, max_value=1404, step=1, key="auto_year", value=1400)
+            
+            if st.button("📊 تحلیل قیمت", key="auto_price_analyze"):
+                base_price = {"پراید": 350_000_000, "تیبا": 450_000_000, "دنا": 650_000_000, 
+                             "شاهین": 750_000_000, "تارا": 850_000_000, "پژو ۲۰۶": 500_000_000, "پژو ۲۰۷": 600_000_000}
+                price = base_price.get(car_model, 500_000_000)
+                depreciation = (1404 - car_year) * 15_000_000
+                final_price = max(price - depreciation, price * 0.4)
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">📊 تحلیل قیمت {car_model}</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">قیمت فعلی</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{final_price:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">کاهش قیمت از سال ۱۴۰۴</p>
+                            <p style="color:#4ECDC4;font-size:1.2rem;font-weight:700;">{depreciation:,.0f}</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("🔧 ۴. مدیریت خدمات پس از فروش"):
+            col1, col2 = st.columns(2)
+            with col1:
+                service_type = st.selectbox("نوع خدمات", ["گارانتی", "تعویض روغن", "سیستم ترمز", "سیستم تعلیق"], key="auto_service")
+            with col2:
+                service_interval = st.number_input("دوره سرویس (کیلومتر)", min_value=1000, step=1000, key="auto_interval", value=10000)
+            
+            if st.button("📊 تحلیل خدمات", key="auto_service_analyze"):
+                yearly_service = 20000 // service_interval
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">🔧 تحلیل خدمات {service_type}</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">دفعات سرویس در سال</p>
+                            <p style="color:#FFD700;font-size:1.3rem;font-weight:700;">{yearly_service}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">کیلومتر بین سرویس‌ها</p>
+                            <p style="color:#4ECDC4;font-size:1.3rem;font-weight:700;">{service_interval:,}</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+    # ==========================================
+    # ۵. فناوری و مخابرات
+    # ==========================================
+    elif "فناوری" in صنف or "مخابرات" in صنف:
+        st.subheader("📱 ابزارهای تخصصی فناوری و مخابرات")
+        
+        with st.expander("👥 ۱. تحلیل رشد کاربران", expanded=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                current_users = st.number_input("کاربران فعلی", min_value=0, step=100, key="tech_users", value=1000)
+            with col2:
+                growth_rate = st.number_input("نرخ رشد ماهانه (%)", min_value=0.0, step=0.5, key="tech_growth", value=5.0)
+            
+            months = st.number_input("تعداد ماه‌های آینده", min_value=1, step=1, key="tech_months", value=12)
+            
+            if st.button("📊 پیش‌بینی رشد", key="tech_forecast"):
+                projected = []
+                for i in range(months + 1):
+                    projected.append(current_users * ((1 + growth_rate / 100) ** i))
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">📊 پیش‌بینی رشد کاربران</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">پس از ۱ ماه</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{projected[1]:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">پس از ۶ ماه</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{projected[6]:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">پس از {months} ماه</p>
+                            <p style="color:#4ECDC4;font-size:1.2rem;font-weight:700;">{projected[-1]:,.0f}</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("📊 ۲. تحلیل درآمد"):
+            col1, col2 = st.columns(2)
+            with col1:
+                revenue_per_user = st.number_input("درآمد هر کاربر (تومان)", min_value=1000, step=1000, key="tech_revenue", value=50000)
+            with col2:
+                churn_rate = st.slider("نرخ ریزش کاربران (%)", 0, 20, 5, key="tech_churn")
+            
+            if st.button("📊 تحلیل درآمد", key="tech_revenue_analyze"):
+                total_revenue = current_users * revenue_per_user
+                lost_revenue = total_revenue * (churn_rate / 100)
+                net_revenue = total_revenue - lost_revenue
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">📊 تحلیل درآمد</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">درآمد کل</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{total_revenue:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">درآمد از دست رفته</p>
+                            <p style="color:#E53E3E;font-size:1.2rem;font-weight:700;">{lost_revenue:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">درآمد خالص</p>
+                            <p style="color:#4ECDC4;font-size:1.2rem;font-weight:700;">{net_revenue:,.0f}</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("📲 ۳. مدیریت اشتراک‌ها"):
+            plan_types = ["ماهانه", "سالانه", "شش ماهه"]
+            col1, col2 = st.columns(2)
+            with col1:
+                plan = st.selectbox("نوع اشتراک", plan_types, key="tech_plan")
+            with col2:
+                plan_price = st.number_input("قیمت اشتراک (تومان)", min_value=1000, step=1000, key="tech_plan_price", value=100000)
+            
+            if st.button("📊 تحلیل اشتراک", key="tech_plan_analyze"):
+                if plan == "ماهانه":
+                    yearly = plan_price * 12
+                    discount = 0
+                elif plan == "سالانه":
+                    yearly = plan_price
+                    discount = 20
+                else:
+                    yearly = plan_price * 2
+                    discount = 10
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">📲 تحلیل اشتراک {plan}</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">هزینه سالانه</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{yearly:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">تخفیف</p>
+                            <p style="color:#4ECDC4;font-size:1.2rem;font-weight:700;">{discount}%</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("🌐 ۴. مدیریت پهنای باند"):
+            col1, col2 = st.columns(2)
+            with col1:
+                bandwidth = st.number_input("پهنای باند فعلی (Mbps)", min_value=1, step=1, key="tech_bandwidth", value=100)
+            with col2:
+                users_count = st.number_input("تعداد کاربران", min_value=1, step=1, key="tech_users_count", value=1000)
+            
+            if st.button("📊 تحلیل پهنای باند", key="tech_bandwidth_analyze"):
+                per_user = (bandwidth * 1024) / users_count
+                status = "مناسب" if per_user > 1 else "نیاز به افزایش"
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">🌐 تحلیل پهنای باند</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">پهنای باند هر کاربر</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{per_user:.2f} Kbps</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">وضعیت</p>
+                            <p style="color:{"#38A169" if status == "مناسب" else "#E53E3E"};font-size:1.2rem;font-weight:700;">{status}</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+    # ==========================================
+    # ۶. املاک
+    # ==========================================
+    elif "املاک" in صنف or "مستغلات" in صنف:
+        st.subheader("🏠 ابزارهای تخصصی املاک")
+        
+        with st.expander("🏠 ۱. برآورد قیمت ملک", expanded=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                area_estate = st.number_input("متراژ ملک", min_value=10, step=10, key="estate_area", value=80)
+            with col2:
+                room_count = st.number_input("تعداد اتاق", min_value=1, step=1, key="estate_rooms", value=2)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                year_built = st.number_input("سال ساخت", min_value=1360, step=1, key="estate_year", value=1400)
+            with col2:
+                location = st.selectbox("موقعیت", ["مرکزی", "شمال", "جنوب", "شرق", "غرب"], key="estate_location")
+            
+            if st.button("📊 برآورد قیمت", key="estate_price"):
+                base_price = 20_000_000 * area_estate
+                room_bonus = room_count * 50_000_000
+                age_discount = (1404 - year_built) * 5_000_000
+                location_bonus = {"مرکزی": 30_000_000, "شمال": 50_000_000, "جنوب": 0, "شرق": 15_000_000, "غرب": 10_000_000}
+                estimated_price = base_price + room_bonus - age_discount + location_bonus.get(location, 0)
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">🏠 برآورد قیمت ملک</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">قیمت نهایی</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{estimated_price:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">قیمت هر متر</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{estimated_price / area_estate:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">موقعیت</p>
+                            <p style="color:#4ECDC4;font-size:1.2rem;font-weight:700;">{location}</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("📊 ۲. تحلیل بازار اجاره"):
+            col1, col2 = st.columns(2)
+            with col1:
+                rent_price = st.number_input("اجاره ماهانه (تومان)", min_value=100000, step=100000, key="estate_rent", value=5_000_000)
+            with col2:
+                deposit = st.number_input("رهن (تومان)", min_value=100000, step=100000, key="estate_deposit", value=50_000_000)
+            
+            if st.button("📊 تحلیل اجاره", key="estate_rent_analyze"):
+                yearly_rent = rent_price * 12
+                roi = (yearly_rent / deposit) * 100 if deposit > 0 else 0
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">📊 تحلیل اجاره</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">اجاره سالانه</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{yearly_rent:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">بازدهی رهن</p>
+                            <p style="color:#4ECDC4;font-size:1.2rem;font-weight:700;">{roi:.1f}%</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("📈 ۳. پیش‌بینی قیمت منطقه"):
+            regions = ["منطقه ۱", "منطقه ۲", "منطقه ۳", "منطقه ۴", "منطقه ۵"]
+            col1, col2 = st.columns(2)
+            with col1:
+                region = st.selectbox("منطقه", regions, key="estate_region")
+            with col2:
+                current_price = st.number_input("قیمت فعلی هر متر (تومان)", min_value=1000, step=1000, key="estate_current_price", value=20_000_000)
+            
+            if st.button("📊 پیش‌بینی قیمت", key="estate_forecast"):
+                growth = np.random.randint(5, 20)
+                future_price = current_price * (1 + growth/100)
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">📈 پیش‌بینی قیمت {region}</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">قیمت پیش‌بینی</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{future_price:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">رشد پیش‌بینی</p>
+                            <p style="color:#4ECDC4;font-size:1.2rem;font-weight:700;">{growth}%</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        with st.expander("💰 ۴. مدیریت سرمایه‌گذاری"):
+            col1, col2 = st.columns(2)
+            with col1:
+                investment = st.number_input("سرمایه اولیه (تومان)", min_value=100000, step=100000, key="estate_invest", value=500_000_000)
+            with col2:
+                years = st.number_input("مدت زمان (سال)", min_value=1, step=1, key="estate_years", value=5)
+            
+            if st.button("📊 تحلیل سرمایه‌گذاری", key="estate_invest_analyze"):
+                roi = np.random.randint(15, 30)
+                final_value = investment * ((1 + roi/100) ** years)
+                
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:16px;">
+                    <h4 style="color:#FFD700;">💰 تحلیل سرمایه‌گذاری</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">ارزش نهایی</p>
+                            <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{final_value:,.0f}</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;text-align:center;">
+                            <p style="color:rgba(255,255,255,0.4);font-size:0.7rem;">بازدهی سالانه</p>
+                            <p style="color:#4ECDC4;font-size:1.2rem;font-weight:700;">{roi}%</p>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+    # ==========================================
+    # ۷. سایر صنف‌ها
+    # ==========================================
+    else:
+        st.info(f"""
+        📌 **ابزارهای تخصصی برای {صنف} در حال توسعه است.**
+        
+        اما میتوانید از ابزارهای زیر استفاده کنید:
+        - 📊 تحلیل داده‌های خود در تب پیش‌بینی
+        - 🔮 تحلیل اقتصادی در تب تحلیلگر آینده
+        - 💬 سوالات خود را از چتبات بپرسید
+        """)
 
 # ==========================================
 # تب 3: تحلیلگر آینده
@@ -1293,9 +1827,9 @@ with tab8:
             st.rerun()
 
 # ==========================================
-# تب‌های دیگر
+# تب 9: نصب
 # ==========================================
-with tab9:  # نصب
+with tab9:
     st.markdown("""
     <div class="card">
         <div class="card-title"><span class="icon">📱</span> نصب روی گوشی</div>
@@ -1304,13 +1838,19 @@ with tab9:  # نصب
     </div>
     """, unsafe_allow_html=True)
 
-with tab10:  # تقویم
+# ==========================================
+# تب 10: تقویم
+# ==========================================
+with tab10:
     st.markdown('<div class="card"><div class="card-title"><span class="icon">📅</span> تقویم شمسی</div>', unsafe_allow_html=True)
     today = jdatetime.date.today()
     st.info(f"📌 امروز: {today.strftime('%A %d %B %Y')}")
     st.markdown('</div>', unsafe_allow_html=True)
 
-with tab11:  # ارجاع
+# ==========================================
+# تب 11: ارجاع
+# ==========================================
+with tab11:
     st.markdown('<div class="card"><div class="card-title"><span class="icon">🤝</span> سیستم ارجاع</div>', unsafe_allow_html=True)
     code = f"iHN-{str(uuid.uuid4())[:8].upper()}"
     st.success(f"🔑 کد ارجاع شما: **{code}**")
@@ -1319,7 +1859,10 @@ with tab11:  # ارجاع
         st.success("✅ +۱۰ امتیاز!")
     st.markdown('</div>', unsafe_allow_html=True)
 
-with tab12:  # داشبورد
+# ==========================================
+# تب 12: داشبورد
+# ==========================================
+with tab12:
     st.markdown('<div class="card"><div class="card-title"><span class="icon">👤</span> داشبورد</div>', unsafe_allow_html=True)
     st.metric("📊 تعداد رکوردها", len(data))
     st.metric("🏷️ صنف", صنف)
@@ -1327,12 +1870,18 @@ with tab12:  # داشبورد
         st.dataframe(pd.DataFrame(st.session_state.history))
     st.markdown('</div>', unsafe_allow_html=True)
 
-with tab13:  # خونه‌پرداز
+# ==========================================
+# تب 13: خونه‌پرداز
+# ==========================================
+with tab13:
     st.markdown('<div class="card"><div class="card-title"><span class="icon">🏠</span> خونه‌پرداز</div>', unsafe_allow_html=True)
     st.info("💰 درآمد و هزینه‌های خود را مدیریت کنید.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-with tab14:  # تماس
+# ==========================================
+# تب 14: تماس
+# ==========================================
+with tab14:
     st.markdown('<div class="card"><div class="card-title"><span class="icon">📝</span> تماس</div>', unsafe_allow_html=True)
     st.info("📬 ha2021alipur@gmail.com | 📱 09019470509")
     st.markdown('</div>', unsafe_allow_html=True)
@@ -1342,6 +1891,6 @@ with tab14:  # تماس
 # ==========================================
 st.markdown(f"""
 <div class="footer">
-    ✨ iHoNoor v14.0 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
+    ✨ iHoNoor v14.2 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
 </div>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=True)خ
