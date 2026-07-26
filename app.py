@@ -49,8 +49,7 @@ st.markdown("""
     }
     .main-header::before {
         content: '';
-        position: absolute;
-        top: -50%; left: -50%;
+        position: absolute; top: -50%; left: -50%;
         width: 200%; height: 200%;
         background: radial-gradient(circle at 30% 50%, rgba(255,215,0,0.03), transparent 60%);
         animation: rotateGlow 30s linear infinite;
@@ -158,102 +157,67 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# ===== تابع بروشور کامل (فارسی) =====
+# ===== بروشور کامل فارسی =====
 # ==========================================
 def show_brochure():
     st.markdown("""
     <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;padding:25px 30px;margin-bottom:25px;">
         
-        <h1 style="font-size:2.2rem;font-weight:800;color:#FFD700;text-align:center;margin-bottom:15px;">📘 بروشور کامل iHoNoor Pro</h1>
-        <p style="text-align:center;color:rgba(255,255,255,0.4);font-size:1.1rem;">راهنمای جامع و کاربردی برای همه سطوح</p>
+        <h1 style="font-size:2rem;font-weight:800;color:#FFD700;text-align:center;">📘 بروشور کامل iHoNoor Pro</h1>
+        <p style="text-align:center;color:rgba(255,255,255,0.4);font-size:1rem;">راهنمای جامع و کاربردی برای همه سطوح</p>
         
-        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:25px 0;">
+        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:20px 0;">
 
-        <h2 style="font-size:1.5rem;font-weight:700;color:#FFD700;margin-top:25px;margin-bottom:12px;">🎯 iHoNoor Pro چیست؟ (به زبان خیلی ساده)</h2>
-        
-        <p style="color:rgba(255,255,255,0.7);line-height:1.9;font-size:0.95rem;">
-            iHoNoor Pro یک <strong>دستیار هوشمند فروش</strong> است که به شما کمک میکند 
-            <strong>بفهمید فردا، هفته آینده یا ماه آینده چقدر می‌فروشید</strong>.
+        <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">🎯 iHoNoor Pro چیست؟</p>
+        <p style="color:rgba(255,255,255,0.7);line-height:1.9;">
+            iHoNoor Pro یک دستیار هوشمند فروش است که به شما کمک میکند 
+            پیش‌بینی کنید فردا، هفته آینده یا ماه آینده چقدر می‌فروشید.
         </p>
-        
-        <div style="background:rgba(255,215,0,0.03);border-right:3px solid #FFD700;padding:12px 18px;border-radius:8px;margin:12px 0;">
-            <p style="margin:0;color:rgba(255,255,255,0.7);font-size:0.95rem;">
-                💡 <strong>به زبان خیلی ساده:</strong> 
-                iHoNoor مثل یک <strong>مشاور فروش با تجربه</strong> است که با نگاه کردن به داده‌های فروش گذشته‌تان، 
-                به شما می‌گوید در آینده چه اتفاقی می‌افتد.
-            </p>
-        </div>
-
-        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:25px 0;">
-
-        <h2 style="font-size:1.5rem;font-weight:700;color:#FFD700;margin-top:25px;margin-bottom:12px;">📋 چه داده‌هایی برای کار با iHoNoor نیاز دارید؟</h2>
-
-        <p style="color:rgba(255,255,255,0.7);line-height:1.9;font-size:0.95rem;">
-            <strong>برای استفاده از iHoNoor، به یک یا چند فایل Excel یا CSV با داده‌های فروش خود نیاز دارید.</strong>
+        <p style="color:rgba(255,255,255,0.5);line-height:1.9;background:rgba(255,215,0,0.03);padding:10px 15px;border-radius:8px;">
+            💡 به زبان خیلی ساده: iHoNoor مثل یک مشاور فروش با تجربه است که با نگاه کردن به داده‌های فروش گذشته‌تان، به شما می‌گوید در آینده چه اتفاقی می‌افتد.
         </p>
 
-        <h3 style="font-size:1.1rem;font-weight:600;color:#FFD700;margin-top:18px;margin-bottom:8px;">📌 حداقل داده‌های مورد نیاز:</h3>
-        
-        <table style="width:100%;border-collapse:collapse;margin:12px 0;">
-            <thead>
-                <tr>
-                    <th style="background:rgba(255,215,0,0.05);color:#FFD700;padding:10px 12px;text-align:right;border:1px solid rgba(255,255,255,0.03);">نام ستون</th>
-                    <th style="background:rgba(255,215,0,0.05);color:#FFD700;padding:10px 12px;text-align:right;border:1px solid rgba(255,255,255,0.03);">نوع داده</th>
-                    <th style="background:rgba(255,215,0,0.05);color:#FFD700;padding:10px 12px;text-align:right;border:1px solid rgba(255,255,255,0.03);">توضیح</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);"><strong>📅 تاریخ</strong></td>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);">تاریخ</td>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);">حتماً داشته باشید</td>
-                </tr>
-                <tr>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);"><strong>💰 فروش</strong></td>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);">عدد</td>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);">مقدار فروش در آن روز</td>
-                </tr>
-                <tr>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);"><strong>👥 تعداد مشتریان</strong></td>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);">عدد</td>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);">اختیاری اما کمک میکند</td>
-                </tr>
-            </tbody>
-        </table>
+        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:20px 0;">
 
-        <div style="background:rgba(76,175,80,0.03);border-right:3px solid #4CAF50;padding:12px 18px;border-radius:8px;margin:12px 0;">
-            <p style="margin:0;color:rgba(255,255,255,0.7);font-size:0.95rem;line-height:1.9;">
-                <strong>📊 مثال از یک فایل ساده:</strong><br>
-                | تاریخ | فروش | تعداد مشتریان | قیمت میانگین |<br>
-                | 1403/01/01 | 5,200,000 | 45 | 25,000 |<br>
-                | 1403/01/02 | 6,800,000 | 52 | 28,000 |
-            </p>
-        </div>
-
-        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:25px 0;">
-
-        <h2 style="font-size:1.5rem;font-weight:700;color:#FFD700;margin-top:25px;margin-bottom:12px;">📁 چگونه چندین فایل را یکجا آپلود کنیم؟</h2>
-
-        <p style="color:rgba(255,255,255,0.7);line-height:1.9;font-size:0.95rem;">
-            <strong>شما میتوانید <span style="color:#FFD700;">تا ۱۰۰۰ فایل</span> را با یک بار کلیک آپلود کنید!</strong>
+        <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">📋 چه داده‌هایی نیاز دارید؟</p>
+        <p style="color:rgba(255,255,255,0.7);line-height:1.9;">
+            به یک یا چند فایل Excel یا CSV با داده‌های فروش خود نیاز دارید.
         </p>
+        
+        <p style="color:rgba(255,255,255,0.5);font-weight:600;">📌 حداقل داده‌های مورد نیاز:</p>
+        <ul style="color:rgba(255,255,255,0.6);line-height:2;padding-right:20px;">
+            <li><strong>📅 تاریخ:</strong> حتماً داشته باشید</li>
+            <li><strong>💰 فروش:</strong> مقدار فروش در آن روز</li>
+            <li><strong>👥 تعداد مشتریان:</strong> اختیاری اما کمک میکند</li>
+        </ul>
 
-        <div style="background:rgba(33,150,243,0.03);border-right:3px solid #2196F3;padding:12px 18px;border-radius:8px;margin:12px 0;">
-            <h3 style="color:#2196F3;margin-top:0;font-size:1.1rem;">📌 مراحل آپلود چند فایل:</h3>
-            <ol style="color:rgba(255,255,255,0.7);line-height:2.2;padding-right:25px;font-size:0.95rem;">
-                <li><strong>روی دکمه "📁 فایل‌های خود را انتخاب کنید" کلیک کنید</strong></li>
-                <li><strong>همه فایل‌های خود را انتخاب کنید</strong> (با کلید Ctrl یا Shift)</li>
-                <li><strong>روش پردازش</strong> را انتخاب کنید (ترکیب یا جداگانه)</li>
-                <li><strong>روی "پردازش" کلیک کنید</strong></li>
-                <li><strong>نتیجه را مشاهده کنید!</strong></li>
-            </ol>
+        <p style="color:rgba(255,255,255,0.5);font-weight:600;">📊 مثال از یک فایل ساده:</p>
+        <div style="background:rgba(76,175,80,0.03);padding:10px 15px;border-radius:8px;border-right:3px solid #4CAF50;color:rgba(255,255,255,0.6);font-family:monospace;font-size:0.85rem;line-height:1.8;">
+            | تاریخ | فروش | تعداد مشتریان | قیمت میانگین |<br>
+            | 1403/01/01 | 5,200,000 | 45 | 25,000 |<br>
+            | 1403/01/02 | 6,800,000 | 52 | 28,000 |
         </div>
 
-        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:25px 0;">
+        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:20px 0;">
 
-        <h2 style="font-size:1.5rem;font-weight:700;color:#FFD700;margin-top:25px;margin-bottom:12px;">🛠️ ابزارهای iHoNoor</h2>
+        <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">📁 چگونه چندین فایل را یکجا آپلود کنیم؟</p>
+        <p style="color:rgba(255,255,255,0.7);line-height:1.9;">
+            شما میتوانید تا <span style="color:#FFD700;">۱۰۰۰ فایل</span> را با یک بار کلیک آپلود کنید!
+        </p>
+        
+        <p style="color:rgba(255,255,255,0.5);font-weight:600;">📌 مراحل آپلود چند فایل:</p>
+        <ol style="color:rgba(255,255,255,0.6);line-height:2.2;padding-right:20px;">
+            <li>روی دکمه "📁 فایل‌های خود را انتخاب کنید" کلیک کنید</li>
+            <li>همه فایل‌های خود را انتخاب کنید (با کلید Ctrl یا Shift)</li>
+            <li>روش پردازش را انتخاب کنید (ترکیب یا جداگانه)</li>
+            <li>روی "پردازش" کلیک کنید</li>
+            <li>نتیجه را مشاهده کنید</li>
+        </ol>
 
-        <ul style="color:rgba(255,255,255,0.6);line-height:2.2;padding-right:25px;font-size:0.95rem;">
+        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:20px 0;">
+
+        <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">🛠️ ابزارهای iHoNoor</p>
+        <ul style="color:rgba(255,255,255,0.6);line-height:2.2;padding-right:20px;">
             <li><strong>🔮 پیش‌بینی فروش:</strong> با ۴ مدل هوش مصنوعی</li>
             <li><strong>🧠 هوش مصنوعی عامل:</strong> پیشنهاد اقدامات عملی</li>
             <li><strong>📊 تحلیل "چه-اگر":</strong> شبیه‌سازی سناریوها</li>
@@ -263,71 +227,60 @@ def show_brochure():
             <li><strong>💬 چتبات هوشمند:</strong> پاسخ به سوالات</li>
         </ul>
 
-        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:25px 0;">
+        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:20px 0;">
 
-        <h2 style="font-size:1.5rem;font-weight:700;color:#FFD700;margin-top:25px;margin-bottom:12px;">🌍 تجربه جهانی</h2>
-
-        <div style="background:rgba(76,175,80,0.03);border-right:3px solid #4CAF50;padding:12px 18px;border-radius:8px;margin:12px 0;">
-            <p style="color:#4CAF50;font-weight:700;margin:0;font-size:1rem;">🇩🇪 آلمان - EDEKA</p>
-            <p style="color:rgba(255,255,255,0.7);font-size:0.95rem;margin:4px 0;">ضایعات غذایی را ۳۰٪ کاهش دادند</p>
+        <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">🌍 تجربه جهانی</p>
+        
+        <div style="background:rgba(76,175,80,0.03);padding:10px 15px;border-radius:8px;border-right:3px solid #4CAF50;margin:8px 0;">
+            <p style="color:#4CAF50;font-weight:700;margin:0;">🇩🇪 آلمان - EDEKA</p>
+            <p style="color:rgba(255,255,255,0.6);font-size:0.9rem;margin:2px 0;">ضایعات غذایی را ۳۰٪ کاهش دادند</p>
         </div>
         
-        <div style="background:rgba(76,175,80,0.03);border-right:3px solid #4CAF50;padding:12px 18px;border-radius:8px;margin:12px 0;">
-            <p style="color:#4CAF50;font-weight:700;margin:0;font-size:1rem;">🇺🇸 آمریکا - Walmart</p>
-            <p style="color:rgba(255,255,255,0.7);font-size:0.95rem;margin:4px 0;">موجودی انبار را ۲۵٪ بهینه‌سازی کردند</p>
+        <div style="background:rgba(76,175,80,0.03);padding:10px 15px;border-radius:8px;border-right:3px solid #4CAF50;margin:8px 0;">
+            <p style="color:#4CAF50;font-weight:700;margin:0;">🇺🇸 آمریکا - Walmart</p>
+            <p style="color:rgba(255,255,255,0.6);font-size:0.9rem;margin:2px 0;">موجودی انبار را ۲۵٪ بهینه‌سازی کردند</p>
+        </div>
+        
+        <div style="background:rgba(76,175,80,0.03);padding:10px 15px;border-radius:8px;border-right:3px solid #4CAF50;margin:8px 0;">
+            <p style="color:#4CAF50;font-weight:700;margin:0;">🇯🇵 ژاپن - 7-Eleven</p>
+            <p style="color:rgba(255,255,255,0.6);font-size:0.9rem;margin:2px 0;">دقت پیش‌بینی را به ۹۵٪ رساندند</p>
         </div>
 
-        <div style="background:rgba(76,175,80,0.03);border-right:3px solid #4CAF50;padding:12px 18px;border-radius:8px;margin:12px 0;">
-            <p style="color:#4CAF50;font-weight:700;margin:0;font-size:1rem;">🇯🇵 ژاپن - 7-Eleven</p>
-            <p style="color:rgba(255,255,255,0.7);font-size:0.95rem;margin:4px 0;">دقت پیش‌بینی را به ۹۵٪ رساندند</p>
-        </div>
-
-        <div style="background:rgba(255,215,0,0.03);border-right:3px solid #FFD700;padding:12px 18px;border-radius:8px;margin:12px 0;">
-            <p style="margin:0;color:rgba(255,255,255,0.7);font-size:0.95rem;">
-                📊 <strong>نتیجه‌گیری جهانی:</strong>
-                کسب‌وکارهایی که از پیش‌بینی هوشمند استفاده میکنند، 
-                بهطور متوسط <strong style="color:#FFD700;">۴۰٪ سود بیشتر</strong> و 
-                <strong style="color:#FFD700;">۳۵٪ هزینه کمتر</strong> دارند.
+        <div style="background:rgba(255,215,0,0.03);padding:10px 15px;border-radius:8px;border-right:3px solid #FFD700;margin:12px 0;">
+            <p style="margin:0;color:rgba(255,255,255,0.7);">
+                📊 کسب‌وکارهایی که از پیش‌بینی هوشمند استفاده میکنند، 
+                بهطور متوسط <span style="color:#FFD700;">۴۰٪ سود بیشتر</span> و 
+                <span style="color:#FFD700;">۳۵٪ هزینه کمتر</span> دارند.
             </p>
         </div>
 
-        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:25px 0;">
+        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:20px 0;">
 
-        <h2 style="font-size:1.5rem;font-weight:700;color:#FFD700;margin-top:25px;margin-bottom:12px;">💰 صرفه‌جویی در هزینه، زمان و سود</h2>
+        <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">💰 صرفه‌جویی در هزینه، زمان و سود</p>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:10px 0;">
+            <div style="background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;text-align:center;">
+                <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">⏱️ زمان</p>
+                <p style="color:#FFD700;font-size:1.2rem;font-weight:700;margin:0;">کاهش ۷۰٪</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;text-align:center;">
+                <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">💰 هزینه</p>
+                <p style="color:#FFD700;font-size:1.2rem;font-weight:700;margin:0;">کاهش ۳۵٪</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;text-align:center;">
+                <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">📈 سود</p>
+                <p style="color:#FFD700;font-size:1.2rem;font-weight:700;margin:0;">افزایش ۴۰٪</p>
+            </div>
+        </div>
 
-        <table style="width:100%;border-collapse:collapse;margin:12px 0;">
-            <thead>
-                <tr>
-                    <th style="background:rgba(255,215,0,0.05);color:#FFD700;padding:10px 12px;text-align:right;border:1px solid rgba(255,255,255,0.03);">نوع صرفه‌جویی</th>
-                    <th style="background:rgba(255,215,0,0.05);color:#FFD700;padding:10px 12px;text-align:right;border:1px solid rgba(255,255,255,0.03);">میزان</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);"><strong>⏱️ زمان</strong></td>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);">کاهش ۷۰٪</td>
-                </tr>
-                <tr>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);"><strong>💰 هزینه</strong></td>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);">کاهش ۳۵٪</td>
-                </tr>
-                <tr>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);"><strong>📈 سود</strong></td>
-                    <td style="padding:10px 12px;border:1px solid rgba(255,255,255,0.03);color:rgba(255,255,255,0.6);">افزایش ۴۰٪</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div style="background:rgba(255,215,0,0.03);border-right:3px solid #FFD700;padding:12px 18px;border-radius:8px;margin:12px 0;">
-            <p style="margin:0;color:rgba(255,255,255,0.7);font-size:0.95rem;">
-                <strong>📌 نتیجه‌گیری نهایی:</strong>
-                iHoNoor Pro به شما کمک میکند 
-                <strong style="color:#FFD700;">سریع‌تر، دقیق‌تر و با هزینه کمتر</strong> تصمیم بگیرید.
+        <div style="background:rgba(255,215,0,0.03);padding:10px 15px;border-radius:8px;border-right:3px solid #FFD700;margin:12px 0;">
+            <p style="margin:0;color:rgba(255,255,255,0.7);">
+                📌 iHoNoor Pro به شما کمک میکند <span style="color:#FFD700;">سریع‌تر، دقیق‌تر و با هزینه کمتر</span> تصمیم بگیرید.
             </p>
         </div>
 
-        <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.02);">
-            <p style="color:rgba(255,255,255,0.2);font-size:0.8rem;">
+        <div style="text-align:center;margin-top:15px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.02);">
+            <p style="color:rgba(255,255,255,0.2);font-size:0.75rem;">
                 📧 ha2021alipur@gmail.com | 📱 09019470509
             </p>
         </div>
@@ -343,14 +296,13 @@ st.markdown("""
         <h1>✨ iHoNoor</h1>
         <span style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.05);padding:2px 12px;border-radius:40px;font-size:0.6rem;color:#FFD700;">PRO</span>
     </div>
-    <p>هوش مصنوعی پیش‌بینی و تحلیل فروش | الهام‌گرفته از Salesforce, Tableau, Power BI, HubSpot</p>
+    <p>هوش مصنوعی پیش‌بینی و تحلیل فروش</p>
     <div>
         <span class="badge">🧠 ۴ مدل AI</span>
         <span class="badge">🤖 دستیار هوشمند</span>
         <span class="badge">📊 تحلیل سرنخ‌ها</span>
         <span class="badge">📈 تحلیل چه-اگر</span>
         <span class="badge">🔍 تحلیل علت</span>
-        <span class="badge">🌍 نسخه بین‌المللی</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -638,7 +590,7 @@ with col5:
     """, unsafe_allow_html=True)
 
 # ==========================================
-# ===== نمایش بروشور (جایگاه علمی) =====
+# ===== نمایش بروشور =====
 # ==========================================
 show_brochure()
 
