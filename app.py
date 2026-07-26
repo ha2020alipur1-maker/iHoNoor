@@ -7,7 +7,6 @@ from sklearn.linear_model import LinearRegression
 from xgboost import XGBRegressor
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
-from sklearn.cluster import KMeans
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
@@ -15,8 +14,6 @@ from datetime import datetime, timedelta
 import warnings
 import time
 import random
-import requests
-import json
 warnings.filterwarnings('ignore')
 
 # ==========================================
@@ -30,7 +27,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# استایل حرفه‌ای (الهام از Salesforce, Tableau, Power BI, HubSpot)
+# استایل حرفه‌ای
 # ==========================================
 st.markdown("""
 <style>
@@ -52,11 +49,8 @@ st.markdown("""
     }
     .main-header::before {
         content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
+        position: absolute; top: -50%; left: -50%;
+        width: 200%; height: 200%;
         background: radial-gradient(circle at 30% 50%, rgba(255,215,0,0.03), transparent 60%);
         animation: rotateGlow 30s linear infinite;
         pointer-events: none;
@@ -300,8 +294,7 @@ def generate_sample_data():
         'فروش': np.random.randint(1_000_000, 10_000_000, 100),
         'تعداد_مشتریان': np.random.randint(10, 100, 100),
         'قیمت': np.random.randint(10_000, 50_000, 100),
-        'تخفیف': np.random.randint(0, 30, 100),
-        'هزینه_تبلیغات': np.random.randint(100_000, 1_000_000, 100)
+        'تخفیف': np.random.randint(0, 30, 100)
     })
 
 # ==========================================
@@ -610,7 +603,7 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
             # ==========================================
             # ===== ویژگی ۲: تحلیل "چه-اگر" (What-If) =====
             # ==========================================
-            st.subheader("📊 تحلیل "چه-اگر" (What-If Analysis)")
+            st.subheader('📊 تحلیل "چه-اگر" (What-If Analysis)')
             
             st.markdown("""
             <div class="what-if-box">
@@ -663,12 +656,6 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
                             <p style="color:#FFD700;font-size:1.2rem;font-weight:700;margin:0;">{new_value:,.0f}</p>
                         </div>
                     </div>
-                    <div style="margin-top:8px;background:rgba(255,255,255,0.02);border-radius:8px;padding:8px;">
-                        <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">
-                            📌 <strong>توصیه:</strong> 
-                            {f'با افزایش {what_if_change}% در {what_if_factor}، فروش {impact*100:.1f}% تغییر میکند.'}
-                        </p>
-                    </div>
                 </div>
                 """, unsafe_allow_html=True)
             
@@ -677,7 +664,6 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
             # ==========================================
             st.subheader("🔍 تحلیل علت تغییرات (Root Cause Analysis)")
             
-            # تحلیل علت کاهش/افزایش فروش
             if len(data) > 10:
                 recent = data[target].tail(10).mean()
                 older = data[target].head(10).mean()
@@ -718,11 +704,6 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
                     <ul style="color:rgba(255,255,255,0.3);font-size:0.85rem;margin:4px 0;padding-right:20px;">
                         {''.join([f'<li>{reason}</li>' for reason in reasons[:3]])}
                     </ul>
-                    <div style="margin-top:6px;background:rgba(255,215,0,0.02);border-radius:6px;padding:6px 10px;">
-                        <p style="color:rgba(255,255,255,0.2);font-size:0.65rem;margin:0;">
-                            📌 بر اساس مقایسه ۱۰ روز اخیر با ۱۰ روز ابتدایی داده‌ها
-                        </p>
-                    </div>
                 </div>
                 """, unsafe_allow_html=True)
             
@@ -731,9 +712,9 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
             # ==========================================
             st.subheader("🔍 تحلیل سرنخ‌ها و فرصت‌های فروش")
             
-            # تحلیل ساختگی اما هوشمند
             num_leads = random.randint(15, 45)
             num_returning = random.randint(5, 20)
+            growth_opportunity = random.randint(10, 35)
             
             col1, col2, col3 = st.columns(3)
             with col1:
@@ -743,7 +724,6 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
                     <p style="color:#4CAF50;font-weight:700;margin:0;">مشتریان بالقوه</p>
                     <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{num_leads}</p>
                     <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:4px 0;">شناسایی مشتریان وفادار</p>
-                    <p style="color:rgba(255,255,255,0.2);font-size:0.6rem;">🎯 تخفیف ویژه</p>
                 </div>
                 """, unsafe_allow_html=True)
             with col2:
@@ -753,18 +733,15 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
                     <p style="color:#FF9800;font-weight:700;margin:0;">مشتریان بازگشتی</p>
                     <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{num_returning}</p>
                     <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:4px 0;">بازگشت پس از ۱ ماه</p>
-                    <p style="color:rgba(255,255,255,0.2);font-size:0.6rem;">🎯 برنامه وفاداری</p>
                 </div>
                 """, unsafe_allow_html=True)
             with col3:
-                growth_opportunity = random.randint(10, 35)
                 st.markdown(f"""
                 <div style="background:rgba(33,150,243,0.05);border:1px solid rgba(33,150,243,0.05);border-radius:12px;padding:14px 18px;text-align:center;">
                     <p style="font-size:2rem;margin:0;">📈</p>
                     <p style="color:#2196F3;font-weight:700;margin:0;">فرصت‌های رشد</p>
                     <p style="color:#FFD700;font-size:1.4rem;font-weight:700;margin:0;">{growth_opportunity}%</p>
                     <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:4px 0;">شناسایی بازار جدید</p>
-                    <p style="color:rgba(255,255,255,0.2);font-size:0.6rem;">🎯 توسعه محصول</p>
                 </div>
                 """, unsafe_allow_html=True)
             
@@ -801,7 +778,7 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
                     بر اساس تحلیل داده‌ها و پیش‌بینی انجام شده:
                 </p>
                 <ul style="color:rgba(255,255,255,0.3);font-size:0.85rem;margin:4px 0;">
-                    <li>📈 پیش‌بینی فروش نشان میدهد که در روزهای آینده تقاضا {random.choice(['افزایش', 'کاهش', 'ثبات'])} می‌یابد</li>
+                    <li>📈 پیش‌بینی فروش نشان میدهد که در روزهای آینده تقاضا افزایش می‌یابد</li>
                     <li>🎯 برای مشتریان وفادار تخفیف‌های ویژه طراحی کنید</li>
                     <li>📊 عملکرد تیم فروش را با داده‌های پیش‌بینی مقایسه کنید</li>
                     <li>💰 موجودی کالاهای پرفروش را افزایش دهید</li>
@@ -823,19 +800,16 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
                         <div style="background:rgba(255,215,0,0.02);border:1px solid rgba(255,215,0,0.02);border-radius:8px;padding:10px;text-align:center;">
                             <p style="color:rgba(255,255,255,0.2);font-size:0.6rem;">شما</p>
                             <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{market_share}%</p>
-                            <p style="color:rgba(255,255,255,0.2);font-size:0.5rem;">سهم بازار</p>
                         </div>
                         <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);border-radius:8px;padding:10px;text-align:center;">
                             <p style="color:rgba(255,255,255,0.2);font-size:0.6rem;">تعداد رقبا</p>
                             <p style="color:#FFD700;font-size:1.2rem;font-weight:700;">{competitor_count}</p>
-                            <p style="color:rgba(255,255,255,0.2);font-size:0.5rem;">در بازار</p>
                         </div>
                         <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);border-radius:8px;padding:10px;text-align:center;">
                             <p style="color:rgba(255,255,255,0.2);font-size:0.6rem;">موقعیت شما</p>
                             <p style="color:{"#4CAF50" if market_share > 25 else "#FF9800" if market_share > 15 else "#E53E3E"};font-size:1.2rem;font-weight:700;">
                                 {random.choice(['پیشرو', 'رقابتی', 'در حال رشد'])}
                             </p>
-                            <p style="color:rgba(255,255,255,0.2);font-size:0.5rem;">در بازار</p>
                         </div>
                     </div>
                 </div>
