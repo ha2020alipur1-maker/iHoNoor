@@ -34,64 +34,39 @@ st.set_page_config(
 )
 
 # ==========================================
-# دریافت قیمت‌ها از منابع معتبر
+# دریافت قیمت‌ها با مدیریت مصرف CPU (رفع Throttle)
 # ==========================================
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=600)  # ۱۰ دقیقه (کاهش مصرف CPU)
 def get_prices():
+    """دریافت قیمت‌ها با کاهش مصرف CPU - فقط در ساعات کاری"""
+    
+    # مقدار پیش‌فرض (برای شب و روزهای تعطیل)
     prices = {
         'dollar': 188500,
-        'gold_18': 0,
+        'gold_18': 17907500,  # ۱۸۸۵۰۰ × ۹۵
         'oil': 85,
         'inflation': 35,
         'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         'source': 'آفلاین'
     }
     
-    # ===== منبع ۱: قیمت دلار از Dolr.ir (معتبر ایرانی) =====
-    try:
-        r = requests.get("https://www.dolr.ir/api/v1/price", timeout=5)
-        if r.status_code == 200:
-            data = r.json()
-            price = data.get('price', 0)
-            if 180000 < price < 200000:
-                prices['dollar'] = int(price)
-                prices['source'] = 'آنلاین (dolr.ir)'
-    except:
-        pass
-    
-    # ===== منبع ۲: قیمت دلار از ExchangeRate-API =====
-    if prices['source'] == 'آفلاین':
+    # فقط در ساعات کاری (۸ صبح تا ۱۰ شب) - کاهش مصرف CPU
+    now = datetime.now()
+    if 8 <= now.hour <= 22:
         try:
-            r = requests.get("https://api.exchangerate-api.com/v4/latest/USD", timeout=5)
+            # فقط از یک منبع استفاده کنید (کاهش درخواست‌ها)
+            r = requests.get("https://www.dolr.ir/api/v1/price", timeout=3)
             if r.status_code == 200:
                 data = r.json()
-                price = data['rates']['IRR'] / 10
+                price = data.get('price', 188500)
                 if 180000 < price < 200000:
                     prices['dollar'] = int(price)
-                    prices['source'] = 'آنلاین (ExchangeRate)'
+                    prices['gold_18'] = int(price * 95)  # تخمین طلای ۱۸ عیار
+                    prices['inflation'] = 30 + (price - 188500) / 5000
+                    prices['source'] = 'آنلاین'
         except:
             pass
     
-    # ===== قیمت طلا از GoldPrice =====
-    try:
-        r = requests.get("https://api.gold-api.com/price/XAU", timeout=5)
-        if r.status_code == 200:
-            data = r.json()
-            gold_usd = data.get('price', 2450)
-            if gold_usd > 0:
-                prices['gold_18'] = int((gold_usd * prices['dollar']) / 9.574)
-    except:
-        prices['gold_18'] = int(prices['dollar'] * 95)
-    
-    # ===== قیمت نفت =====
-    try:
-        r = requests.get("https://api.exchangerate-api.com/v4/latest/USD", timeout=5)
-        if r.status_code == 200:
-            prices['oil'] = 85
-    except:
-        prices['oil'] = 85
-    
-    prices['inflation'] = 30 + (prices['dollar'] - 188500) / 5000
     prices['date'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return prices
 
@@ -540,7 +515,7 @@ with st.sidebar:
     st.markdown("""
     <div style="background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,0.05);border-radius:50px 15px 50px 15px;padding:18px;text-align:center;margin-bottom:18px;">
         <h1 style="font-size:2rem;margin:0;background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">iHo<span style="background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Noor</span></h1>
-        <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">✨ v15.2</p>
+        <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">✨ v15.3</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -589,11 +564,11 @@ st.markdown(f"""
         <span class="dollar-badge">🏅 طلای ۱۸ عیار: {prices['gold_18']:,}</span>
         <span class="dollar-badge">🛢️ نفت: {prices['oil']} $</span>
         <span class="source-badge">📡 {prices['source']}</span>
-        <span class="source-badge">✨ v15.2</span>
+        <span class="source-badge">✨ v15.3</span>
         <span class="source-badge">⏱️ {prices['date']}</span>
     </div>
     <div style="font-size:0.6rem;color:rgba(255,255,255,0.2);margin-top:8px;">
-        💡 قیمت‌ها هر ۵ دقیقه به‌روز میشوند
+        💡 قیمت‌ها هر ۱۰ دقیقه به‌روز میشوند (کاهش مصرف CPU)
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -1021,44 +996,28 @@ with tab5:
     st.markdown("""
     <div class="guide-step">
         <h3>📌 گام ۱: صنف خود را انتخاب کنید</h3>
-        <p>از منوی سمت راست، صنف خود را انتخاب کنید. iHoNoor برای هر صنف، تحلیل مخصوص خود را دارد.</p>
-        <div class="tip">💡 مثال: فروشگاه مواد غذایی → "خواربارفروشی" | پیمانکار ساختمانی → "ساختمان و پیمانکاری"</div>
+        <p>از منوی سمت راست، صنف خود را انتخاب کنید.</p>
+        <div class="tip">💡 مثال: فروشگاه مواد غذایی → "خواربارفروشی"</div>
     </div>
-    
     <div class="guide-step">
         <h3>📌 گام ۲: فایل خود را آپلود کنید</h3>
-        <p>فایل Excel یا CSV خود را در بخش آپلود بارگذاری کنید.</p>
+        <p>فایل Excel یا CSV خود را آپلود کنید.</p>
         <div style="background:rgba(229,62,62,0.03);padding:10px 14px;border-radius:8px;margin-top:6px;font-size:0.85rem;color:rgba(255,255,255,0.6);border-right:2px solid #E53E3E;">
-            ⚠️ <strong>نکات کلیدی:</strong>
-            <ul style="margin:4px 0;padding-right:20px;">
-                <li>فایل باید حداقل شامل <strong>۲ ستون</strong> باشد: "تاریخ" و یک ستون عددی</li>
-                <li><strong>حداقل ۵۰ رکورد</strong> برای پیش‌بینی قابل اعتماد</li>
-                <li><strong>توصیه:</strong> ۱۰۰ تا ۲۰۰ رکورد برای دقت بالاتر</li>
-            </ul>
+            ⚠️ فایل باید حداقل شامل ۲ ستون باشد: "تاریخ" و یک ستون عددی
         </div>
-        <div class="tip">💡 <strong>چرا تعداد رکورد مهم است؟</strong> مدل‌های یادگیری ماشین با داده‌های بیشتر، الگوهای بهتری یاد می‌گیرند و پیش‌بینی دقیق‌تری ارائه میدهند.</div>
+        <div class="tip">💡 حداقل ۵۰ روز داده برای پیش‌بینی قابل اعتماد.</div>
     </div>
-    
     <div class="guide-step">
         <h3>📌 گام ۳: ستون هدف را انتخاب کنید</h3>
-        <p>ستونی که میخواهید پیش‌بینی کنید را انتخاب کنید. این ستون باید <strong>عددی</strong> باشد.</p>
-        <div class="tip">💡 <strong>مثال‌های ستون هدف:</strong> فروش_فردا، تعداد_مشتریان، قیمت، درآمد</div>
-        <div style="background:rgba(56,161,105,0.03);padding:10px 14px;border-radius:8px;margin-top:6px;font-size:0.85rem;color:rgba(255,255,255,0.6);border-right:2px solid #38A169;">
-            ✅ <strong>پیشنهاد iHoNoor:</strong> اگر مطمئن نیستید، گزینه <strong>"💡 پیشنهاد iHoNoor"</strong> را انتخاب کنید.
+        <p>ستونی که میخواهید پیش‌بینی کنید را انتخاب کنید.</p>
+        <div style="background:rgba(56,161,105,0.03);padding:10px 14px;border-radius:8px;margin-top:6px;border-right:2px solid #38A169;">
+            ✅ از گزینه "💡 پیشنهاد iHoNoor" استفاده کنید.
         </div>
     </div>
-    
     <div class="guide-step">
         <h3>📌 گام ۴: پیش‌بینی را دریافت کنید</h3>
-        <p>تعداد روزهای آینده را انتخاب کنید و روی دکمه <strong>"🚀 پیش‌بینی کن"</strong> کلیک کنید.</p>
-        <div class="tip">📊 <strong>خروجی‌ها:</strong>
-            <ul style="margin:4px 0;padding-right:20px;">
-                <li><strong>عدد پیش‌بینی:</strong> مقدار مورد انتظار برای روزهای آینده</li>
-                <li><strong>دقت مدل (R²):</strong> بالای ۷۰٪ خوب است، بالای ۸۵٪ عالی است</li>
-                <li><strong>بازه اطمینان:</strong> محدوده احتمالی فروش</li>
-                <li><strong>نمودار روند:</strong> نمایش تغییرات پیش‌بینی</li>
-            </ul>
-        </div>
+        <p>روی دکمه "🚀 پیش‌بینی کن" کلیک کنید.</p>
+        <div class="tip">📊 خروجی: جدول پیش‌بینی، نمودار روند و آمار</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1079,13 +1038,13 @@ with tab6:
     
     st.markdown("""
     <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:24px;padding:24px 28px;margin-bottom:16px;">
-        <h3 style="color:#4ECDC4;">🧠 یادگیری ماشین چیست و چرا پیش‌بینی میکند؟</h3>
+        <h3 style="color:#4ECDC4;">🧠 یادگیری ماشین چیست؟</h3>
         <p style="color:rgba(255,255,255,0.7);">
             <strong>یادگیری ماشین (Machine Learning)</strong> شاخه‌ای از هوش مصنوعی است که به کامپیوترها امکان میدهد 
-            بدون برنامه‌ریزی مستقیم، از داده‌ها <strong>یاد بگیرند</strong> و <strong>الگوها</strong> را شناسایی کنند.
+            بدون برنامه‌ریزی مستقیم، از داده‌ها یاد بگیرند و الگوها را شناسایی کنند.
         </p>
         <div style="background:rgba(78,205,196,0.05);padding:12px 18px;border-radius:12px;border-right:3px solid #4ECDC4;margin-top:8px;">
-            💡 iHoNoor مانند یک <strong>مشاور فروش هوشمند</strong> عمل میکند.
+            💡 iHoNoor مانند یک مشاور فروش هوشمند عمل میکند.
         </div>
     </div>
     
@@ -1094,11 +1053,11 @@ with tab6:
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;">
             <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:14px 18px;">
                 <p style="color:#FFD700;font-weight:700;margin:0;">🇩🇪 آلمان</p>
-                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin:4px 0;">شرکت <strong>EDEKA</strong> با پیش‌بینی فروش، ضایعات غذایی را <strong>۳۰٪ کاهش</strong> داده است.</p>
+                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin:4px 0;">شرکت EDEKA با پیش‌بینی فروش، ضایعات غذایی را ۳۰٪ کاهش داده است.</p>
             </div>
             <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:14px 18px;">
                 <p style="color:#FFD700;font-weight:700;margin:0;">🇺🇸 آمریکا</p>
-                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin:4px 0;"><strong>Walmart</strong> با پیش‌بینی تقاضا، موجودی انبار را <strong>۲۵٪ بهینه‌سازی</strong> کرده است.</p>
+                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin:4px 0;">Walmart با پیش‌بینی تقاضا، موجودی انبار را ۲۵٪ بهینه‌سازی کرده است.</p>
             </div>
         </div>
     </div>
@@ -1227,6 +1186,6 @@ with tab14:
 # ==========================================
 st.markdown(f"""
 <div class="footer">
-    ✨ iHoNoor v15.2 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
+    ✨ iHoNoor v15.3 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
 </div>
 """, unsafe_allow_html=True)
