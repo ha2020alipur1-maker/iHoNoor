@@ -286,12 +286,10 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # آپلود فایل
     فایل = st.file_uploader("📁 آپلود فایل", type=["csv", "xlsx", "xls"])
     
     st.markdown("---")
     
-    # اتصال به Google Sheets
     with st.expander("🔗 اتصال به Google Sheets"):
         sheet_url = st.text_input("لینک:", placeholder="https://docs.google.com/spreadsheets/d/...")
         if sheet_url and st.button("📥 دریافت داده"):
@@ -377,7 +375,6 @@ if target not in numeric_cols:
     st.error("❌ ستون هدف باید عددی باشد!")
     st.stop()
 
-# تشخیص واحد
 def detect_unit(col):
     col = col.lower()
     if any(w in col for w in ['نفر', 'مشتری', 'تعداد']): return 'نفر'
@@ -389,7 +386,7 @@ unit = detect_unit(target)
 st.info(f"✅ واحد: **{unit}**")
 
 # ==========================================
-# ===== داشبورد مدیریتی =====
+# داشبورد مدیریتی
 # ==========================================
 st.subheader("📊 داشبورد مدیریتی")
 col1, col2, col3, col4, col5 = st.columns(5)
@@ -432,7 +429,7 @@ with col5:
     """, unsafe_allow_html=True)
 
 # ==========================================
-# ===== تحلیل روند =====
+# تحلیل روند
 # ==========================================
 st.subheader("📈 تحلیل روند")
 if len(numeric_cols) > 0:
@@ -445,7 +442,7 @@ if len(numeric_cols) > 0:
     st.plotly_chart(fig, use_container_width=True)
 
 # ==========================================
-# ===== انتخاب مدل =====
+# انتخاب مدل
 # ==========================================
 st.subheader("🧠 انتخاب مدل")
 models = {
@@ -457,7 +454,7 @@ models = {
 selected_model_name = st.selectbox("مدل پیش‌بینی:", list(models.keys()))
 
 # ==========================================
-# ===== بازه زمانی =====
+# بازه زمانی
 # ==========================================
 forecast_days = st.selectbox(
     "📅 چند روز آینده؟",
@@ -466,7 +463,7 @@ forecast_days = st.selectbox(
 )
 
 # ==========================================
-# ===== چتبات هوشمند =====
+# چتبات
 # ==========================================
 with st.expander("💬 چتبات هوشمند iHoNoor"):
     if "chat_history" not in st.session_state:
@@ -487,7 +484,7 @@ with st.expander("💬 چتبات هوشمند iHoNoor"):
             st.rerun()
 
 # ==========================================
-# ===== دکمه پیش‌بینی =====
+# دکمه پیش‌بینی
 # ==========================================
 if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_container_width=True):
     with st.spinner("⏳ در حال تحلیل داده‌ها با هوش مصنوعی..."):
@@ -511,7 +508,6 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
                 st.error("❌ ویژگی عددی کافی نیست.")
                 st.stop()
             
-            # نرمال‌سازی
             X_scaled = scaler.fit_transform(X)
             
             X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
@@ -522,7 +518,6 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
             score = r2_score(y_test, y_pred)
             mae = mean_absolute_error(y_test, y_pred)
             
-            # پیش‌بینی آینده
             avg_row = X.mean().values.reshape(1, -1)
             predictions = []
             current_row = avg_row.copy()
@@ -533,7 +528,7 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
                 if len(X.columns) > 0:
                     current_row[0] = pred
             
-            # ===== نمایش نتیجه =====
+            # نمایش نتیجه
             st.markdown(f"""
             <div class="result-box">
                 <div class="result-label">پیش‌بینی {forecast_days} روز آینده</div>
@@ -543,7 +538,7 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
             </div>
             """, unsafe_allow_html=True)
             
-            # ===== نمایش دقت =====
+            # نمایش دقت
             col1, col2, col3 = st.columns(3)
             with col1:
                 st.metric("🎯 دقت (R²)", f"{score:.1%}")
@@ -552,7 +547,7 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
             with col3:
                 st.metric("🤖 مدل", selected_model_name)
             
-            # ===== جدول پیش‌بینی =====
+            # جدول پیش‌بینی
             last_date = data['تاریخ'].iloc[-1] if 'تاریخ' in data.columns else datetime.now()
             if 'تاریخ' in data.columns:
                 future_dates = pd.date_range(last_date + timedelta(days=1), periods=forecast_days, freq='D')
@@ -567,7 +562,7 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
             })
             st.dataframe(pred_df, use_container_width=True)
             
-            # ===== نمودار =====
+            # نمودار
             fig = go.Figure()
             fig.add_trace(go.Scatter(
                 x=future_dates_str,
@@ -577,7 +572,6 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
                 line=dict(color='#FFD700', width=3),
                 marker=dict(size=10, color='#FFD700')
             ))
-            # بازه اطمینان
             fig.add_trace(go.Scatter(
                 x=future_dates_str + future_dates_str[::-1],
                 y=[p * 1.15 for p in predictions] + [p * 0.85 for p in predictions[::-1]],
@@ -623,7 +617,7 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
                 </div>
                 """, unsafe_allow_html=True)
             
-            # ===== تحلیل اهمیت ویژگی‌ها =====
+            # ===== تحلیل اهمیت ویژگی‌ها (اصلاح شده) =====
             if hasattr(model, 'feature_importances_'):
                 st.subheader("📊 اهمیت ویژگی‌ها")
                 imp_df = pd.DataFrame({
@@ -631,10 +625,21 @@ if st.button("🚀 پیش‌بینی هوشمند", type="primary", use_containe
                     'اهمیت': model.feature_importances_
                 }).sort_values('اهمیت', ascending=False)
                 
-                fig_imp = px.bar(imp_df, x='اهمیت', y='ویژگی', orientation='h', 
-                                 title='تأثیر هر ویژگی بر پیش‌بینی',
-                                 color='اهمیت', color_continuous_scale='gold')
-                fig_imp.update_layout(height=300, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+                fig_imp = px.bar(
+                    imp_df, 
+                    x='اهمیت', 
+                    y='ویژگی', 
+                    orientation='h',
+                    title='تأثیر هر ویژگی بر پیش‌بینی',
+                    color='اهمیت',
+                    color_continuous_scale='YlOrRd'  # ✅ اصلاح شده
+                )
+                fig_imp.update_layout(
+                    height=300,
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='rgba(255,255,255,0.7)')
+                )
                 fig_imp.update_xaxes(showgrid=False)
                 fig_imp.update_yaxes(showgrid=False)
                 st.plotly_chart(fig_imp, use_container_width=True)
