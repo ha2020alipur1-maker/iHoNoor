@@ -3,6 +3,8 @@ pandas
 numpy
 scikit-learn
 plotly
+xgboost
 openpyxl
 gspread
 oauth2client
+requests
