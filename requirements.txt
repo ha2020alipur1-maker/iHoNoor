@@ -3,6 +3,6 @@ pandas
 numpy
 scikit-learn
 plotly
-xgboost
-jdatetime
 openpyxl
+gspread
+oauth2client
