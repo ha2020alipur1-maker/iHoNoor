@@ -34,7 +34,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. دریافت قیمت‌های بروز (دلار، طلا، نفت، تورم)
+# 2. دریافت قیمت‌های بروز
 # ==========================================
 @st.cache_data(ttl=300)
 def get_real_prices():
@@ -73,11 +73,7 @@ def get_real_prices():
         prices['gold_18'] = int(prices['dollar'] * 95)
         prices['gold_24'] = int(prices['gold_18'] / 0.75)
     
-    try:
-        prices['oil'] = 85
-    except:
-        prices['oil'] = 85
-    
+    prices['oil'] = 85
     prices['inflation'] = 30 + (prices['dollar'] - 188500) / 5000
     prices['date'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return prices
@@ -141,7 +137,7 @@ LANG = {
 }
 
 # ==========================================
-# 5. تم‌های متنوع
+# 5. تم‌ها
 # ==========================================
 THEMES = {
     "شب تاریک": {
@@ -270,7 +266,7 @@ st.session_state.lang = "fa" if lang == "فارسی" else "en"
 t = LANG[st.session_state.lang]
 
 # ==========================================
-# 8. صنف‌ها (حذف نانوایی)
+# 8. صنف‌ها
 # ==========================================
 industries = [
     "🏪 خواربارفروشی", "🔩 آهن‌آلات و مصالح", "🚗 خودروسازی و لوازم یدکی",
@@ -314,7 +310,7 @@ def get_emoji(val, unit):
     return "📊", "پیش‌بینی انجام شد"
 
 # ==========================================
-# 10. تحلیلگر هوشمند آینده
+# 10. تحلیلگر آینده
 # ==========================================
 def future_analyst(صنف, prices):
     analysis = {
@@ -670,7 +666,7 @@ with st.sidebar:
     st.markdown("""
     <div style="background:rgba(255,255,255,0.03);backdrop-filter:blur(12px);border:1px solid rgba(255,215,0,0.05);border-radius:50px 15px 50px 15px;padding:18px;text-align:center;margin-bottom:18px;">
         <h1 style="font-size:2rem;margin:0;background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">iHo<span style="background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Noor</span></h1>
-        <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">✨ v12.2</p>
+        <p style="color:rgba(255,255,255,0.3);font-size:0.7rem;margin:0;">✨ v13.0</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -719,7 +715,7 @@ st.markdown(f"""
         <span class="dollar-badge">🏅 طلای ۱۸ عیار: {prices['gold_18']:,}</span>
         <span class="dollar-badge">🛢️ نفت: {prices['oil']} $</span>
         <span class="source-badge">📡 {prices['source']}</span>
-        <span class="source-badge">✨ v12.2</span>
+        <span class="source-badge">✨ v13.0</span>
         <span class="source-badge">⏱️ {prices['date']}</span>
     </div>
     <div style="font-size:0.6rem;color:rgba(255,255,255,0.2);margin-top:8px;">
@@ -768,7 +764,7 @@ st.markdown(f"<style>{tab_style}</style>", unsafe_allow_html=True)
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13 = st.tabs(tab_names)
 
 # ==========================================
-# تب 1: پیش‌بینی
+# تب 1: پیش‌بینی (با قابلیت انتخاب بازه زمانی)
 # ==========================================
 with tab1:
     col1, col2 = st.columns(2)
@@ -800,8 +796,17 @@ with tab1:
     unit = detect_unit(target)
     st.info(f"✅ {t['unit']}: **{unit}**")
     
+    # ===== انتخاب بازه زمانی =====
+    st.subheader("📅 بازه زمانی پیش‌بینی")
+    forecast_days = st.selectbox(
+        "چند روز آینده را پیش‌بینی کنید؟",
+        [1, 3, 7, 14, 30],
+        format_func=lambda x: f"{x} روز آینده" if x == 1 else f"{x} روز آینده"
+    )
+    st.caption(f"💡 پیش‌بینی برای {forecast_days} روز آینده انجام میشود.")
+    
     if st.button(t['predict_btn'], type="primary", use_container_width=True):
-        with st.spinner("⏳ در حال تحلیل..."):
+        with st.spinner(f"⏳ در حال پیش‌بینی {forecast_days} روز آینده..."):
             start_time = time.time()
             try:
                 le = LabelEncoder()
@@ -812,65 +817,144 @@ with tab1:
                             d[col] = le.fit_transform(d[col].astype(str))
                         except:
                             pass
+                
                 X = d.drop(columns=[target]).select_dtypes(include=['number'])
                 y = d[target]
+                
                 if len(X.columns) == 0:
                     st.error("❌ ویژگی عددی کافی نیست.")
                     st.stop()
+                
                 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
                 results = train_models(X_train, y_train, X_test, y_test)
-                best = None; best_score = -1
+                best = None
+                best_score = -1
                 for name, res in results.items():
                     if 'error' not in res and res['r2'] > best_score:
-                        best_score = res['r2']; best = name
+                        best_score = res['r2']
+                        best = name
+                
                 if best:
                     model = results[best]['model']
-                    pred = model.predict(X.mean().values.reshape(1, -1))[0]
-                    st.session_state.score += 5
-                    st.session_state.streak += 1
-                    emoji, msg = get_emoji(pred, unit)
+                    
+                    # ===== پیش‌بینی برای چند روز آینده =====
+                    avg_row = X.mean().values.reshape(1, -1)
+                    predictions = []
+                    current_row = avg_row.copy()
+                    
+                    for day in range(forecast_days):
+                        pred = model.predict(current_row)[0]
+                        predictions.append(pred)
+                        # شبیه‌سازی روند
+                        if len(X.columns) > 0:
+                            current_row[0] = pred
+                    
+                    # نمایش نتایج
                     st.markdown(f"""
                     <div class="result-box">
-                        <span class="result-emoji">{emoji}</span>
-                        <div class="result-label">{msg}</div>
-                        <div class="result-number">{pred:,.0f}</div>
-                        <div class="result-label">{unit}</div>
-                        <div style="font-size:0.7rem;color:rgba(255,255,255,0.3);margin-top:8px;">⏱️ زمان پردازش: {time.time()-start_time:.2f} ثانیه</div>
+                        <span class="result-emoji">📈</span>
+                        <div class="result-label">پیش‌بینی {forecast_days} روز آینده</div>
+                        <div class="result-number">{predictions[-1]:,.0f}</div>
+                        <div class="result-label">{unit} (آخرین روز)</div>
                     </div>
                     """, unsafe_allow_html=True)
-                    c1, c2, c3 = st.columns(3)
-                    c1.metric(t['accuracy'], f"{best_score:.1%}")
-                    c2.metric(t['confidence'], f"{pred*0.85:,.0f} - {pred*1.15:,.0f}")
-                    c3.metric("🏆 مدل", best)
+                    
+                    # جدول پیش‌بینی‌ها
+                    st.subheader("📊 جدول پیش‌بینی‌ها")
+                    
+                    last_date = data['تاریخ'].iloc[-1] if 'تاریخ' in data.columns else datetime.now()
+                    if 'تاریخ' in data.columns:
+                        future_dates = pd.date_range(last_date + timedelta(days=1), periods=forecast_days, freq='D')
+                        future_dates_str = [d.strftime('%Y-%m-%d') for d in future_dates]
+                    else:
+                        future_dates_str = [f"روز {i+1}" for i in range(forecast_days)]
+                    
+                    pred_df = pd.DataFrame({
+                        'تاریخ': future_dates_str,
+                        f'پیش‌بینی {target}': [f"{p:,.0f} {unit}" for p in predictions]
+                    })
+                    st.dataframe(pred_df, use_container_width=True)
+                    
+                    # نمودار روند
+                    st.subheader("📈 روند پیش‌بینی")
+                    fig = go.Figure()
+                    fig.add_trace(go.Scatter(
+                        x=future_dates_str,
+                        y=predictions,
+                        mode='lines+markers',
+                        name=f'پیش‌بینی {target}',
+                        line=dict(color='#FFD700', width=3),
+                        marker=dict(size=10, color='#FFD700')
+                    ))
+                    fig.update_layout(
+                        title=f'روند پیش‌بینی {target} در {forecast_days} روز آینده',
+                        xaxis_title='تاریخ',
+                        yaxis_title=unit,
+                        height=400,
+                        plot_bgcolor='rgba(255,255,255,0.02)',
+                        paper_bgcolor='rgba(255,255,255,0.02)',
+                        font=dict(color='rgba(255,255,255,0.8)')
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                    # آمار پیش‌بینی
+                    st.subheader("📊 آمار پیش‌بینی")
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        st.metric("📈 میانگین", f"{np.mean(predictions):,.0f} {unit}")
+                    with col2:
+                        st.metric("📉 کمترین", f"{np.min(predictions):,.0f} {unit}")
+                    with col3:
+                        st.metric("📈 بیشترین", f"{np.max(predictions):,.0f} {unit}")
+                    with col4:
+                        st.metric("📊 تغییرات", f"{(predictions[-1] - predictions[0]):,.0f} {unit}")
+                    
+                    # اهمیت ویژگی‌ها
                     with st.expander("📊 " + t['feature_importance']):
                         if hasattr(model, 'feature_importances_'):
                             imp = pd.DataFrame({'ویژگی': X.columns, 'اهمیت': model.feature_importances_}).sort_values('اهمیت', ascending=False)
                             st.dataframe(imp)
-                            fig = px.bar(imp, x='اهمیت', y='ویژگی', orientation='h', height=300)
-                            st.plotly_chart(fig, use_container_width=True)
+                            fig2 = px.bar(imp, x='اهمیت', y='ویژگی', orientation='h', height=300)
+                            st.plotly_chart(fig2, use_container_width=True)
                         else:
                             st.info("ℹ️ این مدل اهمیت ویژگی‌ها را پشتیبانی نمیکند.")
+                    
+                    # تحلیل دلاری
                     with st.expander("💱 " + t['dollar_label']):
                         st.markdown(f"💰 **نرخ دلار لحظه‌ای:** {prices['dollar']:,} تومان")
                         if unit == 'تومان':
-                            dollar_value = pred / prices['dollar']
-                            st.metric("💵 پیش‌بینی به دلار", f"${dollar_value:,.2f}")
+                            dollar_values = [p / prices['dollar'] for p in predictions]
+                            dollar_df = pd.DataFrame({
+                                'تاریخ': future_dates_str,
+                                'پیش‌بینی به دلار': [f"${d:,.2f}" for d in dollar_values]
+                            })
+                            st.dataframe(dollar_df, use_container_width=True)
                         else:
                             st.info(f"ℹ️ واحد '{unit}' است. تحلیل دلاری برای ستون‌های تومانی انجام میشود.")
+                    
+                    # مشاور
                     st.markdown(f"""
                     <div class="advisor-box">
                         <strong>✨ {t['advisor']}</strong>
                         <p style="font-size:0.9rem;opacity:0.9;margin-top:8px;">
-                            با توجه به پیش‌بینی، موجودی خود را مدیریت کنید.
+                            با توجه به روند پیش‌بینی، موجودی خود را مدیریت کنید و برای روزهای آینده برنامه‌ریزی داشته باشید.
+                            {f'پیشنهاد تخفیف: {max(5, min(25, int(25 - (predictions[-1]/1_000_000))))}%' if unit == 'تومان' else ''}
                         </p>
                     </div>
                     """, unsafe_allow_html=True)
+                    
+                    # ذخیره تاریخچه
                     st.session_state.history.append({
                         'زمان': datetime.now().strftime("%H:%M"),
                         'هدف': target,
-                        'پیش‌بینی': f"{pred:,.0f} {unit}",
+                        'بازه': f"{forecast_days} روز",
+                        'پیش‌بینی اول': f"{predictions[0]:,.0f} {unit}",
+                        'پیش‌بینی آخر': f"{predictions[-1]:,.0f} {unit}",
                         'دقت': f"{best_score:.1%}"
                     })
+                    
+                    st.success(f"✅ پیش‌بینی {forecast_days} روز آینده با موفقیت انجام شد! (زمان: {time.time()-start_time:.2f} ثانیه)")
+                    
             except Exception as e:
                 st.error(f"❌ خطا: {e}")
 
@@ -988,7 +1072,7 @@ with tab3:
     """, unsafe_allow_html=True)
 
 # ==========================================
-# تب 4: راهنمای جامع (کامل)
+# تب 4: راهنمای جامع
 # ==========================================
 with tab4:
     st.markdown("""
@@ -1006,79 +1090,41 @@ with tab4:
     <div class="guide-step">
         <h3>📌 گام ۱: صنف خود را انتخاب کنید</h3>
         <p>از منوی سمت راست، صنف خود را انتخاب کنید. iHoNoor برای هر صنف، تحلیل مخصوص خود را دارد.</p>
-        <div class="tip">💡 <strong>مثال:</strong> اگر فروشگاه مواد غذایی دارید، "خواربارفروشی" را انتخاب کنید. اگر پیمانکار ساختمانی هستید، "ساختمان و پیمانکاری" را انتخاب کنید.</div>
-        <div style="background:rgba(255,215,0,0.03);padding:10px 14px;border-radius:8px;margin-top:6px;font-size:0.85rem;color:rgba(255,255,255,0.5);">
-            ℹ️ <strong>چرا مهم است؟</strong> هر صنف تحت تأثیر عوامل اقتصادی متفاوتی قرار می‌گیرد. مثلاً صنعت ساختمان بیشتر از افزایش قیمت فولاد و دلار تأثیر می‌پذیرد، در حالی که صنعت خواربارفروشی بیشتر از تورم و قیمت دلار تأثیر می‌گیرد.
-        </div>
+        <div class="tip">💡 <strong>مثال:</strong> اگر فروشگاه مواد غذایی دارید، "خواربارفروشی" را انتخاب کنید.</div>
     </div>
     
     <div class="guide-step">
         <h3>📌 گام ۲: فایل خود را آپلود کنید</h3>
         <p>فایل Excel یا CSV خود را در بخش آپلود بارگذاری کنید.</p>
-        <div class="warning">⚠️ <strong>نکات کلیدی:</strong>
-            <ul style="margin:4px 0;padding-right:20px;color:rgba(255,255,255,0.6);">
-                <li>فایل باید حداقل شامل <strong>۲ ستون</strong> باشد: "تاریخ" و یک ستون عددی (فروش، تعداد مشتریان، قیمت و...)</li>
-                <li><strong>حداقل ۵۰ رکورد</strong> برای پیش‌بینی قابل اعتماد</li>
-                <li><strong>توصیه:</strong> ۱۰۰ تا ۲۰۰ رکورد برای دقت بالاتر</li>
-                <li><strong>حداکثر:</strong> بدون محدودیت (هر چه بیشتر، بهتر)</li>
-            </ul>
-        </div>
-        <div class="tip">💡 <strong>چرا تعداد رکورد مهم است؟</strong> مدل‌های یادگیری ماشین با داده‌های بیشتر، الگوهای بهتری یاد می‌گیرند و پیش‌بینی دقیق‌تری ارائه میدهند. با ۵۰ رکورد دقت حدود ۶۰-۷۰٪، با ۱۰۰ رکورد دقت ۷۰-۸۰٪ و با ۲۰۰+ رکورد دقت بالای ۸۵٪ خواهید داشت.</div>
-        <div style="background:rgba(78,205,196,0.03);padding:10px 14px;border-radius:8px;margin-top:6px;font-size:0.85rem;color:rgba(255,255,255,0.5);border-right:2px solid #4ECDC4;">
-            📊 <strong>ساختار پیشنهادی فایل:</strong><br>
-            | تاریخ | فروش_امروز | تعداد_مشتریان | قیمت_میانگین | تخفیف |
-            |--------|------------|---------------|--------------|--------|
-            | 1403/01/01 | 5,200,000 | 45 | 25,000 | 5 |
-            | 1403/01/02 | 6,800,000 | 52 | 28,000 | 10 |
-        </div>
+        <div class="warning">⚠️ فایل باید حداقل شامل ستون‌های "تاریخ" و یک ستون عددی باشد.</div>
+        <div class="tip">💡 حداقل ۵۰ روز داده برای پیش‌بینی قابل اعتماد.</div>
     </div>
     
     <div class="guide-step">
         <h3>📌 گام ۳: ستون هدف را انتخاب کنید</h3>
-        <p>ستونی که میخواهید پیش‌بینی کنید را انتخاب کنید. این ستون باید <strong>عددی</strong> باشد.</p>
-        <div class="success">✅ <strong>پیشنهاد iHoNoor:</strong> اگر مطمئن نیستید، گزینه <strong>"💡 پیشنهاد iHoNoor"</strong> را انتخاب کنید تا بهترین ستون به شما پیشنهاد شود.</div>
-        <div class="tip">💡 <strong>مثال‌های ستون هدف:</strong><br>
-            - <strong>فروش_فردا:</strong> برای پیش‌بینی فروش روز آینده<br>
-            - <strong>تعداد_مشتریان:</strong> برای پیش‌بینی تعداد مشتریان فردا<br>
-            - <strong>قیمت:</strong> برای پیش‌بینی قیمت محصول<br>
-            - <strong>درآمد:</strong> برای پیش‌بینی درآمد آینده
-        </div>
-        <div style="background:rgba(229,62,62,0.03);padding:10px 14px;border-radius:8px;margin-top:6px;font-size:0.85rem;color:rgba(255,255,255,0.5);border-right:2px solid #E53E3E;">
-            ⚠️ <strong>نکته مهم:</strong> اگر ستون غیرعددی (مثل نام کالا یا توضیحات) انتخاب کنید، برنامه خطا میدهد و پیش‌بینی انجام نمیشود.
-        </div>
+        <p>ستونی که میخواهید پیش‌بینی کنید را انتخاب کنید.</p>
+        <div class="success">✅ از گزینه <strong>"💡 پیشنهاد iHoNoor"</strong> استفاده کنید.</div>
     </div>
     
     <div class="guide-step">
-        <h3>📌 گام ۴: پیش‌بینی را دریافت کنید</h3>
-        <p>روی دکمه <strong>"🚀 پیش‌بینی کن"</strong> کلیک کنید و نتیجه را مشاهده کنید.</p>
-        <div class="tip">📊 <strong>خروجی‌ها و معنی آنها:</strong>
-            <ul style="margin:4px 0;padding-right:20px;">
-                <li><strong>عدد پیش‌بینی:</strong> مقدار مورد انتظار برای فردا (مثلاً فروش فردا چند تومان خواهد بود)</li>
-                <li><strong>دقت مدل (R²):</strong> نشان میدهد چقدر میتوانید به نتیجه اعتماد کنید. بالای ۷۰٪ خوب است، بالای ۸۵٪ عالی است.</li>
-                <li><strong>بازه اطمینان:</strong> محدوده احتمالی فروش (بین ۸۵٪ تا ۱۱۵٪ مقدار پیش‌بینی)</li>
-                <li><strong>اهمیت ویژگی‌ها:</strong> کدام عوامل (مثل تعداد مشتریان، قیمت، تخفیف) بیشترین تأثیر را بر فروش شما دارند</li>
-            </ul>
-        </div>
-        <div style="background:rgba(78,205,196,0.03);padding:10px 14px;border-radius:8px;margin-top:6px;font-size:0.85rem;color:rgba(255,255,255,0.5);border-right:2px solid #4ECDC4;">
-            ⏱️ <strong>زمان پردازش:</strong> معمولاً کمتر از ۱ ثانیه برای داده‌های تا ۲۰۰ رکورد.
-        </div>
+        <h3>📌 گام ۴: بازه زمانی و پیش‌بینی را انتخاب کنید</h3>
+        <p>تعداد روزهای آینده را انتخاب کنید و روی <strong>"🚀 پیش‌بینی کن"</strong> کلیک کنید.</p>
+        <div class="tip">📊 خروجی: جدول پیش‌بینی، نمودار روند و آمار</div>
     </div>
     
     <div style="background:linear-gradient(135deg,rgba(255,215,0,0.02),rgba(255,165,0,0.01));border:1px solid rgba(255,215,0,0.03);border-radius:60px 15px 60px 15px;padding:22px 28px;margin-top:16px;">
-        <h3 style="color:#FFD700;margin:0;">💡 نکات کلیدی برای بهترین نتیجه</h3>
+        <h3 style="color:#FFD700;margin:0;">💡 نکات کلیدی</h3>
         <ul style="margin-top:10px;line-height:2;color:rgba(255,255,255,0.6);">
-            <li>📊 <strong style="color:rgba(255,255,255,0.8);">حداقل ۵۰ روز داده</strong> داشته باشید (توصیه: ۱۰۰-۲۰۰ روز)</li>
-            <li>📅 داده‌های خود را <strong style="color:rgba(255,255,255,0.8);">هر هفته آپدیت</strong> کنید تا پیش‌بینی‌ها دقیق‌تر شوند</li>
+            <li>📊 <strong style="color:rgba(255,255,255,0.8);">حداقل ۵۰ روز داده</strong> داشته باشید</li>
+            <li>📅 داده‌های خود را <strong style="color:rgba(255,255,255,0.8);">هر هفته آپدیت</strong> کنید</li>
             <li>🎯 ستون هدف حتماً <strong style="color:rgba(255,255,255,0.8);">عددی</strong> باشد</li>
             <li>🔄 هر بار که داده جدید دارید، پیش‌بینی را <strong style="color:rgba(255,255,255,0.8);">تکرار</strong> کنید</li>
-            <li>🔍 داده‌های پرت (خیلی بالا یا پایین) را بررسی کنید و در صورت لزوم حذف کنید</li>
-            <li>📈 از بخش <strong style="color:rgba(255,255,255,0.8);">"تحلیلگر آینده"</strong> برای دریافت تحلیل اقتصادی استفاده کنید</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
 
 # ==========================================
-# تب 5: بروشور علمی (کامل)
+# تب 5: بروشور علمی
 # ==========================================
 with tab5:
     st.markdown("""
@@ -1094,104 +1140,35 @@ with tab5:
     
     st.markdown("""
     <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:24px;padding:24px 28px;margin-bottom:16px;">
-        <h3 style="color:#4ECDC4;">🧠 یادگیری ماشین چیست و چرا پیش‌بینی میکند؟</h3>
+        <h3 style="color:#4ECDC4;">🧠 یادگیری ماشین چیست؟</h3>
         <p style="color:rgba(255,255,255,0.7);">
             <strong>یادگیری ماشین (Machine Learning)</strong> شاخه‌ای از هوش مصنوعی است که به کامپیوترها امکان میدهد 
             بدون برنامه‌ریزی مستقیم، از داده‌ها <strong>یاد بگیرند</strong> و <strong>الگوها</strong> را شناسایی کنند.
         </p>
-        <p style="color:rgba(255,255,255,0.6);margin-top:8px;">
-            iHoNoor با استفاده از <strong>۴ مدل پیشرفته</strong> (جنگل تصادفی، ایکس‌جی‌بوست، گرادیان بوستینگ و رگرسیون خطی)، 
-            داده‌های تاریخی فروش شما را تحلیل کرده و <strong>روندها</strong> و <strong>الگوهای پنهان</strong> را کشف میکند.
-        </p>
         <div style="background:rgba(78,205,196,0.05);padding:12px 18px;border-radius:12px;border-right:3px solid #4ECDC4;margin-top:8px;">
-            💡 <strong>به زبان ساده:</strong> iHoNoor مانند یک <strong>مشاور فروش هوشمند</strong> عمل میکند که با بررسی 
-            داده‌های گذشته، بهترین حدس را برای آینده میزند.
+            💡 iHoNoor مانند یک <strong>مشاور فروش هوشمند</strong> عمل میکند.
         </div>
     </div>
     
     <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:24px;padding:24px 28px;margin-bottom:16px;">
-        <h3 style="color:#4ECDC4;">🌍 تجربه جهانی: کشورهایی که از این فناوری استفاده میکنند</h3>
+        <h3 style="color:#4ECDC4;">🌍 تجربه جهانی</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;">
             <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:14px 18px;">
                 <p style="color:#FFD700;font-weight:700;margin:0;">🇩🇪 آلمان</p>
-                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin:4px 0;">شرکت <strong>EDEKA</strong> (بزرگترین فروشگاه زنجیره‌ای آلمان) با استفاده از پیش‌بینی فروش، ضایعات مواد غذایی را <strong>۳۰٪ کاهش</strong> داده است. این یعنی سالانه میلیون‌ها یورو صرفه‌جویی.</p>
+                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin:4px 0;">شرکت <strong>EDEKA</strong> با پیش‌بینی فروش، ضایعات غذایی را <strong>۳۰٪ کاهش</strong> داده است.</p>
             </div>
             <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:14px 18px;">
                 <p style="color:#FFD700;font-weight:700;margin:0;">🇺🇸 آمریکا</p>
-                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin:4px 0;"><strong>Walmart</strong> با تحلیل داده‌های فروش و پیش‌بینی تقاضا، موجودی انبار را <strong>۲۵٪ بهینه‌سازی</strong> کرده است. این یعنی هزینه‌های انبارداری کاهش یافته و محصولات کم‌فروش شناسایی میشوند.</p>
-            </div>
-            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:14px 18px;">
-                <p style="color:#FFD700;font-weight:700;margin:0;">🇯🇵 ژاپن</p>
-                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin:4px 0;">سیستم‌های پیش‌بینی <strong>7-Eleven</strong> (بزرگترین فروشگاه زنجیره‌ای ژاپن) با دقت بالا، موجودی هر فروشگاه را مدیریت میکند. این سیستم هزینه‌های عملیاتی را <strong>۲۰٪ کاهش</strong> داده است.</p>
-            </div>
-            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:16px;padding:14px 18px;">
-                <p style="color:#FFD700;font-weight:700;margin:0;">🇨🇳 چین</p>
-                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin:4px 0;"><strong>Alibaba</strong> با استفاده از هوش مصنوعی و یادگیری ماشین، فروش روزهای خاص (مثل جمعه سیاه) را با دقت <strong>۹۵٪</strong> پیش‌بینی میکند و موجودی خود را بهینه می‌سازد.</p>
+                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin:4px 0;"><strong>Walmart</strong> با پیش‌بینی تقاضا، موجودی انبار را <strong>۲۵٪ بهینه‌سازی</strong> کرده است.</p>
             </div>
         </div>
-    </div>
-    
-    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:24px;padding:24px 28px;margin-bottom:16px;">
-        <h3 style="color:#4ECDC4;">📊 صرفه‌جویی در هزینه، زمان و سود با iHoNoor</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:10px;">
-            <div style="text-align:center;background:rgba(78,205,196,0.03);border:1px solid rgba(78,205,196,0.05);border-radius:16px;padding:14px;">
-                <p style="font-size:2rem;margin:0;">⏱️</p>
-                <p style="color:#FFD700;font-weight:700;margin:0;">زمان</p>
-                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;">کاهش <strong>۷۰٪</strong> زمان تصمیم‌گیری</p>
-            </div>
-            <div style="text-align:center;background:rgba(78,205,196,0.03);border:1px solid rgba(78,205,196,0.05);border-radius:16px;padding:14px;">
-                <p style="font-size:2rem;margin:0;">💰</p>
-                <p style="color:#FFD700;font-weight:700;margin:0;">هزینه</p>
-                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;">کاهش <strong>۳۵٪</strong> هزینه‌های اضافی</p>
-            </div>
-            <div style="text-align:center;background:rgba(78,205,196,0.03);border:1px solid rgba(78,205,196,0.05);border-radius:16px;padding:14px;">
-                <p style="font-size:2rem;margin:0;">📈</p>
-                <p style="color:#FFD700;font-weight:700;margin:0;">سود</p>
-                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;">افزایش <strong>۴۰٪</strong> سود خالص</p>
-            </div>
-        </div>
-        <div style="background:rgba(78,205,196,0.03);padding:12px 18px;border-radius:12px;border-right:3px solid #4ECDC4;margin-top:12px;">
-            📌 <strong>مدرک:</strong> بر اساس گزارش <strong>McKinsey 2024</strong>، کسب‌وکارهایی که از پیش‌بینی هوشمند استفاده میکنند، 
-            بهطور متوسط <strong>۴۰٪ سود بیشتر</strong> و <strong>۳۵٪ هزینه کمتر</strong> دارند.
-        </div>
-    </div>
-    
-    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);border-radius:24px;padding:24px 28px;margin-bottom:16px;">
-        <h3 style="color:#4ECDC4;">📋 حداقل و حداکثر داده برای دریافت نتیجه</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;">
-            <div style="background:rgba(255,215,0,0.02);border:1px solid rgba(255,215,0,0.05);border-radius:16px;padding:14px;">
-                <p style="color:#FFD700;font-weight:700;margin:0;">📉 حداقل</p>
-                <ul style="color:rgba(255,255,255,0.5);font-size:0.85rem;padding-right:16px;">
-                    <li><strong>۵۰ رکورد</strong> (روز) برای پیش‌بینی قابل اعتماد</li>
-                    <li>۲ ستون: تاریخ + یک ستون عددی</li>
-                    <li>دقت: حدود ۶۰-۷۰٪</li>
-                </ul>
-            </div>
-            <div style="background:rgba(78,205,196,0.02);border:1px solid rgba(78,205,196,0.05);border-radius:16px;padding:14px;">
-                <p style="color:#4ECDC4;font-weight:700;margin:0;">📈 حداکثر</p>
-                <ul style="color:rgba(255,255,255,0.5);font-size:0.85rem;padding-right:16px;">
-                    <li><strong>بدون محدودیت</strong> (هر چه بیشتر، بهتر)</li>
-                    <li>هر تعداد ستون عددی (ویژگی‌های بیشتر)</li>
-                    <li>دقت: تا ۹۵٪ با داده‌های بیشتر</li>
-                </ul>
-            </div>
-        </div>
-        <div style="background:rgba(78,205,196,0.03);padding:12px 18px;border-radius:12px;border-right:3px solid #4ECDC4;margin-top:12px;">
-            💡 <strong>توصیه طلایی:</strong> برای بهترین نتیجه، حداقل <strong>۱۰۰ روز</strong> داده با <strong>۳-۵ ویژگی</strong> مختلف (مثل فروش، تعداد مشتریان، قیمت، تخفیف) داشته باشید.
-        </div>
-    </div>
-    
-    <div style="background:rgba(255,215,0,0.02);border:1px solid rgba(255,215,0,0.03);border-radius:60px 15px 60px 15px;padding:18px 24px;margin-top:12px;">
-        <p style="color:rgba(255,255,255,0.6);margin:0;text-align:center;">
-            📚 <strong>منابع علمی:</strong> McKinsey Global Institute (2024) | Harvard Business Review (2023) | MIT Technology Review (2024)
-        </p>
     </div>
     """, unsafe_allow_html=True)
 
 # ==========================================
-# تب‌های دیگر
+# تب 6: چتبات
 # ==========================================
-with tab6:  # چتبات
+with tab6:
     st.markdown("""
     <div class="card">
         <div class="card-title"><span class="icon">💬</span> چتبات هوشمند iHoNoor</div>
@@ -1213,7 +1190,10 @@ with tab6:  # چتبات
         st.session_state.chat_history = []
         st.rerun()
 
-with tab7:  # پنل مدیریت
+# ==========================================
+# تب 7: پنل مدیریت
+# ==========================================
+with tab7:
     if "admin_logged_in" not in st.session_state: st.session_state.admin_logged_in = False
     if not st.session_state.admin_logged_in:
         st.markdown("""
@@ -1239,6 +1219,9 @@ with tab7:  # پنل مدیریت
             st.session_state.admin_logged_in = False
             st.rerun()
 
+# ==========================================
+# تب‌های دیگر
+# ==========================================
 with tab8:  # نصب
     st.markdown("""
     <div class="card">
@@ -1286,6 +1269,6 @@ with tab13:  # تماس
 # ==========================================
 st.markdown(f"""
 <div class="footer">
-    ✨ iHoNoor v12.2 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
+    ✨ iHoNoor v13.0 | {t['app_name']} | دلار: {prices['dollar']:,} تومان | 📡 {prices['source']} | ha2021alipur@gmail.com
 </div>
 """, unsafe_allow_html=True)
